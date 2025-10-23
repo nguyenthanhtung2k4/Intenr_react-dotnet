@@ -45,8 +45,10 @@ public partial class BowlingLeagueContext : DbContext
             entity.HasIndex(e => e.TeamId, "BowlersTeamID");
 
             entity.Property(e => e.BowlerId)
-                .HasColumnType("INT")
-                .HasColumnName("BowlerID");
+                // Đã xóa .HasColumnType("INT") để tránh lỗi SQLite AUTOINCREMENT
+                .HasColumnName("BowlerID")
+                .ValueGeneratedOnAdd();
+
             entity.Property(e => e.BowlerAddress).HasColumnType("nvarchar (50)");
             entity.Property(e => e.BowlerCity).HasColumnType("nvarchar (50)");
             entity.Property(e => e.BowlerFirstName).HasColumnType("nvarchar (50)");
@@ -100,9 +102,11 @@ public partial class BowlingLeagueContext : DbContext
 
             entity.HasIndex(e => e.MatchId, "TourneyMatchesMatchGames");
 
+            // MatchId là khóa phức hợp, không cần ValueGeneratedOnAdd ở đây
             entity.Property(e => e.MatchId)
                 .HasColumnType("INT")
                 .HasColumnName("MatchID");
+
             entity.Property(e => e.GameNumber).HasColumnType("smallint");
             entity.Property(e => e.WinningTeamId)
                 .HasDefaultValue(0)
@@ -116,11 +120,15 @@ public partial class BowlingLeagueContext : DbContext
 
         modelBuilder.Entity<Team>(entity =>
         {
+            entity.HasKey(e => e.TeamId); // Đảm bảo khóa chính được khai báo
+
             entity.HasIndex(e => e.TeamId, "TeamID").IsUnique();
 
             entity.Property(e => e.TeamId)
-                .HasColumnType("INT")
-                .HasColumnName("TeamID");
+                // Đã xóa .HasColumnType("INT")
+                .HasColumnName("TeamID")
+                .ValueGeneratedOnAdd(); // <-- Đảm bảo tự động tăng
+
             entity.Property(e => e.CaptainId)
                 .HasColumnType("INT")
                 .HasColumnName("CaptainID");
@@ -132,8 +140,10 @@ public partial class BowlingLeagueContext : DbContext
             entity.HasKey(e => e.TourneyId);
 
             entity.Property(e => e.TourneyId)
-                .HasColumnType("INT")
-                .HasColumnName("TourneyID");
+                // Đã xóa .HasColumnType("INT")
+                .HasColumnName("TourneyID")
+                .ValueGeneratedOnAdd();
+
             entity.Property(e => e.TourneyDate).HasColumnType("date");
             entity.Property(e => e.TourneyLocation).HasColumnType("nvarchar (50)");
         });
@@ -151,8 +161,10 @@ public partial class BowlingLeagueContext : DbContext
             entity.HasIndex(e => e.EvenLaneTeamId, "Tourney_MatchesEven");
 
             entity.Property(e => e.MatchId)
-                .HasColumnType("INT")
-                .HasColumnName("MatchID");
+                // Đã xóa .HasColumnType("INT")
+                .HasColumnName("MatchID")
+                .ValueGeneratedOnAdd();
+
             entity.Property(e => e.EvenLaneTeamId)
                 .HasDefaultValue(0)
                 .HasColumnType("INT")
@@ -188,6 +200,7 @@ public partial class BowlingLeagueContext : DbContext
             entity.ToTable("ztblSkipLabels");
 
             entity.Property(e => e.LabelCount)
+                // Đây không phải khóa tự động tăng, nên giữ nguyên ValueGeneratedNever
                 .ValueGeneratedNever()
                 .HasColumnType("INT");
         });

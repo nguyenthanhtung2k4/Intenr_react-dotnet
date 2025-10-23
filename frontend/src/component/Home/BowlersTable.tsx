@@ -20,8 +20,8 @@ function BowlersTable(props: any) {
     navigate(`delete/${ID}`);
   };
   // handleCreate
-  var handleCreate = () => {
-    navigate(`create/`);
+  var handleCreate = (type: string) => {
+    navigate(`${type}/`);
   };
 
   // Updated to handle errors thrown when the backend isn't running (generated w/ help from ChatGPT)
@@ -33,7 +33,8 @@ function BowlersTable(props: any) {
           throw new Error('Failed to fetch data');
         }
         const b = await rsp.json();
-        setBowlerData(b || []); // Set empty array if response is falsy
+        const allBowlers = b || [];
+        setBowlerData(allBowlers);
       } catch (error) {
         console.error('Error fetching data:', error);
         setBowlerData([]); // Set empty array in case of error
@@ -43,14 +44,14 @@ function BowlersTable(props: any) {
     fetchBowlerData();
   }, []);
 
-  let filteredBowlers = bowlerData;
+  let filteredBowlers = bowlerData.filter((e) => !e.IsDelete);
 
   // Lọc theo Teams được truyền từ props
-  if (props.displayTeams && props.displayTeams.length > 0) {
-    filteredBowlers = filteredBowlers.filter((b) =>
-      props.displayTeams.includes(b.team?.teamName || ''),
-    );
-  }
+  // if (props.displayTeams && props.displayTeams.length > 0) {
+  //   filteredBowlers = filteredBowlers.filter((b) =>
+  //     props.displayTeams.includes(b.team?.teamName || ''),
+  //   );
+  // }
 
   // Lọc theo ô tìm kiếm (search input)
   if (search) {
@@ -67,10 +68,15 @@ function BowlersTable(props: any) {
     <div>
       <div className="display" style={{ display: 'flex' }}>
         <div className="create">
-          <button type="button" onClick={handleCreate}>
+          <button
+            type="button"
+            onClick={() => handleCreate('create')}
+            className="border-soild bg-blue-500 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 p-2 bottom-1 rounded-md mb-4 ml-4"
+          >
             Create
           </button>
         </div>
+
         <div
           className="search"
           style={{ marginLeft: 'auto', marginRight: 'auto', width: 350 }}
@@ -80,7 +86,18 @@ function BowlersTable(props: any) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search Name"
+            className="block w-full p-2  text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           />
+        </div>
+
+        <div className="Teams">
+          <button
+            type="button"
+            onClick={() => handleCreate('teams')}
+            className="border-soild bg-blue-500 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 p-2 bottom-1 rounded-md mb-4 mr-4"
+          >
+            Teams
+          </button>
         </div>
       </div>
       <div className="row">
@@ -111,7 +128,11 @@ function BowlersTable(props: any) {
                 <td>{b.bowlerPhoneNumber}</td>
                 <td>{b.team?.teamName}</td>
                 <td>
-                  <button type="button" onClick={() => handleEdit(b.bowlerId)}>
+                  <button
+                    type="button"
+                    onClick={() => handleEdit(b.bowlerId)}
+                    className="text-blue-700"
+                  >
                     Edit
                   </button>
                 </td>
@@ -119,6 +140,7 @@ function BowlersTable(props: any) {
                   <button
                     type="button"
                     onClick={() => handleDelete(b.bowlerId)}
+                    className="text-red-700"
                   >
                     Delete
                   </button>

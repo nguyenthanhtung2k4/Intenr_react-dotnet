@@ -1,33 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System;
 
-namespace Backend.Data;
-
-public partial class Bowler
+namespace Backend.Data
 {
-    public int BowlerId { get; set; }
+    public class Bowler
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int BowlerId { get; set; }
 
-    public string? BowlerLastName { get; set; }
+        [Required]
+        public string BowlerFirstName { get; set; } = string.Empty;
 
-    public string? BowlerFirstName { get; set; }
+        [Required]
+        public string BowlerLastName { get; set; } = string.Empty;
 
-    public string? BowlerMiddleInit { get; set; }
+        public string? BowlerMiddleInit { get; set; }
 
-    public string? BowlerAddress { get; set; }
+        public string? BowlerAddress { get; set; }
 
-    public string? BowlerCity { get; set; }
+        public string? BowlerCity { get; set; }
 
-    public string? BowlerState { get; set; }
+        public string? BowlerState { get; set; }
 
-    public string? BowlerZip { get; set; }
+        public string? BowlerZip { get; set; }
 
-    public string? BowlerPhoneNumber { get; set; }
+        public string? BowlerPhoneNumber { get; set; }
+        public bool? IsDelete { get; set; } = false;
 
-    [ForeignKey("TeamID")]
-    public int? TeamId { get; set; }
+        // 🔹 Đây là khóa ngoại — KHÔNG cần ForeignKey attribute
+        public int? TeamId { get; set; }
 
-    public virtual ICollection<BowlerScore> BowlerScores { get; set; } = new List<BowlerScore>();
+        // 🔹 Navigation property
+        public Team? Team { get; set; }
 
-    public virtual Team? Team { get; set; }
+        public virtual ICollection<BowlerScore> BowlerScores { get; set; } = new List<BowlerScore>();
+    }
 }

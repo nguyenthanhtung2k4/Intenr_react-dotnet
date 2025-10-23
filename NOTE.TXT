@@ -1,0 +1,5 @@
+SƯA LỖI  TẠO THÊM  TEAMS . 
+- TIẾP ĐẾM LÀ KHI  THÊM  ĐC TEAMS ĐC OK RỒI. 
+- bACK END:  SỬA mODEL data:  teams:  Id   tự  động thêm. 
+-  bACK END :   XÓA DATA  UPDALOAD CÁI MỚI. 
+-  Test  lại  tạo cầu thủ mới +  xem lại  datat có tự  động tạo  ID không . (  teams ,  Bowler )

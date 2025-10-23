@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Data;
+using Backend.Dtos;
 
 namespace Backend.Controllers
 {
@@ -61,6 +62,15 @@ namespace Backend.Controllers
                 Data.BowlerPhoneNumber = patchDto.BowlerPhoneNumber;
             }
 
+
+            // 2. TÍCH HỢP LOGIC XÓA MỀM (Soft Delete)
+            // Kiểm tra xem client có gửi trường IsDeleted lên hay không
+            if (patchDto.IsDeleted.HasValue)
+            {
+                // Áp dụng giá trị được gửi lên (true để xóa, false để khôi phục)
+                Data.IsDelete = patchDto.IsDeleted.Value;
+            }
+    
             try
             {
                 // Gọi phương thức Repository đã được triển khai
@@ -73,62 +83,87 @@ namespace Backend.Controllers
                 return NotFound(ex);
             }
         }
+        
+
         [HttpPost]
-        public IActionResult Post([FromBody] BowlerPostDto postDto)
+        public IActionResult Post([FromBody] BowlerPostDto newBowler)
         {
-            var Data = _bowlingLeagueRepository.Bowlers;
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState); // Trả về 400 Bad Request nếu dữ liệu không hợp lệ
+                return BadRequest(ModelState);
             }
-            if (Data == null)
-            {
-                return NotFound();
-            }
-
-            var new_data = new Bowler
-            {
-                BowlerLastName = postDto.BowlerLastName,
-                BowlerFirstName = postDto.BowlerFirstName,
-                BowlerAddress = postDto.BowlerAddress,
-                BowlerCity = postDto.BowlerCity,
-                BowlerZip = postDto.BowlerZip,
-                BowlerPhoneNumber = postDto.BowlerPhoneNumber,
-                TeamId = postDto.TeamID
-            };
 
             try
             {
-                _bowlingLeagueRepository.createBowler(new_data);
-                return Ok(new_data);
+                var bowler = new Bowler
+                {
+                    BowlerFirstName = newBowler.BowlerFirstName,
+                    BowlerLastName = newBowler.BowlerLastName,
+                    BowlerMiddleInit = newBowler.BowlerMiddleInit,
+                    BowlerAddress = newBowler.BowlerAddress,
+                    BowlerCity = newBowler.BowlerCity,
+                    BowlerState = newBowler.BowlerState,
+                    BowlerZip = newBowler.BowlerZip,
+                    BowlerPhoneNumber = newBowler.BowlerPhoneNumber,
+                    TeamId = newBowler.TeamId
+                };
 
+                _bowlingLeagueRepository.CreateBowler(bowler);
+
+                return CreatedAtAction(nameof(Get), new { id = bowler.BowlerId }, bowler);
             }
             catch (Exception e)
             {
-                return NotFound(e);
+                return StatusCode(500, $"Lỗi server: {e.Message}");
             }
         }
 
         [HttpGet("teams")]
-        public ActionResult<Team> getTeam()
+        public ActionResult<IEnumerable<Team>> GetTeams() 
         {
             var teams = _bowlingLeagueRepository.Teams;
             try
             {
-                if (teams == null )
+                if (teams == null || !teams.Any())
                 {
-                    return NotFound("Khong tium thay teams!");
-
+                    return NotFound("Không tìm thấy danh sách đội.");
                 }
                 return Ok(teams);
-
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
-
-                throw;
+                return StatusCode(500, $"Lỗi server khi tải đội: {ex.Message}");
             }
         }
 
+        [HttpPost("teams")]
+        public IActionResult PostTeam([FromBody] TeamPostDto newTeamDto) 
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState); 
+            }
+
+            try
+            {
+                var team = new Team
+                {
+                    TeamName = newTeamDto.TeamName,
+                    CaptainId = newTeamDto.CaptainId
+                };
+
+                _bowlingLeagueRepository.CreateTeam(team);
+
+                return CreatedAtAction(
+                    nameof(GetTeams), 
+                    new { id = team.TeamId }, 
+                    team
+                );
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, $"Lỗi server khi tạo đội: {e.Message}");
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 export type Bowler = {
   bowlerId: number;
+  IsDelete: boolean;
   bowlerLastName: string;
   bowlerFirstName: string;
   bowlerMiddleInit: string;

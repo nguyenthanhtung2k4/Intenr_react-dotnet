@@ -6,7 +6,7 @@ import { Routes, Route } from 'react-router-dom';
 import Delete from './component/Home/Detele';
 import Edit from './component/Home/Edit';
 import Create from './component/Home/Create';
-
+import Teams from './component/Home/teams';
 function App() {
   // const Team = ['Marlins', 'Sharks', 'Terrapins', 'Barracudas', 'Dolphins'];
   return (
@@ -17,11 +17,12 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={<BowlersTable displayTeams={['Marlins', 'Sharks']} />}
+          element={<BowlersTable displayTeams={['tungnt', 'Sharks']} />}
         />
         <Route path="/create" element={<Create />} />
+        <Route path="/teams" element={<Teams />} />
         <Route path="/edit/:id" element={<Edit />} />
-        <Route path="/detele/:id" element={<Delete />} />
+        <Route path="/delete/:id" element={<Delete />} />
       </Routes>
     </div>
   );

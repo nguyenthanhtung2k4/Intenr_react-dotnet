@@ -1,50 +1,48 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+// ✅ Thêm dòng này để đăng ký Swagger
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(); // Cross-origin resource sharing
+// Add controllers
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 
+// Database + Repository
 builder.Services.AddDbContext<BowlingLeagueContext>(options =>
-    options.UseSqlite(builder.Configuration["ConnectionStrings:BowlingLeagueConnection"])
-);
+    options.UseSqlite(builder.Configuration["ConnectionStrings:BowlingLeagueConnection"]));
 
-builder.Services.AddScoped<IBowlingLeagueRepository, EFBowlingLeagueRepository>(); // Everyone gets their own context; ABSTRACTION
+builder.Services.AddScoped<IBowlingLeagueRepository, EFBowlingLeagueRepository>();
 
+// ✅ Cấu hình CORS cho React
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp",
-        policy => policy.WithOrigins("http://localhost:3000") // Đảm bảo URL này khớp với Frontend
-                        .AllowAnyHeader()
-                        .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE")); // ✅ Cần thêm PATCH
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
-
-
-
 var app = builder.Build();
-app.UseCors("AllowReactApp"); 
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment()) {
+if (app.Environment.IsDevelopment())
+{
+    // ✅ Swagger sẽ hoạt động đúng sau khi đăng ký ở trên
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseCors(p => p.WithOrigins("http://localhost:3000"));
-
 app.UseHttpsRedirection();
-
+app.UseCors("AllowReactApp");
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
-
-

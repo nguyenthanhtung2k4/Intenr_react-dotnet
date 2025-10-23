@@ -1,11 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace Backend.Data {
+namespace Backend.Data
+{
     public class EFBowlingLeagueRepository : IBowlingLeagueRepository
     {
-        private BowlingLeagueContext _bowlingContext;
+        private readonly BowlingLeagueContext _bowlingContext;
 
-        public EFBowlingLeagueRepository(BowlingLeagueContext temp) { _bowlingContext = temp; }
+        public EFBowlingLeagueRepository(BowlingLeagueContext temp)
+        {
+            _bowlingContext = temp;
+        }
 
         public IEnumerable<Bowler> Bowlers => _bowlingContext.Bowlers.Include(x => x.Team).ToList();
 
@@ -25,18 +32,64 @@ namespace Backend.Data {
 
         public IEnumerable<ZtblWeek> ZtblWeek => _bowlingContext.ZtblWeeks;
 
+        // 🔹 Update
         public void UpdateBowler(Bowler bowler)
         {
-            _bowlingContext.Update(bowler);
-            _bowlingContext.SaveChanges();
-        }
-        
-        public void createBowler(Bowler bowler)
-        {
-            _bowlingContext.Add(bowler);
-            _bowlingContext.SaveChanges();
+            try
+            {
+                _bowlingContext.Bowlers.Update(bowler);
+                _bowlingContext.SaveChanges();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Lỗi cập nhật Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+            }
         }
 
+        // 🔹 Create
+        public void CreateBowler(Bowler bowler)
+        {
+            try
+            {
+                // ⚠️ Bỏ ID cũ để EF tự tăng
+                bowler.BowlerId = 0;
+
+                if (bowler.TeamId.HasValue)
+                {
+                    var existingTeam = _bowlingContext.Teams
+                        .FirstOrDefault(t => t.TeamId == bowler.TeamId.Value);
+
+                    if (existingTeam == null)
+                    {
+                        throw new Exception($"Không tìm thấy Team với ID {bowler.TeamId}");
+                    }
+
+                    bowler.Team = existingTeam;
+                }
+
+                _bowlingContext.Bowlers.Add(bowler);
+                _bowlingContext.SaveChanges();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Lỗi lưu Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+            }
+        }
+       
+       
+       public void CreateTeam(Team team)
+        {
+            try
+            {
+                
+                _bowlingContext.Teams.Add(team);
+                _bowlingContext.SaveChanges();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Lỗi lưu Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+            }
+        }
 
     }
 }

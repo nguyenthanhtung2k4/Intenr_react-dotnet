@@ -1,219 +1,191 @@
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-interface Teams {
+interface Team {
   teamId: number;
   teamName: string;
-  captainId: number;
 }
 
-interface BowlerPostDto {
-  bowlerFirstName: string;
-  bowlerLastName: string;
-  bowlerAddress: string;
-  bowlerPhoneNumber: string;
-  teamId: number | null;
-}
-
-function Create() {
-  const navi = useNavigate();
-
-  const [teams, setTeams] = useState<Teams[]>([]);
-  const [formData, setFormData] = useState<BowlerPostDto>({
+const CreateBowler: React.FC = () => {
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [formData, setFormData] = useState({
     bowlerFirstName: '',
     bowlerLastName: '',
     bowlerAddress: '',
+    bowlerCity: '',
+    bowlerState: '',
+    bowlerZip: '',
     bowlerPhoneNumber: '',
-    teamId: null,
+    teamId: '',
   });
 
+  const [status, setStatus] = useState<string>('');
+
+  // 🔹 Lấy danh sách team để chọn
   useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        const rsp = await fetch(
-          'http://localhost:5231/api/BowlingLeague/teams',
-        );
-        if (!rsp.ok) throw new Error('Failed to fetch teams');
-
-        const teamList: Teams[] = await rsp.json();
-        console.log('✅ Teams fetched:', teamList);
-        setTeams(teamList);
-
-        if (teamList.length > 0) {
-          setFormData((prev) => ({
-            ...prev,
-            teamId: teamList[0].teamId,
-          }));
-        }
-      } catch (error) {
-        console.error('❌ Error fetching teams:', error);
-      }
-    };
-
-    fetchTeams();
+    axios
+      .get('http://localhost:5231/api/BowlingLeague/teams') // hoặc "/api/teams" nếu bạn đặt vậy
+      .then((res: { data: React.SetStateAction<Team[]> }) => setTeams(res.data))
+      .catch(() => setStatus('❌ Không thể tải danh sách đội'));
   }, []);
 
-  const handleInputChange = (
+  // 🔹 Xử lý khi nhập dữ liệu
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: name === 'teamId' ? (value ? parseInt(value) : null) : value,
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
     }));
   };
 
-  const handleCreateBowler = async (e: React.FormEvent) => {
+  // 🔹 Gửi dữ liệu tạo Bowler
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!formData.teamId) {
-      alert('Vui lòng chọn đội!');
-      return;
-    }
+    setStatus('⏳ Đang tạo vận động viên...');
 
     try {
-      const rsp = await fetch('http://localhost:5231/api/BowlingLeague', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      // ⚠️ Không gửi bowlerId — để backend tự tăng
+      const dataToSend = {
+        bowlerFirstName: formData.bowlerFirstName,
+        bowlerLastName: formData.bowlerLastName,
+        bowlerAddress: formData.bowlerAddress,
+        bowlerCity: formData.bowlerCity,
+        bowlerState: formData.bowlerState,
+        bowlerZip: formData.bowlerZip,
+        bowlerPhoneNumber: formData.bowlerPhoneNumber,
+        teamId: formData.teamId ? Number(formData.teamId) : null,
+      };
 
-      if (!rsp.ok) {
-        const errorText = await rsp.text();
-        throw new Error(
-          `Tạo bowler thất bại. Status: ${rsp.status}. Details: ${errorText}`,
-        );
+      const res = await axios.post(
+        'http://localhost:5231/api/BowlingLeague/',
+        dataToSend,
+      );
+
+      if (res.status === 201 || res.status === 200) {
+        setStatus('✅ Tạo vận động viên thành công!');
+        setFormData({
+          bowlerFirstName: '',
+          bowlerLastName: '',
+          bowlerAddress: '',
+          bowlerCity: '',
+          bowlerState: '',
+          bowlerZip: '',
+          bowlerPhoneNumber: '',
+          teamId: '',
+        });
+      } else {
+        setStatus(`⚠️ Lỗi: ${res.statusText}`);
       }
-
-      alert('Tạo vận động viên thành công!');
-      navi('/');
-    } catch (error) {
-      console.error('❌ Error creating bowler:', error);
-      alert('Tạo vận động viên thất bại: ' + (error as Error).message);
+    } catch (error: any) {
+      console.error('❌ Lỗi khi tạo vận động viên:', error);
+      const msg =
+        error.response?.data?.message ||
+        error.response?.data ||
+        error.message ||
+        'Lỗi không xác định.';
+      setStatus(`❌ Tạo vận động viên thất bại: ${msg}`);
     }
-  };
-
-  const handleGoBack = () => {
-    navi(-1);
   };
 
   return (
-    <div className="container mt-4">
-      <h1 className="mb-4">Create Bowler</h1>
+    <div className="max-w-xl mx-auto bg-white shadow-xl rounded-2xl p-6 mt-10">
+      <h2 className="text-2xl font-bold mb-4 text-center text-blue-700">
+        ➕ Thêm vận động viên mới
+      </h2>
 
-      <form onSubmit={handleCreateBowler} style={{ textAlign: 'center' }}>
-        {/* First Name */}
-        <div className="row mb-3">
-          <label className="col-sm-2 col-form-label">First Name:</label>
-          <div className="col-sm-7">
-            <input
-              type="text"
-              className="form-control"
-              name="bowlerFirstName"
-              value={formData.bowlerFirstName}
-              onChange={handleInputChange}
-              placeholder="First Name"
-              required
-            />
-          </div>
+      {status && (
+        <p className="text-center mb-4 text-sm text-gray-700">{status}</p>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            type="text"
+            name="bowlerFirstName"
+            value={formData.bowlerFirstName}
+            onChange={handleChange}
+            placeholder="Tên"
+            required
+            className="border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="bowlerLastName"
+            value={formData.bowlerLastName}
+            onChange={handleChange}
+            placeholder="Họ"
+            required
+            className="border p-2 rounded-md"
+          />
         </div>
 
-        {/* Last Name */}
-        <div className="row mb-3">
-          <label className="col-sm-2 col-form-label">Last Name:</label>
-          <div className="col-sm-7">
-            <input
-              type="text"
-              className="form-control"
-              name="bowlerLastName"
-              value={formData.bowlerLastName}
-              onChange={handleInputChange}
-              placeholder="Last Name"
-              required
-            />
-          </div>
-        </div>
+        <input
+          type="text"
+          name="bowlerAddress"
+          value={formData.bowlerAddress}
+          onChange={handleChange}
+          placeholder="Địa chỉ"
+          className="border p-2 rounded-md w-full"
+        />
+        <input
+          type="text"
+          name="bowlerCity"
+          value={formData.bowlerCity}
+          onChange={handleChange}
+          placeholder="Thành phố"
+          className="border p-2 rounded-md w-full"
+        />
+        <input
+          type="text"
+          name="bowlerState"
+          value={formData.bowlerState}
+          onChange={handleChange}
+          placeholder="Tỉnh/Bang"
+          className="border p-2 rounded-md w-full"
+        />
+        <input
+          type="text"
+          name="bowlerZip"
+          value={formData.bowlerZip}
+          onChange={handleChange}
+          placeholder="Mã bưu điện"
+          className="border p-2 rounded-md w-full"
+        />
+        <input
+          type="text"
+          name="bowlerPhoneNumber"
+          value={formData.bowlerPhoneNumber}
+          onChange={handleChange}
+          placeholder="Số điện thoại"
+          required
+          className="border p-2 rounded-md w-full"
+        />
 
-        {/* Phone */}
-        <div className="row mb-3">
-          <label className="col-sm-2 col-form-label">Phone:</label>
-          <div className="col-sm-7">
-            <input
-              type="text"
-              className="form-control"
-              name="bowlerPhoneNumber"
-              value={formData.bowlerPhoneNumber}
-              onChange={handleInputChange}
-              placeholder="Phone Number"
-            />
-          </div>
-        </div>
+        <select
+          name="teamId"
+          value={formData.teamId}
+          onChange={handleChange}
+          className="border p-2 rounded-md w-full"
+        >
+          <option value="">-- Chọn đội --</option>
+          {teams.map((team) => (
+            <option key={team.teamId} value={team.teamId}>
+              {team.teamName}
+            </option>
+          ))}
+        </select>
 
-        {/* Address */}
-        <div className="row mb-3">
-          <label className="col-sm-2 col-form-label">Address:</label>
-          <div className="col-sm-7">
-            <input
-              type="text"
-              className="form-control"
-              name="bowlerAddress"
-              value={formData.bowlerAddress}
-              onChange={handleInputChange}
-              placeholder="Address"
-            />
-          </div>
-        </div>
-
-        <div className="row mb-3">
-          <label className="col-sm-2 col-form-label">Team:</label>
-          <div className="col-sm-7">
-            <select
-              className="form-control"
-              name="teamId"
-              value={formData.teamId ? String(formData.teamId) : ''}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">-- Chọn đội --</option>
-              {teams.map((team) => (
-                <option key={team.teamId} value={String(team.teamId)}>
-                  {team.teamName}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div className="mb-4">
-          <button
-            type="button"
-            className="btn btn-secondary me-2"
-            onClick={handleGoBack}
-          >
-            Quay lại
-          </button>
-
-          <button type="submit" className="btn btn-primary">
-            Tạo Vận Động Viên
-          </button>
-        </div>
-
-        <div>
-          {/* <h5>Danh sách ID đội:</h5>
-          {teams.length > 0 ? (
-            teams.map((e) => (
-              <p key={e.teamId}>
-                ID: {e.teamId} | Tên: {e.teamName}
-              </p>
-            ))
-          ) : (
-            <p>⏳ Đang tải danh sách đội...</p>
-          )} */}
-        </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition"
+        >
+          ✅ Tạo vận động viên
+        </button>
       </form>
     </div>
   );
-}
+};
 
-export default Create;
+export default CreateBowler;
