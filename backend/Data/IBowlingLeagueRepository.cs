@@ -8,6 +8,7 @@
         IEnumerable<MatchGame> MatchGames { get; }
 
         IEnumerable<Team> Teams { get; }
+        // IEnumerable<idTeamDto> GetIdTeam { get; }
 
         IEnumerable<Tournament> Tournaments { get; }
 

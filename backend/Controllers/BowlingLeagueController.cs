@@ -15,7 +15,9 @@ namespace Backend.Controllers
         [HttpGet]
         public IEnumerable<Bowler> Get()
         {
-            var bowlingLeagueData = _bowlingLeagueRepository.Bowlers.ToArray();
+            var bowlingLeagueData = _bowlingLeagueRepository.Bowlers
+            .Where((e) => e.IsDelete != true)
+            .ToArray();
 
             return bowlingLeagueData;
         }
@@ -70,7 +72,7 @@ namespace Backend.Controllers
                 // Áp dụng giá trị được gửi lên (true để xóa, false để khôi phục)
                 Data.IsDelete = patchDto.IsDeleted.Value;
             }
-    
+
             try
             {
                 // Gọi phương thức Repository đã được triển khai
@@ -83,7 +85,7 @@ namespace Backend.Controllers
                 return NotFound(ex);
             }
         }
-        
+
 
         [HttpPost]
         public IActionResult Post([FromBody] BowlerPostDto newBowler)
@@ -119,7 +121,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet("teams")]
-        public ActionResult<IEnumerable<Team>> GetTeams() 
+        public ActionResult<IEnumerable<Team>> GetTeams()
         {
             var teams = _bowlingLeagueRepository.Teams;
             try
@@ -137,11 +139,11 @@ namespace Backend.Controllers
         }
 
         [HttpPost("teams")]
-        public IActionResult PostTeam([FromBody] TeamPostDto newTeamDto) 
+        public IActionResult PostTeam([FromBody] TeamPostDto newTeamDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState); 
+                return BadRequest(ModelState);
             }
 
             try
@@ -155,14 +157,41 @@ namespace Backend.Controllers
                 _bowlingLeagueRepository.CreateTeam(team);
 
                 return CreatedAtAction(
-                    nameof(GetTeams), 
-                    new { id = team.TeamId }, 
+                    nameof(GetTeams),
+                    new { id = team.TeamId },
                     team
                 );
             }
             catch (Exception e)
             {
                 return StatusCode(500, $"Lỗi server khi tạo đội: {e.Message}");
+            }
+        }
+
+        [HttpGet("teams/{teamId}/bowlers")]
+        public IActionResult GetBowlerByTeamId(int teamId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var data = _bowlingLeagueRepository.Bowlers
+                .Where((e) => e.TeamId == teamId && e.IsDelete!= true)
+                .ToList();
+
+                if (data == null || data.Count == 0)
+                {
+                    return Ok(new List<Bowler>());
+                }
+
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $" Loi  sercver khi tai  cau thu: {ex}");
             }
         }
     }

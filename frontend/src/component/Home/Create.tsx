@@ -92,7 +92,7 @@ const CreateBowler: React.FC = () => {
   return (
     <div className="max-w-xl mx-auto bg-white shadow-xl rounded-2xl p-6 mt-10">
       <h2 className="text-2xl font-bold mb-4 text-center text-blue-700">
-        ➕ Thêm vận động viên mới
+        Thêm vận động viên mới
       </h2>
 
       {status && (
