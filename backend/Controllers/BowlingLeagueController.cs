@@ -4,6 +4,8 @@ using Backend.Data;
 using Backend.Dtos;
 using Backend.Data.DTO;
 using System.Linq.Expressions;
+using Backend.Data.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Backend.Controllers
 {
@@ -12,9 +14,15 @@ namespace Backend.Controllers
     public class BowlingLeagueController : ControllerBase
     {
         private IBowlingLeagueRepository _bowlingLeagueRepository;
-        public BowlingLeagueController(IBowlingLeagueRepository temp) { _bowlingLeagueRepository = temp; }
+        private ITokenService _tokenService;
+        public BowlingLeagueController(IBowlingLeagueRepository temp, ITokenService token)
+        {
+            _bowlingLeagueRepository = temp;
+            _tokenService = token ;
+        }
 
         [HttpGet]
+        [AllowAnonymous] // cho phep xem cong khai
         public IEnumerable<Bowler> Get()
         {
             var bowlingLeagueData = _bowlingLeagueRepository.Bowlers
@@ -26,6 +34,8 @@ namespace Backend.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous] 
+
         public ActionResult<Bowler> Get(int id)
         {
             var bowler = _bowlingLeagueRepository.Bowlers
@@ -41,6 +51,7 @@ namespace Backend.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize]
         public IActionResult Patch(int id, [FromBody] BowlerPatchDto patchDto)
         {
             var Data = _bowlingLeagueRepository.Bowlers
@@ -91,6 +102,8 @@ namespace Backend.Controllers
 
 
         [HttpPost]
+        [Authorize]
+
         public IActionResult Post([FromBody] BowlerPostDto newBowler)
         {
             if (!ModelState.IsValid)
@@ -124,6 +137,8 @@ namespace Backend.Controllers
         }
 
         [HttpGet("teams")]
+        [AllowAnonymous]
+
         public ActionResult<IEnumerable<Team>> GetTeams()
         {
             var teams = _bowlingLeagueRepository.Teams;
@@ -143,6 +158,8 @@ namespace Backend.Controllers
         }
 
         [HttpPost("teams")]
+        [Authorize]
+
         public IActionResult PostTeam([FromBody] TeamPostDto newTeamDto)
         {
             if (!ModelState.IsValid)
@@ -173,6 +190,8 @@ namespace Backend.Controllers
         }
 
         [HttpGet("teams/{teamId}/bowlers")]
+        [AllowAnonymous]
+
         public IActionResult GetBowlerByTeamId(int teamId)
         {
             try
@@ -199,13 +218,14 @@ namespace Backend.Controllers
             }
         }
 
-        private const string UserIdKey = "_UserId";
         [HttpPost("login")]
+        [AllowAnonymous] // Login phải cho phép truy cập công khai
         public IActionResult Login([FromBody] loginDto loginDto)
         {
             try
             {
                 int? UserId = null;
+                // ✅ Giả lập xác thực người dùng
                 if (loginDto.Email == "t@gmail.com" && loginDto.Password == "tungtung")
                 {
                     UserId = 1;
@@ -215,8 +235,18 @@ namespace Backend.Controllers
                     return Unauthorized(new { message = "Email hoặc mật khẩu không đúng" });
 
                 }
-                HttpContext.Session.SetInt32(UserIdKey, UserId.Value);
-                return Ok(new { message = "Dang nhap  thanh  cong! " });
+
+                // 🔑 1. LOẠI BỎ: HttpContext.Session.SetInt32(UserIdKey, UserId.Value); 
+                // 🔑 2. SỬ DỤNG TOKEN SERVICE ĐỂ TẠO JWT
+                var token = _tokenService.GenerateJwtToken(UserId.Value);
+
+                // 🔑 3. TRẢ TOKEN VỀ CLIENT
+                return Ok(new
+                {
+                    message = "Dang nhap thanh cong ! ",
+                    userid = UserId.Value,
+                    token = token
+                });
 
 
             }
@@ -227,20 +257,26 @@ namespace Backend.Controllers
         }
 
         [HttpPost("Logout")]
+        // Với JWT, logout chỉ cần báo thành công vì client tự xóa token
+        [AllowAnonymous] // Có thể để [Authorize] hoặc [AllowAnonymous] tùy thuộc vào thiết kế. Để [AllowAnonymous] cho đơn giản.
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear();
-            return Ok(UserIdKey);
+            // ❌ LOẠI BỎ: HttpContext.Session.Clear();
+            return Ok(new { message = "Đăng xuất thành công!" });
         }
 
         // Endpoint để React kiểm tra trạng thái đăng nhập ban đầu
         [HttpGet("is-authenticated")]
+        [Authorize] // 🔑 Endpoint này chỉ hoạt động khi JWT hợp lệ
         public IActionResult IsAuthenticated()
         {
-            int? userId = HttpContext.Session.GetInt32(UserIdKey);
-
-            return Ok(new { isAuthenticated = userId.HasValue });
+            // Lấy ID từ Claims (Payload của JWT)
+           var userIdClaim = User.FindFirst("Id"); 
+            return Ok(new 
+            { 
+                isAuthenticated = true,
+                userId = userIdClaim?.Value
+            });
         }
-
     }
 }

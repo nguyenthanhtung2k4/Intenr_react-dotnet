@@ -27,14 +27,15 @@ function Login() {
     setError(null);
 
     try {
-      await login(email, password);
+      await login(email.trim(), password);
       console.log('Đăng nhập thành công!');
       toast.showToast('Đăng nhập thành công!', 'success');
       navigate('/');
     } catch (ex: any) {
       console.error('Lỗi Đăng nhập:', ex);
-      toast.showToast('Đăng nhập thất bại!', 'error');
-      // setError(ex.message || 'Đã xảy ra lỗi trong quá trình đăng nhập.');
+      const message = ex?.message || 'Đã xảy ra lỗi trong quá trình đăng nhập.';
+      setError(message);
+      toast.showToast(message, 'error');
     } finally {
       setIsLoading(false);
     }

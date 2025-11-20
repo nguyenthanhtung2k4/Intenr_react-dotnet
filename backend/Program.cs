@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Backend.Data.Services;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Thêm dòng này để đăng ký Swagger
 builder.Services.AddSwaggerGen();
 
 // Add controllers
@@ -19,9 +23,10 @@ builder.Services.AddControllers()
 builder.Services.AddDbContext<BowlingLeagueContext>(options =>
     options.UseSqlite(builder.Configuration["ConnectionStrings:BowlingLeagueConnection"]));
 
+// interfacer
 builder.Services.AddScoped<IBowlingLeagueRepository, EFBowlingLeagueRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
-// ✅ Cấu hình CORS cho React
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
@@ -33,19 +38,32 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 1. Thêm dịch vụ Cache phân tán (Cần cho Session)
-builder.Services.AddDistributedMemoryCache();
-// 2. Thêm dịch vụ Session
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Session hết hạn sau 30 phút không hoạt động
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    // options.Cookie.SameSite = SameSiteMode.None;
-    // options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
-    options.Cookie.SecurePolicy = CookieSecurePolicy.None; // Tạm thời tắt yêu cầu HTTPS trong môi trường dev
-    options.Cookie.SameSite = SameSiteMode.Lax; // Lax hoạt động tốt hơn None trên HTTP
+// 2. Thêm và Cấu hình JWT Bearer Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        // Sử dụng toán tử ?? để đảm bảo Key được cấu hình
+        var key = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured.");
+        
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+        };
+    });
 
+// Tùy chọn: Thêm chính sách mặc định để luôn yêu cầu xác thực
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
 });
 
 var app = builder.Build();
@@ -59,7 +77,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
-app.UseSession();
+// app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
