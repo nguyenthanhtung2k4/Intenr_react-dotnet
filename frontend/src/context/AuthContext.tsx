@@ -7,19 +7,17 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-// Sửa import để lấy các hàm Auth đã sửa đổi
 import {
   loginAccount,
   logoutAccount,
   checkAuthStatus,
-} from '../../services/api.services'; // Đảm bảo đường dẫn này đúng
+} from '../services/api.services';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  // Nếu cần, bạn có thể lưu thông tin user ID, email... ở đây
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,7 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const response = await checkAuthStatus(); // Sử dụng hàm mới
+        const response = await checkAuthStatus();
         setIsAuthenticated(response.isAuthenticated);
         console.log('Is Authenticated:', response.isAuthenticated);
       } catch (error) {
@@ -48,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      await loginAccount({ email, password }); // Sử dụng hàm mới
+      await loginAccount({ email, password });
       setIsAuthenticated(true);
     } catch (error) {
       throw error;

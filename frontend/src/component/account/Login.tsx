@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Thêm hook useAuth
-import { useAuth } from './Auth';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 function Login() {
+  const toast = useToast();
+
   const navigate = useNavigate();
 
   const { login } = useAuth();
@@ -26,11 +29,12 @@ function Login() {
     try {
       await login(email, password);
       console.log('Đăng nhập thành công!');
+      toast.showToast('Đăng nhập thành công!', 'success');
       navigate('/');
     } catch (ex: any) {
       console.error('Lỗi Đăng nhập:', ex);
-
-      setError(ex.message || 'Đã xảy ra lỗi trong quá trình đăng nhập.');
+      toast.showToast('Đăng nhập thất bại!', 'error');
+      // setError(ex.message || 'Đã xảy ra lỗi trong quá trình đăng nhập.');
     } finally {
       setIsLoading(false);
     }
