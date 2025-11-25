@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Bowler } from '../../types/Bowler';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchTeamBowlers } from '../../services/api.services';
+import { useAuth } from '../../context/AuthContext';
 
 function Team() {
   const [bowlerData, setBowlerData] = useState<Bowler[]>([]);
@@ -11,6 +12,7 @@ function Team() {
 
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (!id) {
@@ -107,13 +109,15 @@ function Team() {
                 >
                   Phone
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider"
-                  colSpan={2}
-                >
-                  Actions
-                </th>
+                {isAuthenticated && (
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider"
+                    colSpan={2}
+                  >
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -147,27 +151,29 @@ function Team() {
                       {b.bowlerPhoneNumber}
                     </td>
 
-                    {/* Edit Button */}
-                    <td className="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(b.bowlerId)}
-                        className="text-indigo-600 hover:text-indigo-900 transition duration-150"
-                      >
-                        Edit
-                      </button>
-                    </td>
+                    {isAuthenticated && (
+                      <>
+                        <td className="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
+                          <button
+                            type="button"
+                            onClick={() => handleEdit(b.bowlerId)}
+                            className="text-indigo-600 hover:text-indigo-900 transition duration-150"
+                          >
+                            Edit
+                          </button>
+                        </td>
 
-                    {/* Delete Button */}
-                    <td className="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(b.bowlerId)}
-                        className="text-red-600 hover:text-red-900 transition duration-150"
-                      >
-                        Delete
-                      </button>
-                    </td>
+                        <td className="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(b.bowlerId)}
+                            className="text-red-600 hover:text-red-900 transition duration-150"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))
               )}

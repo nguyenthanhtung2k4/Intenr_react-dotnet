@@ -10,6 +10,7 @@ function BowlersTable(props: any) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('props : ', props);
   var handleTeam = (ID: number) => {
     navigate(`team/${ID}`);
   };
@@ -75,21 +76,22 @@ function BowlersTable(props: any) {
           onChange={(e) => setSearch(e.target.value)}
           className="p-3 border border-gray-300 rounded-lg shadow-sm w-full sm:w-80 focus:ring-indigo-500 focus:border-indigo-500"
         />
-
-        <div className="flex space-x-3">
-          <button
-            onClick={() => handleCreate('create')}
-            className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition duration-300"
-          >
-            + Tạo VĐV Mới
-          </button>
-          <button
-            onClick={() => handleCreate('view-teams')}
-            className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 transition duration-300"
-          >
-            Quản lý Teams
-          </button>
-        </div>
+        {props.isAuth && (
+          <div className="flex space-x-3">
+            <button
+              onClick={() => handleCreate('create')}
+              className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition duration-300"
+            >
+              + Tạo VĐV Mới
+            </button>
+            <button
+              onClick={() => handleCreate('view-teams')}
+              className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 transition duration-300"
+            >
+              Quản lý Teams
+            </button>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -139,16 +141,17 @@ function BowlersTable(props: any) {
                 >
                   Team
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider"
-                  colSpan={2}
-                >
-                  Actions
-                </th>
+                {props.isAuth && (
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider"
+                    colSpan={2}
+                  >
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
-            {/* ... Table Body Mapping ... */}
             <tbody className="divide-y divide-gray-200">
               {filteredBowlers.length === 0 ? (
                 <tr>
@@ -190,24 +193,28 @@ function BowlersTable(props: any) {
                         {b?.team?.teamName || 'N/A'}
                       </button>
                     </td>
-                    <td className="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(b.bowlerId)}
-                        className="text-indigo-600 hover:text-indigo-900 transition duration-150"
-                      >
-                        Edit
-                      </button>
-                    </td>
-                    <td className="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(b.bowlerId)}
-                        className="text-red-600 hover:text-red-900 transition duration-150"
-                      >
-                        Delete
-                      </button>
-                    </td>
+                    {props.isAuth && (
+                      <>
+                        <td className="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
+                          <button
+                            type="button"
+                            onClick={() => handleEdit(b.bowlerId)}
+                            className="text-indigo-600 hover:text-indigo-900 transition duration-150"
+                          >
+                            Edit
+                          </button>
+                        </td>
+                        <td className="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(b.bowlerId)}
+                            className="text-red-600 hover:text-red-900 transition duration-150"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))
               )}

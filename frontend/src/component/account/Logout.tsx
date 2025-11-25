@@ -3,27 +3,45 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
-export const LogoutButton = () => {
+export const LogoutButton: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
-  const { logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   const handleLogout = async () => {
-    console.log('Logging out...');
     try {
       await logout();
-      console.log('Logout successful!');
-      toast.showToast('Logout successfull !', 'success');
+      toast.showToast('Đăng xuất thành công!', 'success');
       navigate('/login');
     } catch (error) {
-      console.error('Logout error:', error);
-      toast.showToast('Logout error !', 'error');
+      console.error('Lỗi Đăng xuất:', error);
+      toast.showToast('Lỗi khi đăng xuất!', 'error');
     }
   };
 
+  const handleLoginNavigation = () => {
+    navigate('/login');
+  };
+
   return (
-    <button onClick={handleLogout} className="text-red-600">
-      Logout
-    </button>
+    <>
+      {isAuthenticated ? (
+        <button
+          onClick={handleLogout}
+          className="text-red-600 font-medium hover:text-red-800 transition duration-150"
+          type="button"
+        >
+          Đăng xuất
+        </button>
+      ) : (
+        <button
+          onClick={handleLoginNavigation}
+          className="text-indigo-600 font-medium hover:text-indigo-800 transition duration-150"
+          type="button"
+        >
+          Đăng nhập
+        </button>
+      )}
+    </>
   );
 };

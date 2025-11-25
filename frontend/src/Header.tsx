@@ -1,32 +1,3 @@
-// import { CSSProperties } from 'react';
-// import logo from './BLE-logo.png';
-
-// function Header(props: any) {
-//   const bg = {
-//     backgroundColor: '#02002a',
-//   };
-
-//   const alignLeft: CSSProperties = {
-//     textAlign: 'left',
-//   };
-
-//   return (
-//     <header className="row navbar navbar-dark" style={bg}>
-//       <div className="col-4">
-//         <a href="http://localhost:3000/">
-//           <img src={logo} className="logo" alt="logo" />
-//         </a>
-//       </div>
-//       <div className="col subtitle" style={alignLeft}>
-//         <h1 className="text-white">{props.title}</h1>
-//         <p className="text-white">{props.description}</p>
-//       </div>
-//     </header>
-//   );
-// }
-
-// export default Header;
-
 import React from 'react';
 import logo from './BLE-logo.png';
 
@@ -38,7 +9,6 @@ interface HeaderProps {
 function Header(props: HeaderProps) {
   return (
     <header className="flex items-center justify-between bg-[#02002a] text-white p-4 shadow-2xl">
-      {/* --- Phần Logo và Link --- */}
       <div className="flex-shrink-0">
         <a
           href="http://localhost:3000/"

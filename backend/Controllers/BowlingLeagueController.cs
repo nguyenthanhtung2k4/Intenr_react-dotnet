@@ -225,7 +225,6 @@ namespace Backend.Controllers
             try
             {
                 int? UserId = null;
-                // ✅ Giả lập xác thực người dùng
                 if (loginDto.Email == "t@gmail.com" && loginDto.Password == "tungtung")
                 {
                     UserId = 1;
@@ -236,11 +235,8 @@ namespace Backend.Controllers
 
                 }
 
-                // 🔑 1. LOẠI BỎ: HttpContext.Session.SetInt32(UserIdKey, UserId.Value); 
-                // 🔑 2. SỬ DỤNG TOKEN SERVICE ĐỂ TẠO JWT
                 var token = _tokenService.GenerateJwtToken(UserId.Value);
 
-                // 🔑 3. TRẢ TOKEN VỀ CLIENT
                 return Ok(new
                 {
                     message = "Dang nhap thanh cong ! ",
@@ -257,17 +253,14 @@ namespace Backend.Controllers
         }
 
         [HttpPost("Logout")]
-        // Với JWT, logout chỉ cần báo thành công vì client tự xóa token
         [AllowAnonymous] // Có thể để [Authorize] hoặc [AllowAnonymous] tùy thuộc vào thiết kế. Để [AllowAnonymous] cho đơn giản.
         public IActionResult Logout()
         {
-            // ❌ LOẠI BỎ: HttpContext.Session.Clear();
             return Ok(new { message = "Đăng xuất thành công!" });
         }
 
-        // Endpoint để React kiểm tra trạng thái đăng nhập ban đầu
         [HttpGet("is-authenticated")]
-        [Authorize] // 🔑 Endpoint này chỉ hoạt động khi JWT hợp lệ
+        [Authorize] 
         public IActionResult IsAuthenticated()
         {
             // Lấy ID từ Claims (Payload của JWT)

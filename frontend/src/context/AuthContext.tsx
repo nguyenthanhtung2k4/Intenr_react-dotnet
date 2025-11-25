@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- 1. KIỂM TRA TRẠNG THÁI KHI ỨNG DỤNG KHỞI ĐỘNG ---
   useEffect(() => {
     const checkStatus = async () => {
       try {
@@ -37,12 +36,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
+        console.log('Is Authenticated:', isLoading);
       }
     };
     checkStatus();
   }, []);
 
-  // --- 2. HÀM LOGIN ---
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -55,7 +54,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // --- 3. HÀM LOGOUT ---
   const logout = async () => {
     setIsLoading(true);
     try {

@@ -15,7 +15,7 @@ if (!URL_API) {
   console.error('Lỗi cấu hình: Không tìm thấy REACT_APP_API_URL trong .env.');
 }
 
-// 🔑 1. KHỞI TẠO AXIOS INSTANCE VÀ QUẢN LÝ TOKEN
+// 1. KHỞI TẠO AXIOS INSTANCE VÀ QUẢN LÝ TOKEN
 let authToken = localStorage.getItem('jwtToken');
 const api = axios.create({
   // <--- TẠO CUSTOM AXIOS INSTANCE
@@ -25,7 +25,6 @@ const api = axios.create({
   },
 });
 
-// 🔑 2. HÀM LƯU TOKEN MỚI VÀ CẬP NHẬT HEADER
 export const setAuthToken = (token: string | null) => {
   if (token) {
     authToken = token;
@@ -38,7 +37,6 @@ export const setAuthToken = (token: string | null) => {
   }
 };
 
-// Hàm tiện ích để xử lý lỗi API và ném ra lỗi có ý nghĩa hơn
 const handleApiError = (error: any, functionName: string): never => {
   let errorMessage = `Lỗi khi giao tiếp với API (${functionName}).`;
   if (axios.isAxiosError(error)) {
@@ -46,12 +44,10 @@ const handleApiError = (error: any, functionName: string): never => {
       errorMessage += ` Status: ${error.response.status}. Chi tiết: ${
         error.response.data.message || JSON.stringify(error.response.data)
       }`;
-      // Xóa token nếu gặp 401 (Unauthorized)
       if (error.response.status === 401) {
         setAuthToken(null);
       }
     } else if (error.request) {
-      // 🔑 Sửa: Nếu không có phản hồi và request được gửi, đó là lỗi mạng/server down
       errorMessage = `Lỗi kết nối mạng (${functionName}). Vui lòng kiểm tra server.`;
     }
   } else {
@@ -61,12 +57,10 @@ const handleApiError = (error: any, functionName: string): never => {
   throw new Error(errorMessage);
 };
 
-// --- BOWLER API FUNCTIONS ---
-
 // 1. Lấy danh sách Bowlers
 export const fetchAllBowlers = async (): Promise<Bowler[]> => {
   try {
-    const response = await api.get('/'); // 🔑 Dùng 'api'
+    const response = await api.get('/');
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchAllBowlers');
@@ -76,7 +70,7 @@ export const fetchAllBowlers = async (): Promise<Bowler[]> => {
 // 2. Lấy chi tiết Bowler theo ID
 export const fetchBowlerDetails = async (id: string): Promise<Bowler> => {
   try {
-    const response = await api.get(`/${id}`); // 🔑 Dùng 'api'
+    const response = await api.get(`/${id}`);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'fetchBowlerDetails');
@@ -87,10 +81,10 @@ export const fetchBowlerDetails = async (id: string): Promise<Bowler> => {
 export const saveBowler = async (bowlerData: any, id?: string | number) => {
   try {
     if (id && id !== 'new') {
-      const response = await api.patch(`/${id}`, bowlerData); // 🔑 Dùng 'api'
+      const response = await api.patch(`/${id}`, bowlerData);
       return response.data;
     } else {
-      const response = await api.post('/', bowlerData); // 🔑 Dùng 'api'
+      const response = await api.post('/', bowlerData);
       return response.data;
     }
   } catch (error) {
@@ -102,7 +96,7 @@ export const saveBowler = async (bowlerData: any, id?: string | number) => {
 export const softDeleteBowler = async (id: string) => {
   try {
     const payload = { isDeleted: true };
-    const response = await api.patch(`/${id}`, payload); // 🔑 Dùng 'api'
+    const response = await api.patch(`/${id}`, payload);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'softDeleteBowler');
@@ -114,7 +108,7 @@ export const softDeleteBowler = async (id: string) => {
 // 5. Lấy danh sách Teams
 export const fetchTeams = async (): Promise<Team[]> => {
   try {
-    const response = await api.get(`/teams`); // 🔑 Dùng 'api'
+    const response = await api.get(`/teams`);
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchTeams');
@@ -124,7 +118,7 @@ export const fetchTeams = async (): Promise<Team[]> => {
 // 6. Lấy danh sách Bowlers theo Team ID
 export const fetchTeamBowlers = async (teamId: string): Promise<Bowler[]> => {
   try {
-    const response = await api.get(`/teams/${teamId}/bowlers`); // 🔑 Dùng 'api'
+    const response = await api.get(`/teams/${teamId}/bowlers`);
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchTeamBowlers');
@@ -137,7 +131,7 @@ export const createTeam = async (teamData: {
   CaptainId: number | null;
 }) => {
   try {
-    const response = await api.post(`/teams`, teamData); // 🔑 Dùng 'api'
+    const response = await api.post(`/teams`, teamData);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'createTeam');
@@ -150,11 +144,10 @@ export const loginAccount = async (
   credentials: LoginCredentials,
 ): Promise<void> => {
   try {
-    const response = await api.post(`/login`, credentials); // 🔑 Dùng 'api'
-    // 🔑 LƯU TOKEN TỪ PHẢN HỒI
+    const response = await api.post(`/login`, credentials);
     const token = response.data.token;
     if (token) {
-      setAuthToken(token); // Lưu token và cập nhật header
+      setAuthToken(token);
     }
   } catch (error) {
     throw handleApiError(error, 'loginAccount');
@@ -167,12 +160,11 @@ export const checkAuthStatus = async (): Promise<{
   isAuthenticated: boolean;
   userId?: string;
 }> => {
-  // Kiểm tra cục bộ nếu không có Token thì không cần gọi API
   if (!authToken) {
     return { isAuthenticated: false };
   }
   try {
-    const response = await api.get(`/is-authenticated`); // 🔑 Dùng 'api'
+    const response = await api.get(`/is-authenticated`);
     return response.data;
   } catch (error) {
     return { isAuthenticated: false };
@@ -183,8 +175,7 @@ export const checkAuthStatus = async (): Promise<{
 // ENDPOINT: /api/BowlingLeague/Logout
 export const logoutAccount = async (): Promise<void> => {
   try {
-    await api.post(`/Logout`); // 🔑 Dùng 'api'
-    // 🔑 XÓA TOKEN CỤC BỘ
+    await api.post(`/Logout`);
     setAuthToken(null);
   } catch (error) {
     console.warn('Logout API warning (might be already logged out):', error);

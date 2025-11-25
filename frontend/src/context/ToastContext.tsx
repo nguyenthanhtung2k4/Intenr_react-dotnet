@@ -1,5 +1,3 @@
-// src/context/ToastContext.tsx
-
 import React, {
   createContext,
   useContext,
@@ -8,10 +6,8 @@ import React, {
   ReactNode,
 } from 'react';
 
-// Import component Toast để sử dụng trong Provider
 import { Toast } from '../component/share/Toast';
 
-// Định nghĩa các loại thông báo và interface
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 interface ToastMessage {
@@ -24,10 +20,8 @@ interface ToastContextType {
   showToast: (message: string, type: ToastType) => void;
 }
 
-// 1. Khởi tạo Context
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-// 2. Component Provider
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   // messages: Mảng chứa tất cả thông báo hiện tại
   const [messages, setMessages] = useState<ToastMessage[]>([]);
@@ -37,21 +31,18 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     const id = Date.now();
     const newToast: ToastMessage = { id, message, type };
 
-    // Thêm thông báo mới vào đầu mảng
     setMessages((prevMessages) => [newToast, ...prevMessages]);
 
-    // Tự động xóa thông báo sau 5 giây
     setTimeout(() => {
       setMessages((prevMessages) =>
         prevMessages.filter((msg) => msg.id !== id),
       );
-    }, 5000); // 5000ms = 5 giây
+    }, 5000);
   }, []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      {/* ⚠️ QUAN TRỌNG: Render component Toast ở đây để nó nằm ngoài luồng DOM chính */}
       <Toast messages={messages} />
     </ToastContext.Provider>
   );

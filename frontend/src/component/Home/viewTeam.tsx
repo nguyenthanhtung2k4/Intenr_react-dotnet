@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchTeams } from '../../services/api.services';
 import { Team } from '../../types/Team';
+import { useAuth } from '../../context/AuthContext';
 
 function getTeamId(t: any): number | null {
   const raw = t?.TeamId ?? t?.teamId ?? t?.id;
@@ -14,6 +15,7 @@ function ViewTeams() {
   const [dataTeams, setDataTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const loadTeams = async () => {
@@ -101,12 +103,15 @@ function ViewTeams() {
                 >
                   Xem chi tiết
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider rounded-tr-xl"
-                >
-                  Hành Động
-                </th>
+                {isAuthenticated && (
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider"
+                    colSpan={2}
+                  >
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -141,24 +146,26 @@ function ViewTeams() {
                         Xem VĐV
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <button
-                        type="button"
-                        id={`${team.TeamId}`}
-                        onClick={() => handleTeamBowlers(team, 'edit')}
-                        className="text-blue-600 hover:text-indigo-900 transition duration-150 pr-4"
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        type="button"
-                        id={`${team.TeamId}`}
-                        onClick={() => handleTeamBowlers(team, 'delete')}
-                        className="text-red-600 hover:text-red-900 transition duration-150"
-                      >
-                        Xóa
-                      </button>
-                    </td>
+                    {isAuthenticated && (
+                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                        <button
+                          type="button"
+                          id={`${team.TeamId}`}
+                          onClick={() => handleTeamBowlers(team, 'edit')}
+                          className="text-blue-600 hover:text-indigo-900 transition duration-150 pr-4"
+                        >
+                          Sửa
+                        </button>
+                        <button
+                          type="button"
+                          id={`${team.TeamId}`}
+                          onClick={() => handleTeamBowlers(team, 'delete')}
+                          className="text-red-600 hover:text-red-900 transition duration-150"
+                        >
+                          Xóa
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
