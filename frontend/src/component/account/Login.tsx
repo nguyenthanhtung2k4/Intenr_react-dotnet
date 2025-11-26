@@ -143,7 +143,7 @@ function Login() {
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600">
-          Tài khoản dùng thử: **(Sẽ sử dụng tài khoản thực từ Backend)**
+          Tài khoản dùng thử: **email: t@gmail.com |password: tungtung **
         </p>
       </div>
     </div>
