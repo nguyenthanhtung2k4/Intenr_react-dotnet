@@ -1,1 +1,9 @@
-Bổ sung thêm  accounts trong  backend nữa là được thay  vì dùng   account cố đính  nhé ! 
+Phát  triển tiếp: 
+-  Làm Các giải đấu
+-  Làm các trận  đấu
+-  Làm các điểm -  so sánh nó 
+ Phát triển tiếp:
+ -  Làm phân tích xếp hạng 
+ - Điểm của nó
+ .... 
+ 

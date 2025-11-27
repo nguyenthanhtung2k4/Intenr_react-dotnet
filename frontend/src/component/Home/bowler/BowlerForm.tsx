@@ -5,7 +5,7 @@ import {
   fetchTeams,
   fetchBowlerDetails,
   saveBowler,
-} from '../../services/api.services';
+} from '../../../services/api.services';
 
 type UiTeam = { id: string; name: string };
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bowler } from '../../types/Bowler';
-import { fetchAllBowlers } from '../../services/api.services';
+import { Bowler } from '../../../types/Bowler';
+import { fetchAllBowlers } from '../../../services/api.services';
 
 function BowlersTable(props: any) {
   const navigate = useNavigate();

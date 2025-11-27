@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   softDeleteBowler,
   fetchBowlerDetails,
-} from '../../services/api.services';
+} from '../../../services/api.services';
 
 function Delete() {
   const { id } = useParams<{ id: string }>();

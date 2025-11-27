@@ -56,4 +56,20 @@ Tournament.cs,Bảng Giải Đấu,"Lưu trữ thông tin về các sự kiện 
 TourneyMatch.cs,Bảng Trận Đấu của Giải Đấu,"Lưu trữ thông tin về các trận đấu cụ thể diễn ra trong một giải đấu (ví dụ: ID trận đấu, ID đội thắng, ID đội thua)."
 MatchGame.cs,Bảng Trò Chơi (Game) trong Trận Đấu,"Lưu trữ thông tin chi tiết hơn về từng trò chơi/ván đấu (game) riêng lẻ trong một trận đấu (ví dụ: ID trận đấu, số game, điểm game, người thắng game)."
 BowlerScore.cs,Bảng Điểm của Vận Động Viên,Lưu trữ chi tiết điểm số của một vận động viên bowling trong một game hoặc một khung (frame) cụ thể. Đây là bảng quan trọng để tính toán tổng điểm.
+
+
+Tên Lớp (File),Chức Năng (Vai trò),Giải thích
+BowlingLeagueContext.cs,Lớp Context của Entity Framework,"Lớp này là cầu nối chính giữa ứng dụng C# và cơ sở dữ liệu. Nó chứa các thuộc tính DbSet<T> cho mỗi bảng (ví dụ: DbSet<Bowler>) và quản lý các kết nối, truy vấn dữ liệu."
+IBowlingLeagueRepository.cs,Interface của Repository,"Định nghĩa các phương thức mà ứng dụng cần để truy cập và thao tác với dữ liệu (ví dụ: GetBowlers(), AddMatchGame())."
+EFBowlingLeagueRepository.cs,Triển khai Repository,"Lớp này triển khai giao diện IBowlingLeagueRepository, sử dụng BowlingLeagueContext để thực hiện các thao tác cơ sở dữ liệu thực tế (CRUD - Create, Read, Update, Delete)."
+Accounts.cs,Bảng Tài Khoản,"Có thể là bảng lưu trữ thông tin người dùng của ứng dụng (ví dụ: Thông tin đăng nhập, vai trò), tách biệt với các vận động viên."
+
+
+
+Tên Lớp (File),Chức Năng (Vai trò là một bảng DB),Giải thích
+ZtblBowlerRating.cs,Bảng Xếp Hạng VĐV,"Lưu trữ các mức xếp hạng hoặc phân loại khác nhau cho các vận động viên (ví dụ: ""Novice"", ""Amateur"", ""Pro"")."
+ZtblSkipLabel.cs,Bảng Nhãn Bỏ Qua,Có thể là bảng tra cứu cho các nhãn hoặc lý do cụ thể khi một game/match bị bỏ qua hoặc hủy bỏ.
+ZtblWeek.cs,Bảng Tuần Lịch,"Lưu trữ thông tin về các tuần cụ thể trong mùa giải, thường được dùng để theo dõi lịch trình theo tuần."
+
+
 ``` 
