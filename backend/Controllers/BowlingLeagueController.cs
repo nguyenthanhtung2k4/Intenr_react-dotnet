@@ -265,46 +265,48 @@ namespace Backend.Controllers
             }
         }
 
+        // Lấy danh sách accounts (chỉ lấy những account chưa bị xóa mềm)
         [HttpGet("accounts")]
         [Authorize]
-        public IActionResult Accounts()
+        public IActionResult GetAccounts()
         {
             try
             {
                 var acc = _bowlingLeagueRepository.Accounts
-                .Where(e => !e.IsDelete)
-                .OrderByDescending(e => e.Id)
-                .ToList();
+                    .Where(e => !e.IsDelete)
+                    .OrderByDescending(e => e.Id)
+                    .ToList();
 
                 return Ok(acc);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Loi server! ", ex });
+                return StatusCode(500, new { message = "Lỗi server!", detail = ex.Message });
             }
         }
 
 
+        // Tạo mới account
         [HttpPost("accounts")]
         [Authorize]
-        public IActionResult AddAccounts([FromBody] AccountsDto accountsDto)
+        public IActionResult CreateAccount([FromBody] AccountsDto accountsDto)
         {
-
             try
             {
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
-
                 }
-                var check = _bowlingLeagueRepository.Accounts
-                .Any(a => a.Email == accountsDto.Email);
-                if (check)
+
+                var emailExists = _bowlingLeagueRepository.Accounts
+                    .Any(a => !a.IsDelete && a.Email == accountsDto.Email);
+
+                if (emailExists)
                 {
-                    return Conflict(new { message = "Email da ton tai ! " });
-
+                    return Conflict(new { status = 409, message = "Email đã tồn tại!" });
                 }
-                var accounts = new Accounts
+
+                var account = new Accounts
                 {
                     Email = accountsDto.Email,
                     Password = accountsDto.Password,
@@ -312,60 +314,117 @@ namespace Backend.Controllers
                     IsDelete = accountsDto.IsDelete
                 };
 
-                _bowlingLeagueRepository.CreateAcounts(accounts);
+                _bowlingLeagueRepository.CreateAcounts(account);
 
-                return Ok(new { message = "Da them tai  khoan thanh cong" });
-
-
+                return Ok(new
+                {
+                    status = 200,
+                    message = "Đã thêm tài khoản thành công",
+                    data = account
+                });
             }
             catch (Exception ex)
             {
-                return Unauthorized(new { message = "Loi  server ", ex });
+                return StatusCode(500, new { message = "Lỗi server", detail = ex.Message });
             }
-
         }
 
 
+        // Cập nhật account
         [HttpPost("accounts/{id}")]
         [Authorize]
-        public IActionResult AddAccounts(int id, [FromBody] AccountsDto accountsDto)
+        public IActionResult UpdateAccount(int id, [FromBody] AccountsDto accountsDto)
         {
-
             try
             {
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
-
                 }
-                var check = _bowlingLeagueRepository.Accounts
-                .Any(a => a.Email == accountsDto.Email);
-                if (check)
-                {
-                    return Conflict(new { message = "Email da ton tai ! " });
 
-                }
                 var acc = _bowlingLeagueRepository.Accounts
-                .FirstOrDefault(e => e.Id == id);
+                    .FirstOrDefault(e => e.Id == id);
 
-                if (acc == null) { return NotFound(); }
+                if (acc == null)
+                {
+                    return NotFound(new { status = 404, message = "Không tìm thấy tài khoản" });
+                }
 
-                if (accountsDto.Email != null) { acc.Email = accountsDto.Email; }
-                if (accountsDto.Password != null) { acc.Password = accountsDto.Password; }
-                if (accountsDto.Role != null) { acc.Role = accountsDto.Role; }
-                /// check  isDelete true la  xoa di
-                if (accountsDto.IsDelete == true) { acc.IsDelete = accountsDto.IsDelete; }
+                if (!string.IsNullOrEmpty(accountsDto.Email))
+                {
+                    var emailExists = _bowlingLeagueRepository.Accounts
+                        .Any(a => !a.IsDelete &&
+                                  a.Email == accountsDto.Email &&
+                                  a.Id != id);
+
+                    if (emailExists)
+                    {
+                        return BadRequest(new
+                        {
+                            status = 400,
+                            message = "Email đã tồn tại!"
+                        });
+                    }
+
+                    acc.Email = accountsDto.Email;
+                }
+
+                if (!string.IsNullOrEmpty(accountsDto.Password))
+                {
+                    acc.Password = accountsDto.Password;
+                }
+
+                if (!string.IsNullOrEmpty(accountsDto.Role))
+                {
+                    acc.Role = accountsDto.Role;
+                }
+
+                // Xóa mềm nếu gửi IsDelete = true
+                if (accountsDto.IsDelete == true)
+                {
+                    acc.IsDelete = true;
+                }
 
                 _bowlingLeagueRepository.UpdateAccounts(acc);
 
-                return Ok(acc);
+                return Ok(new
+                {
+                    status = 200,
+                    message = "Cập nhật tài khoản thành công",
+                    data = acc
+                });
             }
             catch (Exception ex)
             {
-                return Unauthorized(new { message = "Loi  server ", ex });
+                return StatusCode(500, new { message = "Lỗi server", detail = ex.Message });
             }
-
         }
+
+
+        // Lấy chi tiết 1 tài khoản
+        [HttpGet("accounts/details/{id}")]
+        [Authorize]
+        public IActionResult GetAccountDetails(int id)
+        {
+            try
+            {
+                var dataAcc = _bowlingLeagueRepository.Accounts
+                    .Where(e => !e.IsDelete)
+                    .FirstOrDefault(e => e.Id == id);
+
+                if (dataAcc == null)
+                {
+                    return NotFound(new { status = 404, message = "Không tìm thấy tài khoản" });
+                }
+
+                return Ok(dataAcc);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi server", detail = ex.Message });
+            }
+        }
+
 
         [HttpPost("Logout")]
         [AllowAnonymous] // Có thể để [Authorize] hoặc [AllowAnonymous] tùy thuộc vào thiết kế. Để [AllowAnonymous] cho đơn giản.

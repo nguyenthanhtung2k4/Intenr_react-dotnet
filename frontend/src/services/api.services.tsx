@@ -162,10 +162,37 @@ export const fetchAccounts = async (): Promise<Acc[]> => {
     throw handleApiError(error, 'fetchAccounts');
   }
 };
-// 7.3 Lấy danh sách Accounts
-export const Details = async (id: string): Promise<Acc[]> => {
+// 7.3 Cập nhật Accounts
+export const fetchAccountUpdate = async (
+  id: string,
+  dataUpdate: {
+    Email: string;
+    Password: string;
+    Role: string;
+  },
+): Promise<Acc[]> => {
   try {
-    const response = await api.get(`/accounts/${id}`);
+    const response = await api.post(`/accounts/${id}`, dataUpdate);
+    return response.data || [];
+  } catch (error) {
+    throw handleApiError(error, 'fetchAccountsDetails');
+  }
+};
+// 7.4 Xóa Accounts
+export const fetchdeleteAccount = async (id: number) => {
+  try {
+    const dataDelete = { IsDelete: true };
+    const response = await api.post(`/accounts/${id}`, dataDelete);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'deleteAccount');
+  }
+};
+
+// 7.4 Lấy accounts  chi  tiết
+export const fetchAccountsDetails = async (id: string): Promise<Acc> => {
+  try {
+    const response = await api.get(`/accounts/details/${id}`);
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchAccountsDetails');

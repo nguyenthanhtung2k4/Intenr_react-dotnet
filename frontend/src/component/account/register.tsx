@@ -1,20 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import {
   createAccounts,
-  fetchBowlerDetails,
+  fetchAccountsDetails,
+  fetchAccountUpdate,
 } from '../../services/api.services';
-import { convertTypeAcquisitionFromJson } from 'typescript';
 
 function Register() {
   const { id } = useParams<{ id: string }>();
-  console.log('param la: ', id);
   const isEdit = id !== undefined && id !== 'create-accounts';
-  console.log(isEdit);
   const pageTitle = isEdit ? 'Chỉnh sửa account' : 'Thêm account';
-
-  console.log(pageTitle);
 
   const toast = useToast();
   const navigate = useNavigate();
@@ -26,29 +22,94 @@ function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Lấy data khi edit
+  useEffect(() => {
+    const fetchAccountData = async () => {
+      if (isEdit && id) {
+        try {
+          const dataDetail = await fetchAccountsDetails(id);
+          // Tùy backend trả camelCase hay PascalCase mà bạn map lại cho đúng
+          setEmail(dataDetail.email ?? dataDetail.email ?? '');
+          setPassword(dataDetail.password ?? dataDetail.password ?? '');
+          setRole(dataDetail.role ?? dataDetail.role ?? '');
+        } catch (err) {
+          console.error('Lỗi lấy chi tiết account:', err);
+          toast.showToast('Không lấy được thông tin tài khoản.', 'error');
+        }
+      }
+    };
+    fetchAccountData();
+  }, [id, isEdit, toast]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      setError('Vui lòng nhập đầy đủ Email và Mật khẩu.');
+    if (!email || !password || !role) {
+      setError('Vui lòng nhập đầy đủ Email, Mật khẩu và Vai trò.');
       return;
     }
-// Thieu  va  sai  o day 
-// 
+
     setIsLoading(true);
     setError(null);
+    // ================== UPDATE ==================
+
     if (isEdit && id) {
-      await fetchBowlerDetails(id);
-    } else {
       try {
-        await createAccounts({ Email: email, Password: password, Role: role });
-        console.log('Add accounts  success !');
-        toast.showToast('Them thanh cong!', 'success');
+        await fetchAccountUpdate(id, {
+          Email: email,
+          Password: password,
+          Role: role,
+        });
+
+        toast.showToast('Cập nhật tài khoản thành công!', 'success');
+        navigate('/view-accounts');
+      } catch (ex: any) {
+        console.error('Lỗi cập nhật tài khoản:', ex);
+
+        const status = ex?.response?.status;
+        const apiMessage = ex?.response?.data?.message;
+
+        let message = 'Email tài khoản đã tồn tại !';
+
+        if (status === 400 || status === 409) {
+          message = apiMessage || 'Email đã tồn tại!';
+        } else if (apiMessage) {
+          message = apiMessage;
+        }
+
+        setError(message);
+        toast.showToast(message, 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    // ================== CREATE ==================
+    else {
+      try {
+        await createAccounts({
+          Email: email,
+          Password: password,
+          Role: role,
+        });
+
+        toast.showToast('Thêm tài khoản thành công!', 'success');
         navigate('/');
       } catch (ex: any) {
-        console.error('Lỗi Đăng nhập:', ex);
-        const message =
-          ex?.message || 'Đã xảy ra lỗi trong quá trình đăng nhập.';
+        console.error('Lỗi tạo tài khoản:', ex);
+
+        const status = ex?.response?.status;
+        const apiMessage = ex?.response?.data?.message;
+
+        let message = 'Đã xảy ra lỗi trong quá trình tạo tài khoản.';
+
+        if (status === 400 || status === 409) {
+          message = apiMessage || 'Email đã tồn tại!';
+        } else if (apiMessage) {
+          message = apiMessage;
+        } else if (ex?.message) {
+          message = ex.message;
+        }
+
         setError(message);
         toast.showToast(message, 'error');
       } finally {
@@ -56,6 +117,7 @@ function Register() {
       }
     }
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-inter">
       <div className="max-w-md w-full space-y-8 p-8 bg-white shadow-xl rounded-xl">
@@ -85,6 +147,7 @@ function Register() {
                 disabled={isLoading}
               />
             </div>
+
             {/* Password Input */}
             <div className="mt-px">
               <label htmlFor="password" className="sr-only">
@@ -98,14 +161,13 @@ function Register() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                // Removed rounded-b-lg here, applying it to the select element later
                 className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Mật khẩu"
                 disabled={isLoading}
               />
             </div>
 
-            {/* Role Input (FIXED: Using a single <select> element) */}
+            {/* Role Input */}
             <div className="mt-px">
               <label htmlFor="user-role" className="sr-only">
                 Chọn Vai Trò (Role)
@@ -168,8 +230,10 @@ function Register() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Đang thêm...
+                  Đang load...
                 </div>
+              ) : isEdit && id ? (
+                'Sửa accounts'
               ) : (
                 'Thêm accounts'
               )}
@@ -181,7 +245,6 @@ function Register() {
   );
 }
 
-// Main App component to host Register
 export default function App() {
   return <Register />;
 }
