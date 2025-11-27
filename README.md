@@ -44,3 +44,16 @@ This is just an example app for the development side of things only. This is not
 │   └── main.tsx / index.tsx
 └── package.json
 ```
+
+
+# db : 
+
+```bash
+Tên Lớp (File),Chức Năng (Vai trò là một bảng DB),Giải thích
+Team.cs,Bảng Đội,"Lưu trữ thông tin về mỗi đội tham gia giải đấu (ví dụ: Tên đội, ID đội)."
+Bowler.cs,Bảng Vận động viên Bowling,"Lưu trữ thông tin cá nhân của mỗi người chơi bowling (ví dụ: Tên, tuổi, ID đội mà họ thuộc về)."
+Tournament.cs,Bảng Giải Đấu,"Lưu trữ thông tin về các sự kiện giải đấu tổng thể (ví dụ: Tên giải đấu, ngày bắt đầu, ngày kết thúc)."
+TourneyMatch.cs,Bảng Trận Đấu của Giải Đấu,"Lưu trữ thông tin về các trận đấu cụ thể diễn ra trong một giải đấu (ví dụ: ID trận đấu, ID đội thắng, ID đội thua)."
+MatchGame.cs,Bảng Trò Chơi (Game) trong Trận Đấu,"Lưu trữ thông tin chi tiết hơn về từng trò chơi/ván đấu (game) riêng lẻ trong một trận đấu (ví dụ: ID trận đấu, số game, điểm game, người thắng game)."
+BowlerScore.cs,Bảng Điểm của Vận Động Viên,Lưu trữ chi tiết điểm số của một vận động viên bowling trong một game hoặc một khung (frame) cụ thể. Đây là bảng quan trọng để tính toán tổng điểm.
+``` 

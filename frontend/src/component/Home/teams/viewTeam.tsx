@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchTeams } from '../../services/api.services';
-import { Team } from '../../types/Team';
-import { useAuth } from '../../context/AuthContext';
+import { fetchTeams } from '../../../services/api.services';
+import { Team } from '../../../types/Team';
+import { useAuth } from '../../../context/AuthContext';
 
 function getTeamId(t: any): number | null {
   const raw = t?.TeamId ?? t?.teamId ?? t?.id;

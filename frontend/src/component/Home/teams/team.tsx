@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Bowler } from '../../types/Bowler';
+import { Bowler } from '../../../types/Bowler';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fetchTeamBowlers } from '../../services/api.services';
-import { useAuth } from '../../context/AuthContext';
+import { fetchTeamBowlers } from '../../../services/api.services';
+import { useAuth } from '../../../context/AuthContext';
 
 function Team() {
   const [bowlerData, setBowlerData] = useState<Bowler[]>([]);

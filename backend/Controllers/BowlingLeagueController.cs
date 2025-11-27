@@ -220,48 +220,53 @@ namespace Backend.Controllers
         }
 
         // ///////////////////////////////////////////////////////////
-
         [HttpPost("login")]
-        [AllowAnonymous] // Login phải cho phép truy cập công khai
-        public IActionResult Login([FromBody] loginDto loginDto)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] loginDto loginDto)
         {
+            // 1. Kiểm tra dữ liệu đầu vào cơ bản
+            if (string.IsNullOrEmpty(loginDto.Email) || string.IsNullOrEmpty(loginDto.Password))
+            {
+                return BadRequest(new { message = "Vui lòng nhập đầy đủ Email và Mật khẩu." });
+            }
+
             try
             {
-                int? UserId = null;
-                if (loginDto.Email == "t@gmail.com" && loginDto.Password == "tungtung")
-                {
-                    UserId = 1;
-                }
-                else
-                {
-                    var acc = _bowlingLeagueRepository.Accounts.FirstOrDefault(e => e.Email == loginDto.Email && !e.IsDelete);
+                var acc = _bowlingLeagueRepository.Accounts
+                    .FirstOrDefault(e => e.Email.ToLower() == loginDto.Email.ToLower() && !e.IsDelete);
 
-                    if (acc != null && acc.Password != loginDto.Password)
-                    {
-                        return Unauthorized(new { message = "Email hoặc mật khẩu không đúng! " });
-                    }
-
-                }
-                if (UserId == null)
+                // 3. Kiểm tra tài khoản tồn tại và Mật khẩu (Sử dụng HASH)
+                if (acc == null)
                 {
-                    return Unauthorized(new { message = "Email hoặc mật khẩu không đúng" });
-
+                    return Unauthorized(new { message = "Email hoặc mật khẩu không đúng." });
                 }
 
-                var token = _tokenService.GenerateJwtToken(UserId.Value);
+                // 4. KIỂM TRA MẬT KHẨU (SỬ DỤNG HASHING)
+                // ** SỬ DỤNG HASHING **
+                // if (!PasswordHasher.VerifyPasswordHash(loginDto.Password, acc.PasswordHash, acc.PasswordSalt)) 
+                // {
+                //     return Unauthorized(new { message = "Email hoặc mật khẩu không đúng." });
+                // }
+
+                if (acc.Password != loginDto.Password)
+                {
+                    return Unauthorized(new { message = "Email hoặc mật khẩu không đúng." });
+                }
+
+                var userId = acc.Id;
+                var token = _tokenService.GenerateJwtToken(userId); // Sử dụng Id của tài khoản
 
                 return Ok(new
                 {
-                    message = "Dang nhap thanh cong ! ",
-                    userid = UserId.Value,
+                    message = "Đăng nhập thành công!",
+                    userid = userId,
                     token = token
                 });
-
 
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Loi server " + ex.Message });
+                return StatusCode(500, new { message = "Lỗi máy chủ (Server Error). Vui lòng thử lại sau.", ex });
             }
         }
 
