@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  ReactNode,
-} from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
 import { Toast } from '../component/share/Toast';
 
@@ -34,9 +28,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     setMessages((prevMessages) => [newToast, ...prevMessages]);
 
     setTimeout(() => {
-      setMessages((prevMessages) =>
-        prevMessages.filter((msg) => msg.id !== id),
-      );
+      setMessages((prevMessages) => prevMessages.filter((msg) => msg.id !== id));
     }, 5000);
   }, []);
 

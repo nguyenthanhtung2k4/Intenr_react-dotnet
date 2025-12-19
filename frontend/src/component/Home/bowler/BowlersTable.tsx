@@ -118,9 +118,7 @@ function BowlersTable(props: any) {
         {isLoading && !error ? (
           <div className="text-center p-20">
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#00f3ff] mx-auto"></div>
-            <p className="mt-4 text-[#00f3ff] font-bold text-lg animate-pulse">
-              LOADING DATA...
-            </p>
+            <p className="mt-4 text-[#00f3ff] font-bold text-lg animate-pulse">LOADING DATA...</p>
           </div>
         ) : (
           // Datat
@@ -128,16 +126,14 @@ function BowlersTable(props: any) {
             <table className="min-w-full divide-y divide-[#2a2c39]">
               <thead className="bg-[#1a1c29]">
                 <tr>
-                  {['Last Name', 'First Name', 'Address', 'Phone', 'Team'].map(
-                    (head) => (
-                      <th
-                        key={head}
-                        className="px-6 py-4 text-xs font-bold text-[#00f3ff] uppercase tracking-wider text-left"
-                      >
-                        {head}
-                      </th>
-                    ),
-                  )}
+                  {['Last Name', 'First Name', 'Address', 'Phone', 'Team'].map((head) => (
+                    <th
+                      key={head}
+                      className="px-6 py-4 text-xs font-bold text-[#00f3ff] uppercase tracking-wider text-left"
+                    >
+                      {head}
+                    </th>
+                  ))}
                   {props.isAuth && (
                     <th className="px-6 py-4 text-center text-xs font-bold text-[#ff0055] uppercase tracking-wider">
                       Actions
@@ -148,27 +144,18 @@ function BowlersTable(props: any) {
               <tbody className="divide-y divide-[#2a2c39] bg-transparent">
                 {filteredBowlers.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={7}
-                      className="px-6 py-12 text-center text-lg text-gray-400"
-                    >
-                      {search
-                        ? `No bowlers found for "${search}".`
-                        : 'No bowler data available.'}
+                    <td colSpan={7} className="px-6 py-12 text-center text-lg text-gray-400">
+                      {search ? `No bowlers found for "${search}".` : 'No bowler data available.'}
                     </td>
                   </tr>
                 ) : (
                   filteredBowlers.map((b) => (
-                    <tr
-                      key={b.bowlerId}
-                      className="hover:bg-[#ff0055]/10 transition duration-200"
-                    >
+                    <tr key={b.bowlerId} className="hover:bg-[#ff0055]/10 transition duration-200">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">
                         {b.bowlerLastName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {b.bowlerFirstName}{' '}
-                        {b.bowlerMiddleInit ? b.bowlerMiddleInit + '.' : ''}
+                        {b.bowlerFirstName} {b.bowlerMiddleInit ? b.bowlerMiddleInit + '.' : ''}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-400 max-w-xs truncate">
                         {b.bowlerAddress}, {b.bowlerCity}

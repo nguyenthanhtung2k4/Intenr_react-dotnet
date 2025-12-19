@@ -64,10 +64,7 @@ function ViewTeams() {
             LEAGUE TEAMS
           </h1>
           <div className="space-x-4">
-            <button
-              onClick={() => navigate('/create-team')}
-              className="btn-primary"
-            >
+            <button onClick={() => navigate('/create-team')} className="btn-primary">
               + Create Team
             </button>
             <button
@@ -110,19 +107,13 @@ function ViewTeams() {
               <tbody className="divide-y divide-[#2a2c39] bg-transparent">
                 {dataTeams.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={3}
-                      className="px-6 py-12 text-center text-lg text-gray-400"
-                    >
+                    <td colSpan={3} className="px-6 py-12 text-center text-lg text-gray-400">
                       No teams found.
                     </td>
                   </tr>
                 ) : (
                   dataTeams.map((team) => (
-                    <tr
-                      key={team.TeamId}
-                      className="hover:bg-[#00f3ff]/10 transition duration-200"
-                    >
+                    <tr key={team.TeamId} className="hover:bg-[#00f3ff]/10 transition duration-200">
                       <td className="px-6 py-4 whitespace-nowrap text-lg font-bold text-white text-center">
                         {team.teamName}
                       </td>

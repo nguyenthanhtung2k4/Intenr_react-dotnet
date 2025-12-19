@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Header from './Header';
 import TourMatch from './component/Home/matchs/TourMatchs';
 import BowlersTable from './component/Home/bowler/BowlersTable';
@@ -25,25 +20,16 @@ function App() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div
-      className="App min-h-screen"
-      style={{ backgroundColor: 'var(--color-bg)' }}
-    >
+    <div className="App min-h-screen" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
       <Header title="Bowling League" description="Official Tournament" />
       <Routes>
         {/* Public League Routes */}
         <Route path="/" element={<TourMatch />} />
         <Route path="/fixtures" element={<MatchList />} />
         <Route path="/standings" element={<StandingsTable />} />
-        <Route
-          path="/stats"
-          element={<BowlersTable isAuth={isAuthenticated} />}
-        />
+        <Route path="/stats" element={<BowlersTable isAuth={isAuthenticated} />} />
         <Route path="/teams" element={<ViewTeams />} />
-        <Route
-          path="/team/:id"
-          element={<BowlersTable isAuth={isAuthenticated} />}
-        />
+        <Route path="/team/:id" element={<BowlersTable isAuth={isAuthenticated} />} />
 
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
@@ -52,38 +38,24 @@ function App() {
         {/* Protected Admin Routes */}
         <Route
           path="/bowlers"
-          element={
-            isAuthenticated ? (
-              <BowlersTable isAuth={true} />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
+          element={isAuthenticated ? <BowlersTable isAuth={true} /> : <Navigate to="/login" />}
         />
         <Route path="/view-teams" element={<ViewTeams />} />
         <Route
           path="/bowler/new"
-          element={
-            isAuthenticated ? <BowlerForm /> : <Navigate to="/login" />
-          }
+          element={isAuthenticated ? <BowlerForm /> : <Navigate to="/login" />}
         />
         <Route
           path="/bowler/:id"
-          element={
-            isAuthenticated ? <BowlerForm /> : <Navigate to="/login" />
-          }
+          element={isAuthenticated ? <BowlerForm /> : <Navigate to="/login" />}
         />
         <Route
           path="/create-team"
-          element={
-            isAuthenticated ? <CreateTeams /> : <Navigate to="/login" />
-          }
+          element={isAuthenticated ? <CreateTeams /> : <Navigate to="/login" />}
         />
         <Route
           path="/edit-team/:id"
-          element={
-            isAuthenticated ? <CreateTeams /> : <Navigate to="/login" />
-          }
+          element={isAuthenticated ? <CreateTeams /> : <Navigate to="/login" />}
         />
         <Route
           path="/delete/:id"
@@ -96,15 +68,11 @@ function App() {
 
         <Route
           path="/view-accounts"
-          element={
-            isAuthenticated ? <ViewAccounts /> : <Navigate to="/login" />
-          }
+          element={isAuthenticated ? <ViewAccounts /> : <Navigate to="/login" />}
         />
         <Route
           path="/accounts/details/:id"
-          element={
-            isAuthenticated ? <AccountDetails /> : <Navigate to="/login" />
-          }
+          element={isAuthenticated ? <AccountDetails /> : <Navigate to="/login" />}
         />
         <Route
           path="/account/edit/:id"

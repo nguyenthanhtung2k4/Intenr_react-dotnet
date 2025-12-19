@@ -120,10 +120,7 @@ const Accounts = () => {
             <tbody className="divide-y divide-gray-200">
               {dataAccounts.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-4 text-center text-sm text-gray-500"
-                  >
+                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
                     Không có accounts nào được tìm thấy.
                   </td>
                 </tr>

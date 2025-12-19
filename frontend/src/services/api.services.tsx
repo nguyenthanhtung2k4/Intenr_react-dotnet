@@ -127,10 +127,7 @@ export const fetchTeamBowlers = async (teamId: string): Promise<Bowler[]> => {
 };
 
 // 7. Tạo mới Team
-export const createTeam = async (teamData: {
-  TeamName: string;
-  CaptainId: number | null;
-}) => {
+export const createTeam = async (teamData: { TeamName: string; CaptainId: number | null }) => {
   try {
     const response = await api.post(`/teams`, teamData);
     return response.data;
@@ -201,9 +198,7 @@ export const fetchAccountsDetails = async (id: string): Promise<Acc> => {
 
 // 8. Đăng nhập (Sử dụng POST)
 // ENDPOINT: /api/BowlingLeague/login
-export const loginAccount = async (
-  credentials: LoginCredentials,
-): Promise<void> => {
+export const loginAccount = async (credentials: LoginCredentials): Promise<void> => {
   try {
     const response = await api.post(`/login`, credentials);
     const token = response.data.token;

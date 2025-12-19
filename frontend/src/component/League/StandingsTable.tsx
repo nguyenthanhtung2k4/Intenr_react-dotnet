@@ -16,9 +16,7 @@ const StandingsTable = () => {
   useEffect(() => {
     const fetchStandings = async () => {
       try {
-        const response = await axios.get(
-          'http://localhost:5292/api/Matchs/standings',
-        );
+        const response = await axios.get('http://localhost:5292/api/Matchs/standings');
         setStandings(response.data);
       } catch (error) {
         console.error('Error fetching standings:', error);
@@ -32,9 +30,7 @@ const StandingsTable = () => {
 
   if (loading)
     return (
-      <div className="text-center p-10 text-[#00f3ff] animate-pulse">
-        Loading Standings...
-      </div>
+      <div className="text-center p-10 text-[#00f3ff] animate-pulse">Loading Standings...</div>
     );
 
   return (
@@ -44,9 +40,7 @@ const StandingsTable = () => {
           <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#ff0055] to-[#ff00ff] uppercase tracking-tighter filter drop-shadow-[0_0_10px_rgba(255,0,85,0.5)]">
             League Standings
           </h2>
-          <p className="text-gray-400 mt-2 font-mono text-sm">
-            Current season team rankings
-          </p>
+          <p className="text-gray-400 mt-2 font-mono text-sm">Current season team rankings</p>
         </div>
       </div>
 
@@ -79,25 +73,17 @@ const StandingsTable = () => {
                     {team.teamName}
                   </span>
                 </td>
-                <td className="p-4 text-center text-gray-400 font-mono">
-                  {team.played}
-                </td>
-                <td className="p-4 text-center text-gray-400 font-mono">
-                  {team.won}
-                </td>
+                <td className="p-4 text-center text-gray-400 font-mono">{team.played}</td>
+                <td className="p-4 text-center text-gray-400 font-mono">{team.won}</td>
                 <td className="p-4 text-center">
-                  <span className="text-[#ff0055] font-black text-xl font-mono">
-                    {team.points}
-                  </span>
+                  <span className="text-[#ff0055] font-black text-xl font-mono">{team.points}</span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
         {standings.length === 0 && (
-          <div className="text-center p-12 text-gray-500 font-mono">
-            No standings available.
-          </div>
+          <div className="text-center p-12 text-gray-500 font-mono">No standings available.</div>
         )}
       </div>
     </div>

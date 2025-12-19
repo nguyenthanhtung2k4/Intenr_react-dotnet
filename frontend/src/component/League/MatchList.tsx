@@ -17,9 +17,7 @@ const MatchList = () => {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const response = await axios.get(
-          'http://localhost:5292/api/Matchs/matches',
-        );
+        const response = await axios.get('http://localhost:5292/api/Matchs/matches');
         setMatches(response.data);
       } catch (error) {
         console.error('Error fetching matches:', error);
@@ -32,11 +30,7 @@ const MatchList = () => {
   }, []);
 
   if (loading)
-    return (
-      <div className="text-center p-10 text-[#00f3ff] animate-pulse">
-        Loading Fixtures...
-      </div>
-    );
+    return <div className="text-center p-10 text-[#00f3ff] animate-pulse">Loading Fixtures...</div>;
 
   return (
     <div className="container mx-auto p-6 max-w-6xl animate-fade-in-up">
@@ -90,12 +84,8 @@ const MatchList = () => {
 
                 {/* Lanes */}
                 <div className="text-right min-w-[100px]">
-                  <div className="text-gray-400 text-xs font-mono mb-1">
-                    LANES
-                  </div>
-                  <div className="text-[#ff0055] font-bold text-2xl font-mono">
-                    {match.lanes}
-                  </div>
+                  <div className="text-gray-400 text-xs font-mono mb-1">LANES</div>
+                  <div className="text-[#ff0055] font-bold text-2xl font-mono">{match.lanes}</div>
                 </div>
               </div>
             </div>

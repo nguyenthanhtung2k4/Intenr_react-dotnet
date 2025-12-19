@@ -47,15 +47,10 @@ function Login() {
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1
-            className="text-4xl font-bold mb-2"
-            style={{ color: 'var(--color-text-primary)' }}
-          >
+          <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             Bowling League
           </h1>
-          <p style={{ color: 'var(--color-text-secondary)' }}>
-            Đăng nhập để quản lý giải đấu
-          </p>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Đăng nhập để quản lý giải đấu</p>
         </div>
 
         {/* Login Card */}
@@ -186,16 +181,13 @@ function Login() {
           >
             <p className="font-medium mb-1">Tài khoản dùng thử</p>
             <p className="text-xs">
-              Email: <strong>t@gmail.com</strong> | Password:{' '}
-              <strong>tungtung</strong>
+              Email: <strong>t@gmail.com</strong> | Password: <strong>tungtung</strong>
             </p>
           </div>
 
           {/* Register Link */}
           <div className="mt-4 text-center">
-            <span style={{ color: 'var(--color-text-secondary)' }}>
-              Chưa có tài khoản?{' '}
-            </span>
+            <span style={{ color: 'var(--color-text-secondary)' }}>Chưa có tài khoản? </span>
             <Link
               to="/create-account"
               style={{

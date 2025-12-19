@@ -1,11 +1,7 @@
 // src/component/Home/BowlerForm.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  fetchTeams,
-  fetchBowlerDetails,
-  saveBowler,
-} from '../../../services/api.services';
+import { fetchTeams, fetchBowlerDetails, saveBowler } from '../../../services/api.services';
 
 type UiTeam = { id: string; name: string };
 
@@ -28,9 +24,7 @@ const BowlerForm: React.FC = () => {
   const navigate = useNavigate();
 
   const isEditMode = id !== undefined && id !== 'new';
-  const pageTitle = isEditMode
-    ? 'Chỉnh Sửa Vận Động Viên'
-    : 'Tạo Vận Động Viên Mới';
+  const pageTitle = isEditMode ? 'Chỉnh Sửa Vận Động Viên' : 'Tạo Vận Động Viên Mới';
 
   const [teamsRaw, setTeamsRaw] = useState<any[]>([]);
   const [teams, setTeams] = useState<UiTeam[]>([]);
@@ -45,10 +39,7 @@ const BowlerForm: React.FC = () => {
       .map((t) => {
         const idVal = t?.TeamId ?? t?.teamId ?? t?.id ?? t?.TeamID;
         const nameVal =
-          t?.teamName ??
-          t?.TeamName ??
-          t?.name ??
-          (idVal != null ? `Team #${idVal}` : undefined);
+          t?.teamName ?? t?.TeamName ?? t?.name ?? (idVal != null ? `Team #${idVal}` : undefined);
         if (idVal == null || nameVal == null) return null;
         return { id: String(idVal), name: String(nameVal) } as UiTeam;
       })
@@ -100,9 +91,7 @@ const BowlerForm: React.FC = () => {
   const hasTeams = teams.length > 0;
 
   // ------- Handlers -------
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
@@ -122,14 +111,10 @@ const BowlerForm: React.FC = () => {
 
     try {
       await saveBowler(payload, id);
-      setStatus(
-        `✅ ${pageTitle} thành công! Đang chuyển hướng về trang chủ...`,
-      );
+      setStatus(`✅ ${pageTitle} thành công! Đang chuyển hướng về trang chủ...`);
       setTimeout(() => navigate('/'), 1200);
     } catch (e: any) {
-      setStatus(
-        `❌ Lỗi ${isEditMode ? 'cập nhật' : 'tạo mới'}: ${e?.message ?? e}`,
-      );
+      setStatus(`❌ Lỗi ${isEditMode ? 'cập nhật' : 'tạo mới'}: ${e?.message ?? e}`);
     }
   };
 

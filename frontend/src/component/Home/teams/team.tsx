@@ -59,9 +59,7 @@ function Team() {
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen font-inter">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Danh Sách Vận Động Viên: {nameTeam}
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-800">Danh Sách Vận Động Viên: {nameTeam}</h1>
         <button
           onClick={() => navigate('/')}
           className="bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-gray-500 transition duration-300"
@@ -123,10 +121,7 @@ function Team() {
             <tbody className="divide-y divide-gray-200">
               {bowlerData.length === 0 && !error ? (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-4 text-center text-sm text-gray-500"
-                  >
+                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
                     Đội này hiện không có vận động viên nào.
                   </td>
                 </tr>
@@ -140,12 +135,10 @@ function Team() {
                       {b.bowlerLastName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {b.bowlerFirstName}{' '}
-                      {b.bowlerMiddleInit ? b.bowlerMiddleInit + '.' : ''}
+                      {b.bowlerFirstName} {b.bowlerMiddleInit ? b.bowlerMiddleInit + '.' : ''}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {b.bowlerAddress}, {b.bowlerCity}, {b.bowlerState}{' '}
-                      {b.bowlerZip}
+                      {b.bowlerAddress}, {b.bowlerCity}, {b.bowlerState} {b.bowlerZip}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {b.bowlerPhoneNumber}
