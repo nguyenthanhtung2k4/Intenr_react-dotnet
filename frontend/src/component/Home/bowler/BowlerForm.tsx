@@ -136,154 +136,148 @@ const BowlerForm: React.FC = () => {
   // ------- UI -------
   if (isLoading) {
     return (
-      <div className="text-center p-10 text-xl font-semibold text-indigo-600">
-        Đang tải form...
+      <div className="text-center p-20 pt-32">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#00f3ff] mx-auto"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto p-8 bg-white shadow-xl rounded-lg my-8">
-      <h1 className="text-3xl font-bold mb-6 text-center text-indigo-700">
-        {pageTitle}
-      </h1>
+    <div
+      className="min-h-screen pt-24 pb-12 flex items-center justify-center font-inter"
+      style={{ backgroundColor: 'var(--color-bg)' }}
+    >
+      <div className="glass-panel w-full max-w-xl mx-auto p-8 rounded-2xl neon-border">
+        <h1 className="text-3xl font-black mb-8 text-center text-white uppercase italic tracking-wider">
+          {pageTitle}
+        </h1>
 
-      {status && (
-        <p
-          className={`p-3 rounded-md text-center ${status.startsWith('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
-        >
-          {status}
-        </p>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Họ Tên */}
-        <input
-          type="text"
-          name="bowlerFirstName"
-          value={formData.bowlerFirstName}
-          onChange={handleChange}
-          placeholder="Tên (First Name)"
-          required
-          className="border p-2 rounded-md w-full"
-        />
-        {/* <input
-          type="text"
-          name="bowlerMiddleInit"
-          value={formData.bowlerMiddleInit || ''}
-          onChange={handleChange}
-          placeholder="Chữ lót (Middle Init - Tùy chọn)"
-          className="border p-2 rounded-md w-full"
-        /> */}
-
-        <input
-          type="text"
-          name="bowlerLastName"
-          value={formData.bowlerLastName}
-          onChange={handleChange}
-          placeholder="Họ (Last Name)"
-          required
-          className="border p-2 rounded-md w-full"
-        />
-
-        {/* Địa chỉ */}
-        <input
-          type="text"
-          name="bowlerAddress"
-          value={formData.bowlerAddress}
-          onChange={handleChange}
-          placeholder="Địa chỉ (Address)"
-          required
-          className="border p-2 rounded-md w-full"
-        />
-
-        <input
-          type="text"
-          name="bowlerCity"
-          value={formData.bowlerCity}
-          onChange={handleChange}
-          placeholder="Thành phố (City)"
-          required
-          className="border p-2 rounded-md w-full"
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="bowlerState"
-            value={formData.bowlerState}
-            onChange={handleChange}
-            placeholder="Bang/Tỉnh (State)"
-            required
-            className="border p-2 rounded-md w-full"
-          />
-          <input
-            type="text"
-            name="bowlerZip"
-            value={formData.bowlerZip}
-            onChange={handleChange}
-            placeholder="Mã bưu điện (Zip)"
-            required
-            className="border p-2 rounded-md w-full"
-          />
-        </div>
-
-        {/* Điện thoại */}
-        <input
-          type="text"
-          name="bowlerPhoneNumber"
-          value={formData.bowlerPhoneNumber}
-          onChange={handleChange}
-          placeholder="Số điện thoại (Phone)"
-          required
-          className="border p-2 rounded-md w-full"
-        />
-
-        {/* Team Select (robust) */}
-        <div>
-          <label className="block mb-1 font-medium">Đội</label>
-          <select
-            name="teamId"
-            value={selectedTeamId}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded-md w-full"
+        {status && (
+          <p
+            className={`p-4 rounded-xl mb-6 text-center font-bold border ${
+              status.startsWith('❌')
+                ? 'bg-red-900/30 text-red-400 border-red-500'
+                : 'bg-green-900/30 text-[#00f3ff] border-[#00f3ff]'
+            }`}
           >
-            <option value="">-- Chọn đội --</option>
-            {hasTeams ? (
-              teams.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
+            {status}
+          </p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              name="bowlerFirstName"
+              value={formData.bowlerFirstName}
+              onChange={handleChange}
+              placeholder="First Name"
+              required
+              className="w-full p-3 bg-[#0b0c15] text-white border border-[#2a2c39] rounded-lg focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none"
+            />
+            <input
+              type="text"
+              name="bowlerLastName"
+              value={formData.bowlerLastName}
+              onChange={handleChange}
+              placeholder="Last Name"
+              required
+              className="w-full p-3 bg-[#0b0c15] text-white border border-[#2a2c39] rounded-lg focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none"
+            />
+          </div>
+
+          <input
+            type="text"
+            name="bowlerAddress"
+            value={formData.bowlerAddress}
+            onChange={handleChange}
+            placeholder="Address"
+            required
+            className="w-full p-3 bg-[#0b0c15] text-white border border-[#2a2c39] rounded-lg focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none"
+          />
+
+          <input
+            type="text"
+            name="bowlerCity"
+            value={formData.bowlerCity}
+            onChange={handleChange}
+            placeholder="City"
+            required
+            className="w-full p-3 bg-[#0b0c15] text-white border border-[#2a2c39] rounded-lg focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none"
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              name="bowlerState"
+              value={formData.bowlerState}
+              onChange={handleChange}
+              placeholder="State"
+              required
+              className="w-full p-3 bg-[#0b0c15] text-white border border-[#2a2c39] rounded-lg focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none"
+            />
+            <input
+              type="text"
+              name="bowlerZip"
+              value={formData.bowlerZip}
+              onChange={handleChange}
+              placeholder="Zip Code"
+              required
+              className="w-full p-3 bg-[#0b0c15] text-white border border-[#2a2c39] rounded-lg focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none"
+            />
+          </div>
+
+          <input
+            type="text"
+            name="bowlerPhoneNumber"
+            value={formData.bowlerPhoneNumber}
+            onChange={handleChange}
+            placeholder="Phone Number"
+            required
+            className="w-full p-3 bg-[#0b0c15] text-white border border-[#2a2c39] rounded-lg focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none"
+          />
+
+          <div>
+            <label className="block mb-2 font-bold text-[#00f3ff] text-sm uppercase">
+              Assign Team
+            </label>
+            <select
+              name="teamId"
+              value={selectedTeamId}
+              onChange={handleChange}
+              required
+              className="w-full p-3 bg-[#0b0c15] text-white border border-[#2a2c39] rounded-lg focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none appearance-none"
+            >
+              <option value="">-- Select Team --</option>
+              {hasTeams ? (
+                teams.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>
+                  (No teams available)
                 </option>
-              ))
-            ) : (
-              <option value="" disabled>
-                (Không có đội nào — kiểm tra API fetchTeams)
-              </option>
-            )}
-          </select>
-          {!hasTeams && (
-            <div className="text-sm text-amber-700 mt-1">
-              Không thấy danh sách đội. Hãy kiểm tra API hoặc cấu hình CORS, sau
-              đó tải lại trang.
-            </div>
-          )}
-        </div>
+              )}
+            </select>
+          </div>
 
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 text-white font-semibold py-3 rounded-lg shadow-md hover:bg-indigo-700 transition duration-300"
-        >
-          {isEditMode ? 'Lưu Thay Đổi' : 'Tạo Mới'}
-        </button>
-      </form>
+          <div className="pt-4 space-y-3">
+            <button type="submit" className="w-full btn-primary text-lg">
+              {isEditMode ? 'Update Bowler' : 'Create Bowler'}
+            </button>
 
-      <button
-        onClick={() => navigate('/')}
-        className="mt-4 w-full bg-gray-400 text-white font-semibold py-3 rounded-lg shadow-md hover:bg-gray-500 transition duration-300"
-      >
-        Quay lại
-      </button>
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="w-full py-3 rounded-full border border-gray-600 text-gray-400 font-bold hover:bg-white/5 hover:text-white transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -34,7 +34,7 @@ const CreateTeams: React.FC = () => {
     }
 
     setIsLoading(true);
-    setStatusMessage('Đang tạo đội...');
+    setStatusMessage('Creating Team...');
 
     const payload = {
       TeamName: formData.TeamName,
@@ -44,7 +44,7 @@ const CreateTeams: React.FC = () => {
     try {
       await createTeam(payload);
 
-      setStatusMessage('✅ Tạo đội thành công! Đang chuyển hướng...');
+      setStatusMessage('✅ Team Created Successfully! Redirecting...');
 
       setFormData({ TeamId: '', TeamName: '', CaptainId: '' });
 
@@ -53,9 +53,7 @@ const CreateTeams: React.FC = () => {
       }, 1500);
     } catch (error: any) {
       console.error('Lỗi khi tạo đội:', error);
-      setStatusMessage(
-        error.message || '❌ Lỗi: Không thể tạo đội. Vui lòng kiểm tra API.',
-      );
+      setStatusMessage(error.message || '❌ Error: Could not create team.');
     } finally {
       setIsLoading(false);
     }
@@ -66,75 +64,80 @@ const CreateTeams: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-8 bg-white shadow-xl rounded-lg my-8">
-      <h1 className="text-2xl font-bold mb-6 text-center text-indigo-700">
-        Tạo Đội Mới
-      </h1>
+    <div
+      className="min-h-screen pt-24 pb-12 flex items-center justify-center font-inter"
+      style={{ backgroundColor: 'var(--color-bg)' }}
+    >
+      <div className="glass-panel w-full max-w-md mx-auto p-8 rounded-2xl neon-border">
+        <h1 className="text-3xl font-black mb-6 text-center text-white uppercase italic tracking-wider">
+          Create New Team
+        </h1>
 
-      {statusMessage && (
-        <p
-          className={`p-3 rounded-md mb-4 text-center ${statusMessage.startsWith('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
-        >
-          {statusMessage}
-        </p>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        {/* Input TeamName */}
-        <div className="mb-4">
-          <label
-            htmlFor="TeamName"
-            className="block text-gray-700 text-sm font-bold mb-2"
+        {statusMessage && (
+          <p
+            className={`p-3 rounded-lg mb-4 text-center border font-bold ${statusMessage.startsWith('❌') ? 'bg-red-900/30 text-red-500 border-red-500' : 'bg-green-900/30 text-[#00f3ff] border-[#00f3ff]'}`}
           >
-            Tên Đội:
-          </label>
-          <input
-            id="TeamName"
-            type="text"
-            name="TeamName"
-            value={formData.TeamName}
-            onChange={handleChange}
-            placeholder="Nhập tên đội"
-            required
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
+            {statusMessage}
+          </p>
+        )}
 
-        <div className="mb-4">
-          <label
-            htmlFor="CaptainId"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            ID Đội Trưởng (Tùy chọn):
-          </label>
-          <input
-            id="CaptainId"
-            type="text"
-            name="CaptainId"
-            value={formData.CaptainId}
-            onChange={handleChange}
-            placeholder="Nhập ID đội trưởng"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Input TeamName */}
+          <div>
+            <label
+              htmlFor="TeamName"
+              className="block text-[#00f3ff] text-sm font-bold mb-2 uppercase"
+            >
+              Team Name
+            </label>
+            <input
+              id="TeamName"
+              type="text"
+              name="TeamName"
+              value={formData.TeamName}
+              onChange={handleChange}
+              placeholder="Enter Team Name"
+              required
+              className="w-full p-3 bg-[#0b0c15] text-white border border-[#2a2c39] rounded-lg focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none"
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={isLoading || !formData.TeamName}
-          className={`w-full font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ${isLoading || !formData.TeamName ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
-        >
-          {isLoading ? 'Đang Tạo...' : 'Tạo Đội'}
-        </button>
-      </form>
+          <div>
+            <label
+              htmlFor="CaptainId"
+              className="block text-[#00f3ff] text-sm font-bold mb-2 uppercase"
+            >
+              Captain ID (Optional)
+            </label>
+            <input
+              id="CaptainId"
+              type="text"
+              name="CaptainId"
+              value={formData.CaptainId}
+              onChange={handleChange}
+              placeholder="Enter Captain ID"
+              className="w-full p-3 bg-[#0b0c15] text-white border border-[#2a2c39] rounded-lg focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none"
+            />
+          </div>
 
-      <div className="mt-6">
-        <button
-          type="button"
-          onClick={() => handleCreate('view-teams')}
-          className="w-full bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-gray-700 transition duration-300"
-        >
-          Xem Danh Sách Đội
-        </button>
+          <div className="pt-4 space-y-3">
+            <button
+              type="submit"
+              disabled={isLoading || !formData.TeamName}
+              className={`w-full font-bold py-3 px-4 rounded-full shadow-lg transition duration-300 uppercase tracking-wider ${isLoading || !formData.TeamName ? 'bg-gray-600 cursor-not-allowed text-gray-400' : 'btn-primary'}`}
+            >
+              {isLoading ? 'Creating...' : 'Create Team'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleCreate('view-teams')}
+              className="w-full py-3 rounded-full border border-gray-600 text-gray-400 font-bold hover:bg-white/5 hover:text-white transition"
+            >
+              Cancel / View Teams
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

@@ -20,13 +20,17 @@ namespace Backend.Data
 
         public IEnumerable<BowlerScore> Scores => _bowlingContext.Scores;
 
-        public IEnumerable<MatchGame> MatchGames => _bowlingContext.MatchGames;
+        public IEnumerable<MatchGame> MatchGames => _bowlingContext.MatchGames.Include(x => x.Match).ToList();
 
         public IEnumerable<Team> Teams => _bowlingContext.Teams;
 
         public IEnumerable<Tournament> Tournaments => _bowlingContext.Tournaments;
 
-        public IEnumerable<TourneyMatch> TourneyMatches => _bowlingContext.TourneyMatches;
+        public IEnumerable<TourneyMatch> TourneyMatches => _bowlingContext.TourneyMatches
+            .Include(x => x.Tourney)
+            .Include(x => x.OddLaneTeam)
+            .Include(x => x.EvenLaneTeam)
+            .ToList();
 
         public IEnumerable<ZtblBowlerRating> ZtblBowlerRatings => _bowlingContext.ZtblBowlerRatings;
 

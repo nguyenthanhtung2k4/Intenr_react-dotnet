@@ -1,15 +1,13 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-// Thêm hook useAuth
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
 function Login() {
   const toast = useToast();
-
   const navigate = useNavigate();
-
   const { login } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -42,41 +40,71 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-inter">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Đăng nhập vào Hệ thống
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Sử dụng tài khoản của bạn để tiếp tục
+    <div
+      className="min-h-screen flex items-center justify-center py-12 px-4"
+      style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+    >
+      <div className="max-w-md w-full">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1
+            className="text-4xl font-bold mb-2"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
+            Bowling League
+          </h1>
+          <p style={{ color: 'var(--color-text-secondary)' }}>
+            Đăng nhập để quản lý giải đấu
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            {/* Email Input */}
+        {/* Login Card */}
+        <div
+          className="card"
+          style={{
+            padding: 'var(--spacing-2xl)',
+            boxShadow: 'var(--shadow-lg)',
+          }}
+        >
+          <h2
+            className="text-2xl font-bold text-center mb-6"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
+            Đăng nhập
+          </h2>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            {/* Email Field */}
             <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium mb-2"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Email
               </label>
               <input
-                id="email-address"
+                id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Địa chỉ Email"
+                className="input"
+                placeholder="your.email@example.com"
                 disabled={isLoading}
               />
             </div>
-            {/* Password Input */}
+
+            {/* Password Field */}
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium mb-2"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Mật khẩu
               </label>
               <input
                 id="password"
@@ -86,35 +114,42 @@ function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Mật khẩu"
+                className="input"
+                placeholder="••••••••"
                 disabled={isLoading}
               />
             </div>
-          </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="text-red-600 p-3 bg-red-100 border border-red-400 rounded-md text-center text-sm font-medium">
-              {error}
-            </div>
-          )}
+            {/* Error Message */}
+            {error && (
+              <div
+                className="p-3 rounded-md text-sm text-center font-medium"
+                style={{
+                  backgroundColor: '#fee2e2',
+                  color: 'var(--color-error)',
+                  border: '1px solid var(--color-error)',
+                }}
+              >
+                {error}
+              </div>
+            )}
 
-          {/* Submit Button */}
-          <div>
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
-                isLoading
-                  ? 'bg-indigo-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-              } transition duration-300 ease-in-out`}
+              className="btn btn-primary w-full"
+              style={{
+                padding: '0.75rem',
+                fontSize: 'var(--font-size-base)',
+                opacity: isLoading ? 0.6 : 1,
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+              }}
             >
               {isLoading ? (
-                <div className="flex items-center">
+                <div className="flex items-center justify-center">
                   <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    className="animate-spin -ml-1 mr-3 h-5 w-5"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -136,15 +171,42 @@ function Login() {
                   Đang đăng nhập...
                 </div>
               ) : (
-                'Đăng Nhập'
+                'Đăng nhập'
               )}
             </button>
-          </div>
-        </form>
+          </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Tài khoản dùng thử: **email: t@gmail.com |password: tungtung **
-        </p>
+          {/* Demo Account Info */}
+          <div
+            className="mt-6 p-3 rounded-md text-center text-sm"
+            style={{
+              backgroundColor: 'var(--color-primary-light)',
+              color: 'var(--color-primary)',
+            }}
+          >
+            <p className="font-medium mb-1">Tài khoản dùng thử</p>
+            <p className="text-xs">
+              Email: <strong>t@gmail.com</strong> | Password:{' '}
+              <strong>tungtung</strong>
+            </p>
+          </div>
+
+          {/* Register Link */}
+          <div className="mt-4 text-center">
+            <span style={{ color: 'var(--color-text-secondary)' }}>
+              Chưa có tài khoản?{' '}
+            </span>
+            <Link
+              to="/create-account"
+              style={{
+                color: 'var(--color-primary)',
+                fontWeight: 'var(--font-weight-medium)',
+              }}
+            >
+              Đăng ký ngay
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

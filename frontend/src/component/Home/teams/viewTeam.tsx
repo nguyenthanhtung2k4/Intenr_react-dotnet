@@ -51,128 +51,119 @@ function ViewTeams() {
   };
 
   return (
-    <div className="p-4 sm:p-8 bg-gray-50 min-h-screen font-inter">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-800">Danh Sách Các Đội</h1>
-        <div className="space-x-3">
-          <button
-            onClick={() => navigate('/create-team')}
-            className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition duration-300"
+    <div
+      className="p-4 sm:p-8 min-h-screen font-inter pt-24"
+      style={{ backgroundColor: 'var(--color-bg)' }}
+    >
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8 flex items-center justify-between">
+          <h1
+            className="text-4xl font-black text-white italic tracking-tighter"
+            style={{ textShadow: '0 0 10px #00f3ff' }}
           >
-            + Tạo Đội Mới
-          </button>
-          <button
-            onClick={() => navigate('/')}
-            className="bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-gray-500 transition duration-300"
-          >
-            &larr; Quay lại Trang Chủ
-          </button>
+            LEAGUE TEAMS
+          </h1>
+          <div className="space-x-4">
+            <button
+              onClick={() => navigate('/create-team')}
+              className="btn-primary"
+            >
+              + Create Team
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="px-6 py-3 rounded-full border border-white/20 text-white font-bold hover:bg-white/10 transition"
+            >
+              Back Home
+            </button>
+          </div>
         </div>
-      </div>
 
-      {error && (
-        <div className="text-red-600 p-4 mb-4 bg-red-100 border border-red-400 rounded-lg text-center font-semibold">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="text-red-400 p-4 mb-4 bg-red-900/20 border border-red-500 rounded-lg text-center font-bold">
+            {error}
+          </div>
+        )}
 
-      {isLoading && !error ? (
-        <div className="text-center p-10 text-xl font-semibold text-indigo-600">
-          Đang tải danh sách đội...
-        </div>
-      ) : (
-        <div className="overflow-x-auto shadow-xl rounded-xl">
-          <table className="min-w-full divide-y divide-gray-200 bg-white">
-            <thead className="bg-gray-800">
-              <tr>
-                {/* <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-white uppercase tracking-wider rounded-tl-xl text-center"
-                >
-                  ID Đội
-                </th> */}
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider"
-                >
-                  Tên Đội
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider "
-                >
-                  Xem chi tiết
-                </th>
-                {isAuthenticated && (
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider"
-                    colSpan={2}
-                  >
-                    Actions
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {dataTeams.length === 0 ? (
+        {isLoading && !error ? (
+          <div className="text-center p-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#00f3ff] mx-auto"></div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto glass-panel rounded-2xl neon-border">
+            <table className="min-w-full divide-y divide-[#2a2c39]">
+              <thead className="bg-[#1a1c29]">
                 <tr>
-                  <td
-                    colSpan={3}
-                    className="px-6 py-4 text-center text-sm text-gray-500"
-                  >
-                    Không có đội nào được tìm thấy.
-                  </td>
+                  <th className="px-6 py-4 text-center text-xs font-bold text-[#00f3ff] uppercase tracking-wider">
+                    Team Name
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-bold text-[#00f3ff] uppercase tracking-wider">
+                    Details
+                  </th>
+                  {isAuthenticated && (
+                    <th className="px-6 py-4 text-center text-xs font-bold text-[#ff0055] uppercase tracking-wider">
+                      Actions
+                    </th>
+                  )}
                 </tr>
-              ) : (
-                dataTeams.map((team) => (
-                  <tr
-                    key={team.TeamId}
-                    className="even:bg-gray-50 hover:bg-indigo-50/70 transition duration-150 ease-in-out"
-                  >
-                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">
-                      {team.TeamId}
-                    </td> */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {team.teamName}
+              </thead>
+              <tbody className="divide-y divide-[#2a2c39] bg-transparent">
+                {dataTeams.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={3}
+                      className="px-6 py-12 text-center text-lg text-gray-400"
+                    >
+                      No teams found.
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        type="button"
-                        id={`${team.TeamId}`}
-                        onClick={() => handleViewBowlers(team)}
-                        className="text-indigo-600 hover:text-nowrap-900 transition duration-150"
-                      >
-                        Xem VĐV
-                      </button>
-                    </td>
-                    {isAuthenticated && (
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                  </tr>
+                ) : (
+                  dataTeams.map((team) => (
+                    <tr
+                      key={team.TeamId}
+                      className="hover:bg-[#00f3ff]/10 transition duration-200"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-lg font-bold text-white text-center">
+                        {team.teamName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                         <button
                           type="button"
                           id={`${team.TeamId}`}
-                          onClick={() => handleTeamBowlers(team, 'edit')}
-                          className="text-blue-600 hover:text-indigo-900 transition duration-150 pr-4"
+                          onClick={() => handleViewBowlers(team)}
+                          className="text-[#00f3ff] hover:text-white font-bold underline transition"
                         >
-                          Sửa
-                        </button>
-                        <button
-                          type="button"
-                          id={`${team.TeamId}`}
-                          onClick={() => handleTeamBowlers(team, 'delete')}
-                          className="text-red-600 hover:text-red-900 transition duration-150"
-                        >
-                          Xóa
+                          View Roster
                         </button>
                       </td>
-                    )}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                      {isAuthenticated && (
+                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                          <button
+                            type="button"
+                            id={`${team.TeamId}`}
+                            onClick={() => handleTeamBowlers(team, 'edit')}
+                            className="text-white hover:text-[#00f3ff] transition mr-4"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            id={`${team.TeamId}`}
+                            onClick={() => handleTeamBowlers(team, 'delete')}
+                            className="text-[#ff0055] hover:text-white transition"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
