@@ -6,7 +6,7 @@ import { useAuth } from '../../../context/AuthContext';
 
 function Team() {
   const [bowlerData, setBowlerData] = useState<Bowler[]>([]);
-  const [nameTeam, setNameTeam] = useState('Đang tải...');
+  const [nameTeam, setNameTeam] = useState('Loading...');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,20 +25,17 @@ function Team() {
       try {
         setError(null);
         setIsLoading(true);
-
         const data = await fetchTeamBowlers(id);
 
         if (data && data.length > 0) {
           setNameTeam(data[0].team.teamName);
         } else {
-          setNameTeam('Đội không có vận động viên nào');
+          setNameTeam('Empty Team');
         }
         setBowlerData(data || []);
       } catch (ex: any) {
-        console.error(ex);
         setError(ex.message || 'Lỗi khi tải dữ liệu đội.');
-        setBowlerData([]);
-        setNameTeam('Lỗi tải tên đội');
+        setNameTeam('Error');
       } finally {
         setIsLoading(false);
       }
@@ -46,135 +43,155 @@ function Team() {
     fetchBowler();
   }, [id]);
 
-  // HandleEdit
-  var handleEdit = (ID: number) => {
-    navigate(`/bowler/${ID}`);
-  };
-
-  // HandleDelete
-  var handleDelete = (ID: number) => {
-    navigate(`/delete/${ID}`);
-  };
+  const handleEdit = (ID: number) => navigate(`/bowler/${ID}`);
+  const handleDelete = (ID: number) => navigate(`/delete/${ID}`);
 
   return (
-    <div className="p-4 sm:p-8 bg-gray-50 min-h-screen font-inter">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-800">Danh Sách Vận Động Viên: {nameTeam}</h1>
-        <button
-          onClick={() => navigate('/')}
-          className="bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-gray-500 transition duration-300"
-        >
-          &larr; Quay lại Trang Chủ
-        </button>
-      </div>
+    <div className="min-h-screen bg-white pt-32 pb-12 px-6 font-sans text-slate-900">
+      <div className="max-w-6xl mx-auto">
+        {/* Header Section: Đồng bộ với trang chính */}
+        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-2 text-blue-600 font-bold uppercase tracking-[0.3em] text-xs">
+              <span className="w-8 h-px bg-blue-600"></span> Team Roster
+              <span className="w-8 h-px bg-blue-600"></span>
+            </div>
+            <h1 className="text-5xl font-black italic tracking-tighter leading-none uppercase">
+              <span className="p-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+                {nameTeam}
+              </span>
+            </h1>
+            {/* <div className="h-2 w-32 bg-gradient-to-r from-pink-500 to-purple-500 mt-4 rounded-full"></div> */}
+          </div>
 
-      {error && (
-        <div className="text-red-600 p-4 mb-4 bg-red-100 border border-red-400 rounded-lg text-center font-semibold">
-          {error}
+          <button
+            onClick={() => navigate('/view-teams')}
+            className="group flex items-center gap-2 bg-white border-2 border-slate-200 text-slate-700 font-bold px-6 py-3 rounded-full hover:bg-slate-50 transition-all text-sm uppercase tracking-wider shadow-sm"
+          >
+            <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Teams
+          </button>
         </div>
-      )}
 
-      {isLoading && !error ? (
-        <div className="text-center p-10 text-xl font-semibold text-indigo-600">
-          Đang tải danh sách vận động viên của đội...
-        </div>
-      ) : (
-        <div className="overflow-x-auto shadow-xl rounded-xl">
-          <table className="min-w-full divide-y divide-gray-200 bg-white">
-            <thead className="bg-gray-800">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-white uppercase tracking-wider rounded-tl-xl text-center"
-                >
-                  Last Name
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-white uppercase tracking-wider text-center"
-                >
-                  First Names
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-white uppercase tracking-wider text-center"
-                >
-                  Address
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-white uppercase tracking-wider text-center"
-                >
-                  Phone
-                </th>
-                {isAuthenticated && (
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider"
-                    colSpan={2}
-                  >
-                    Actions
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {bowlerData.length === 0 && !error ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
-                    Đội này hiện không có vận động viên nào.
-                  </td>
-                </tr>
-              ) : (
-                bowlerData.map((b) => (
-                  <tr
-                    key={b.bowlerId}
-                    className="even:bg-gray-50 hover:bg-indigo-50/70 transition duration-150 ease-in-out"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {b.bowlerLastName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {b.bowlerFirstName} {b.bowlerMiddleInit ? b.bowlerMiddleInit + '.' : ''}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {b.bowlerAddress}, {b.bowlerCity}, {b.bowlerState} {b.bowlerZip}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {b.bowlerPhoneNumber}
-                    </td>
+        {error && (
+          <div className="p-5 mb-8 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-2xl font-bold shadow-sm">
+            {error}
+          </div>
+        )}
 
+        {isLoading && !error ? (
+          <div className="flex flex-col items-center justify-center py-24">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-100 border-t-blue-600"></div>
+            <p className="mt-4 text-slate-400 font-bold tracking-widest uppercase text-xs">
+              Fetching athletes...
+            </p>
+          </div>
+        ) : (
+          /* Bảng thiết kế lại: Trắng, sạch, bóng đổ mềm */
+          <div className="overflow-hidden bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)]">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  {/* Header bảng màu tối sâu cực sang trọng */}
+                  <tr className="bg-[#1a1c2e]">
+                    <th className="px-8 py-6 text-left text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                      Athlete
+                    </th>
+                    <th className="px-8 py-6 text-left text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                      Contact
+                    </th>
+                    <th className="px-8 py-6 text-left text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                      Location
+                    </th>
                     {isAuthenticated && (
-                      <>
-                        <td className="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
-                          <button
-                            type="button"
-                            onClick={() => handleEdit(b.bowlerId)}
-                            className="text-indigo-600 hover:text-indigo-900 transition duration-150"
-                          >
-                            Edit
-                          </button>
-                        </td>
-
-                        <td className="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(b.bowlerId)}
-                            className="text-red-600 hover:text-red-900 transition duration-150"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </>
+                      <th className="px-8 py-6 text-right text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                        Actions
+                      </th>
                     )}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-slate-50 bg-white">
+                  {bowlerData.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-8 py-20 text-center text-slate-400 italic font-medium"
+                      >
+                        This team doesn't have any registered players yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    bowlerData.map((b) => (
+                      <tr key={b.bowlerId} className="hover:bg-blue-50/40 transition-all group">
+                        {/* Cột Tên + Avatar Placeholder */}
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-md group-hover:scale-110 transition-transform">
+                              {b.bowlerLastName.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="text-lg font-bold text-slate-800 tracking-tight">
+                                {b.bowlerLastName}, {b.bowlerFirstName}
+                              </div>
+                              <div className="text-[10px] text-blue-600 font-black uppercase tracking-widest">
+                                Active Player
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Cột Số điện thoại */}
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <div className="text-sm font-bold text-slate-700">
+                            {b.bowlerPhoneNumber}
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-bold uppercase">
+                            Mobile
+                          </div>
+                        </td>
+
+                        {/* Cột Địa chỉ */}
+                        <td className="px-8 py-6">
+                          <div className="text-sm text-slate-600 font-medium">
+                            {b.bowlerCity}, {b.bowlerState}
+                          </div>
+                          <div className="text-xs text-slate-400 truncate max-w-[200px]">
+                            {b.bowlerAddress}
+                          </div>
+                        </td>
+
+                        {/* Cột Actions (Chỉ cho Admin) */}
+                        {isAuthenticated && (
+                          <td className="px-8 py-6 text-right whitespace-nowrap space-x-6">
+                            <button
+                              onClick={() => handleEdit(b.bowlerId)}
+                              className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(b.bowlerId)}
+                              className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-pink-600 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Footer info thêm cho đẹp */}
+        <div className="mt-8 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">
+          Bowling League Management System • {new Date().getFullYear()}
         </div>
-      )}
+      </div>
     </div>
   );
 }
+
 export default Team;

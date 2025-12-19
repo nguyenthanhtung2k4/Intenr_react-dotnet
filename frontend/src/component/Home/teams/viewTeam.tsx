@@ -41,9 +41,10 @@ function ViewTeams() {
 
   return (
     // Nền trắng sáng, padding top lớn để tránh đè Header
-    <div className="min-h-screen bg-white pt-32 pb-12 px-6 font-sans text-slate-900">
+    <div className="min-h-screen  pt-32 pb-12 px-6 font-sans text-slate-900">
       <div className="max-w-6xl mx-auto">
         {/* Header Section với Gradient giống trang chính */}
+        
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="relative">
             <h1 className="text-6xl font-black italic tracking-tighter leading-none uppercase">
