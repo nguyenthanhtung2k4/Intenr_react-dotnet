@@ -33,7 +33,7 @@ const MatchList = () => {
     return <div className="text-center p-10 text-[#00f3ff] animate-pulse">Loading Fixtures...</div>;
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl animate-fade-in-up">
+    <div className="container mx-auto p-6 max-w-6xl animate-fade-in-up p-600">
       <div className="flex justify-between items-end mb-8 border-b-2 border-[#00f3ff]/30 pb-4">
         <div>
           <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00f3ff] to-[#ff00ff] uppercase tracking-tighter filter drop-shadow-[0_0_10px_rgba(0,243,255,0.5)]">

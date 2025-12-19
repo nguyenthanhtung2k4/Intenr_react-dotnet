@@ -16,7 +16,7 @@ import MatchList from './component/League/MatchList';
 import StandingsTable from './component/League/StandingsTable';
 import Footer from './Footer';
 import Team from './component/Home/teams/team';
-import './index.css';
+
 function App() {
   const { isAuthenticated } = useAuth();
 

@@ -64,6 +64,20 @@ namespace Backend.Data
             }
         }
 
+        public void Update<T>(T entity)
+        {
+            try
+            {
+                _bowlingContext.Update(entity);
+                _bowlingContext.SaveChanges();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Lỗi cập nhật Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+            }
+        }
+
+// 🔹 Create
         public void CreateAcounts(Accounts accounts)
         {
             try

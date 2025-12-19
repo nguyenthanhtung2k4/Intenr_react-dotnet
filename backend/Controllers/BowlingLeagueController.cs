@@ -219,7 +219,111 @@ namespace Backend.Controllers
             }
         }
 
-        // ///////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+
+
+        [HttpGet("tournaments")]
+        public IActionResult GetTournaments()
+        {
+            try
+            {
+                var tournaments = _bowlingLeagueRepository.tournaments
+                if (tournaments == null || tournaments.Count == 0 && tournaments.IsDelete != true)
+                {
+                    return Ok(new List<Tournament>());
+                }
+                return Ok(tournaments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Loi server khi tai turnament: {ex}");
+            }
+        }
+
+        [HttpPost("tournaments")]
+        public IActionResult PostTournament([FromBody] Tournament tournament)
+        {
+            try
+            {
+                data = _bowlingLeagueRepository.tournaments.Add(tournament);
+                if(data == null)
+                {
+                    return BadRequest(ModelState);
+                }
+                return Ok(data);    
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Loi server khi tao turnament: {ex}");
+            }
+        }
+
+        [HttpGet("tournaments/{tournamentId}")]
+        public IActionResult GetTournamentById(int tournamentId)
+        {
+            try
+            {
+                var tournament = _bowlingLeagueRepository.tournaments
+                if (tournament == null || tournament.IsDelete != true)
+                {
+                    return Ok(new Tournament());
+                }
+                return Ok(tournament);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Loi server khi tai turnament: {ex}");
+            }
+        }   
+
+        [HttpPut("tournaments/{tournamentId}")]
+        public IActionResult PutTournament(int tournamentId, [FromBody] Tournament tournament)
+        {
+            try
+            {
+                var tournament = _bowlingLeagueRepository.tournaments
+                if (tournament == null)
+                {
+                    return Ok(new Tournament());
+                }   
+                tournament.Update(tournament);
+                return Ok(tournament);  
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Loi server khi tai turnament: {ex}");
+            }
+        }       
+
+        [HttpGet("tourneymatch")]
+        public IActionResult GetTourneyMatch()
+        {
+            try
+            {
+                var tournamentMatches = _bowlingLeagueRepository.TourneyMatch
+                if (tournamentMatches == null || tournamentMatches.IsDelete != true)
+                {
+                    return Ok(new TourneyMatch());
+                }
+                return Ok(tournamentMatches);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Loi server khi tai turnament matches: {ex}");
+            }
+        }
+
+        
+
+
+
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] loginDto loginDto)

@@ -1,9 +1,12 @@
-Phát  triển tiếp: 
--  Làm Các giải đấu
--  Làm các trận  đấu
--  Làm các điểm -  so sánh nó 
- Phát triển tiếp:
- -  Làm phân tích xếp hạng 
- - Điểm của nó
- .... 
- 
+Đang làm về backend xử lý  các data
+ -  Tournament
+ -  TourneyMatch
+ -  MatchGame
+ ->  Cần làm tiếp  ( mới đang viết đến backend)
+
+ - Phân Front- end chưa viết phần:
+  -  Tournament
+  -  TourneyMatch
+  -  MatchGame
+
+Sửa lại login  chưa  update UI ! 

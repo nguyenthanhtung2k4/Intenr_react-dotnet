@@ -10,6 +10,18 @@ function BowlersTable(props: any) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleTeam = (ID: number) => navigate(`team/${ID}`);
+  const handleEdit = (ID: number) => navigate(`bowler/${ID}`);
+  const handleDelete = (ID: number) => navigate(`delete/${ID}`);
+
+  const handleCreate = (type: string) => {
+    if (type === 'create') {
+      navigate(`bowler/new`);
+    } else {
+      navigate(`view-teams`);
+    }
+  };
+
   useEffect(() => {
     const fetchBowlerData = async () => {
       try {
@@ -18,7 +30,7 @@ function BowlersTable(props: any) {
         const b = await fetchAllBowlers();
         setBowlerData(b || []);
       } catch (ex: any) {
-        setError(ex.message || 'Lỗi: Không thể tải dữ liệu.');
+        setError(ex.message || 'Lỗi: Không thể tải dữ liệu VĐV từ API.');
         setBowlerData([]);
       } finally {
         setIsLoading(false);
@@ -27,152 +39,181 @@ function BowlersTable(props: any) {
     fetchBowlerData();
   }, []);
 
+  // Logic lọc dữ liệu
   let filteredBowlers = bowlerData.filter((e) => !e.isDelete);
   if (search) {
-    const kw = search.toLowerCase();
+    const lowerCaseSearch = search.toLowerCase();
     filteredBowlers = filteredBowlers.filter(
-      (b) =>
-        `${b.bowlerFirstName} ${b.bowlerLastName}`.toLowerCase().includes(kw) ||
-        b.team?.teamName.toLowerCase().includes(kw),
+      (bowler) =>
+        bowler.bowlerFirstName.toLowerCase().includes(lowerCaseSearch) ||
+        bowler.bowlerLastName.toLowerCase().includes(lowerCaseSearch) ||
+        bowler.team.teamName.toLowerCase().includes(lowerCaseSearch) ||
+        bowler.bowlerCity.toLowerCase().includes(lowerCaseSearch),
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-28 pb-20 px-4 md:px-8">
+    <div className="min-h-screen bg-white pt-32 pb-12 px-6 font-sans text-slate-900">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section - Chơi Typography kiểu Tạp chí Thể thao */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-          <div className="border-l-8 border-slate-900 pl-6">
-            <h2 className="text-slate-400 text-sm font-black uppercase tracking-[0.3em] mb-1">
-              League Members
-            </h2>
-            <h1 className="text-6xl font-black uppercase italic tracking-tighter text-slate-900 leading-none">
-              The{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500">
-                Bowlers
-              </span>
-            </h1>
+        {/* Title Section */}
+        <div className="mb-10">
+          <h1 className="text-5xl font-black italic tracking-tighter uppercase leading-none">
+            Player{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+              Database
+            </span>
+          </h1>
+          <div className="h-2 w-24 bg-gradient-to-r from-pink-500 to-purple-500 mt-4 rounded-full"></div>
+        </div>
+
+        {/* Control Panel: Search & Buttons */}
+        <div className="mb-8 flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="relative w-full lg:w-1/3">
+            <input
+              type="text"
+              placeholder="Search by name, team or city..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all shadow-sm"
+            />
+            <span className="absolute left-4 top-3.5 text-slate-400 text-xl">🔍</span>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            {props.isAuth && (
+          {props.isAuth && (
+            <div className="flex flex-wrap justify-center gap-3 w-full lg:w-auto">
               <button
-                onClick={() => navigate('bowler/new')}
-                className="bg-slate-900 text-white font-bold px-8 py-4 rounded-full hover:bg-blue-600 transition-all active:scale-95 shadow-2xl shadow-blue-500/20 text-xs uppercase tracking-widest"
+                onClick={() => handleCreate('create')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-0.5 active:scale-95 text-sm uppercase tracking-wider"
               >
-                + Register Athlete
+                + New Bowler
               </button>
-            )}
-            <button
-              onClick={() => navigate('view-teams')}
-              className="bg-white border-2 border-slate-200 text-slate-900 font-bold px-8 py-4 rounded-full hover:border-slate-900 transition-all text-xs uppercase tracking-widest"
-            >
-              Teams View
-            </button>
+              <button
+                onClick={() => handleCreate('view-teams')}
+                className="bg-white border-2 border-slate-200 text-slate-700 font-bold px-6 py-3 rounded-xl hover:bg-slate-50 transition-all text-sm uppercase tracking-wider shadow-sm"
+              >
+                Manage Teams
+              </button>
+              <button
+                onClick={() => navigate('view-accounts')}
+                className="bg-pink-50 text-pink-600 border border-pink-100 font-bold px-6 py-3 rounded-xl hover:bg-pink-100 transition-all text-sm uppercase tracking-wider"
+              >
+                Accounts
+              </button>
+            </div>
+          )}
+        </div>
+
+        {error && (
+          <div className="p-4 mb-8 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl font-bold">
+            {error}
           </div>
-        </div>
+        )}
 
-        {/* Search Bar - Hiện đại & Tối giản */}
-        <div className="relative mb-10 group">
-          <input
-            type="text"
-            placeholder="Filter by name or team..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white border-b-4 border-slate-200 py-6 px-4 text-2xl font-bold text-slate-800 placeholder-slate-300 focus:outline-none focus:border-blue-600 transition-colors"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors text-3xl italic font-black">
-            SEARCH
-          </span>
-        </div>
-
-        {/* Athletes List */}
-        {isLoading ? (
-          <div className="py-20 text-center font-black italic text-slate-200 text-7xl uppercase animate-pulse">
-            Loading...
+        {isLoading && !error ? (
+          <div className="flex flex-col items-center justify-center py-24">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-100 border-t-purple-600"></div>
+            <p className="mt-4 text-slate-400 font-bold tracking-widest uppercase text-xs">
+              Synchronizing Data...
+            </p>
           </div>
         ) : (
-          <div className="grid gap-4">
-            {/* Table Header - Chỉ hiện trên màn hình lớn */}
-            <div className="hidden lg:grid grid-cols-12 px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-              <div className="col-span-4">Athlete Identity</div>
-              <div className="col-span-3">Assigned Team</div>
-              <div className="col-span-3">Contact info</div>
-              <div className="col-span-2 text-right">Operations</div>
-            </div>
-
-            {filteredBowlers.length === 0 ? (
-              <div className="bg-white p-20 text-center rounded-3xl border-2 border-dashed border-slate-200 text-slate-400 font-bold uppercase italic">
-                No Players Found In This League
-              </div>
-            ) : (
-              filteredBowlers.map((b) => (
-                <div
-                  key={b.bowlerId}
-                  className="group bg-white border border-slate-100 p-6 lg:px-8 rounded-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all flex flex-col lg:grid lg:grid-cols-12 lg:items-center gap-4"
-                >
-                  {/* Identity */}
-                  <div className="col-span-4 flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-slate-900 flex items-center justify-center text-white font-black italic group-hover:bg-gradient-to-tr group-hover:from-blue-600 group-hover:to-purple-600 transition-all shadow-lg">
-                      {b.bowlerLastName.charAt(0)}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-black text-slate-900 uppercase italic leading-none group-hover:text-blue-600 transition-colors">
-                        {b.bowlerLastName}, {b.bowlerFirstName}
-                      </h3>
-                      <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-widest">
-                        Athlete ID: #{b.bowlerId}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Team Badge */}
-                  <div className="col-span-3">
-                    <button
-                      onClick={() => navigate(`team/${b.teamId}`)}
-                      className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-                    >
-                      {b.team?.teamName || 'Independent'}
-                    </button>
-                  </div>
-
-                  {/* Contact */}
-                  <div className="col-span-3">
-                    <div className="text-sm font-bold text-slate-800">{b.bowlerPhoneNumber}</div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter truncate">
-                      {b.bowlerCity}, {b.bowlerState}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="col-span-2 flex justify-end gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {props.isAuth ? (
-                      <>
-                        <button
-                          onClick={() => navigate(`bowler/${b.bowlerId}`)}
-                          className="text-[10px] font-black uppercase text-slate-400 hover:text-blue-600 tracking-widest border-b-2 border-transparent hover:border-blue-600"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => navigate(`delete/${b.bowlerId}`)}
-                          className="text-[10px] font-black uppercase text-slate-400 hover:text-red-500 tracking-widest border-b-2 border-transparent hover:border-red-500"
-                        >
-                          Revoke
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => navigate(`bowler/${b.bowlerId}`)}
-                        className="text-[10px] font-black uppercase text-slate-900 tracking-widest"
+          <div className="overflow-hidden bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)]">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-[#1a1c2e]">
+                    {['Player Name', 'Location', 'Phone', 'Team'].map((head) => (
+                      <th
+                        key={head}
+                        className="px-8 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-[0.2em]"
                       >
-                        Profile
-                      </button>
+                        {head}
+                      </th>
+                    ))}
+                    {props.isAuth && (
+                      <th className="px-8 py-5 text-right text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                        Actions
+                      </th>
                     )}
-                  </div>
-                </div>
-              ))
-            )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 bg-white">
+                  {filteredBowlers.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-8 py-20 text-center text-slate-400 italic">
+                        {search ? `No results found for "${search}"` : 'No player data available.'}
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredBowlers.map((b) => (
+                      <tr key={b.bowlerId} className="hover:bg-slate-50/80 transition-all group">
+                        {/* Name Column */}
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 text-xs group-hover:from-blue-600 group-hover:to-purple-600 group-hover:text-white transition-all">
+                              {b.bowlerLastName.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="text-sm font-bold text-slate-800 tracking-tight">
+                                {b.bowlerLastName}, {b.bowlerFirstName}
+                              </div>
+                              <div className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">
+                                ID: #{b.bowlerId}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Address Column */}
+                        <td className="px-8 py-5 text-sm text-slate-500">
+                          <span className="font-medium text-slate-700">{b.bowlerCity}</span>
+                          <div className="text-xs opacity-60 truncate max-w-[150px]">
+                            {b.bowlerAddress}
+                          </div>
+                        </td>
+
+                        {/* Phone Column */}
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                            {b.bowlerPhoneNumber}
+                          </span>
+                        </td>
+
+                        {/* Team Column */}
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleTeam(b.teamId)}
+                            className="text-slate-800 hover:text-purple-600 font-bold text-sm flex items-center gap-2 transition-all"
+                          >
+                            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                            {b?.team?.teamName || 'N/A'}
+                          </button>
+                        </td>
+
+                        {/* Action Column */}
+                        {props.isAuth && (
+                          <td className="px-8 py-5 text-right whitespace-nowrap">
+                            <button
+                              onClick={() => handleEdit(b.bowlerId)}
+                              className="text-xs font-extrabold uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors mr-6"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(b.bowlerId)}
+                              className="text-xs font-extrabold uppercase tracking-widest text-slate-400 hover:text-pink-600 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

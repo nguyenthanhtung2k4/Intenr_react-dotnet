@@ -22,6 +22,9 @@
         IEnumerable<ZtblWeek> ZtblWeek { get; }
         
         void UpdateBowler(Bowler bowler);
+        
+        void Update<T>(T entity);
+
         void UpdateAccounts(Accounts accounts);
         void CreateAcounts(Accounts accounts);
         void CreateBowler(Bowler bowler);
