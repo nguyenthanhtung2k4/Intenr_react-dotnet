@@ -15,12 +15,14 @@ import { useAuth } from './context/AuthContext';
 import MatchList from './component/League/MatchList';
 import StandingsTable from './component/League/StandingsTable';
 import Footer from './Footer';
+import Team from './component/Home/teams/team';
 
 function App() {
   const { isAuthenticated } = useAuth();
 
   return (
     <div className="App min-h-screen" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
+      {/* <Header title="Bowling League" description="Official Tournament" /> */}
       <Header title="Bowling League" description="Official Tournament" />
       <Routes>
         {/* Public League Routes */}
@@ -29,7 +31,7 @@ function App() {
         <Route path="/standings" element={<StandingsTable />} />
         <Route path="/stats" element={<BowlersTable isAuth={isAuthenticated} />} />
         <Route path="/teams" element={<ViewTeams />} />
-        <Route path="/team/:id" element={<BowlersTable isAuth={isAuthenticated} />} />
+        <Route path="/team/:id" element={<Team />} />
 
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />

@@ -10,17 +10,11 @@ function BowlersTable(props: any) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log('props : ', props);
-  var handleTeam = (ID: number) => {
-    navigate(`team/${ID}`);
-  };
-  var handleEdit = (ID: number) => {
-    navigate(`bowler/${ID}`);
-  };
-  var handleDelete = (ID: number) => {
-    navigate(`delete/${ID}`);
-  };
-  var handleCreate = (type: string) => {
+  const handleTeam = (ID: number) => navigate(`team/${ID}`);
+  const handleEdit = (ID: number) => navigate(`bowler/${ID}`);
+  const handleDelete = (ID: number) => navigate(`delete/${ID}`);
+
+  const handleCreate = (type: string) => {
     if (type === 'create') {
       navigate(`bowler/new`);
     } else {
@@ -33,26 +27,20 @@ function BowlersTable(props: any) {
       try {
         setError(null);
         setIsLoading(true);
-
-        // Gọi API Service
         const b = await fetchAllBowlers();
         setBowlerData(b || []);
       } catch (ex: any) {
-        console.error('Error fetching data:', ex);
-        // Hiển thị thông báo lỗi từ hàm service (hoặc lỗi chung)
         setError(ex.message || 'Lỗi: Không thể tải dữ liệu VĐV từ API.');
         setBowlerData([]);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchBowlerData();
   }, []);
 
-  // --- LOGIC LỌC VÀ TÌM KIẾM HOÀN CHỈNH ---
-  let filteredBowlers = bowlerData.filter((e) => !e.isDelete); // Lọc VĐV chưa bị xóa
-
+  // Logic lọc dữ liệu
+  let filteredBowlers = bowlerData.filter((e) => !e.isDelete);
   if (search) {
     const lowerCaseSearch = search.toLowerCase();
     filteredBowlers = filteredBowlers.filter(
@@ -65,42 +53,49 @@ function BowlersTable(props: any) {
   }
 
   return (
-    <div
-      className="p-4 sm:p-8 min-h-screen font-inter pt-24"
-      style={{ backgroundColor: 'var(--color-bg)' }}
-    >
-      {/* Control Panel */}
+    <div className="min-h-screen bg-white pt-32 pb-12 px-6 font-sans text-slate-900">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Search Input */}
-          <div className="relative w-full sm:w-96">
+        {/* Title Section */}
+        <div className="mb-10">
+          <h1 className="text-5xl font-black italic tracking-tighter uppercase leading-none">
+            Player{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+              Database
+            </span>
+          </h1>
+          <div className="h-2 w-24 bg-gradient-to-r from-pink-500 to-purple-500 mt-4 rounded-full"></div>
+        </div>
+
+        {/* Control Panel: Search & Buttons */}
+        <div className="mb-8 flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="relative w-full lg:w-1/3">
             <input
               type="text"
-              placeholder="Search Name or Team..."
+              placeholder="Search by name, team or city..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full p-4 bg-[#1a1c29] text-white border border-[#2a2c39] rounded-xl focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] outline-none transition-all placeholder-gray-500"
+              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all shadow-sm"
             />
-            <div className="absolute right-4 top-4 text-[#00f3ff]">🔍</div>
+            <span className="absolute left-4 top-3.5 text-slate-400 text-xl">🔍</span>
           </div>
 
           {props.isAuth && (
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap justify-center gap-3 w-full lg:w-auto">
               <button
                 onClick={() => handleCreate('create')}
-                className="btn-primary text-sm py-3 px-6"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-0.5 active:scale-95 text-sm uppercase tracking-wider"
               >
                 + New Bowler
               </button>
               <button
                 onClick={() => handleCreate('view-teams')}
-                className="glass-panel text-white font-bold py-3 px-6 rounded-full hover:bg-[#00f3ff] hover:text-black transition duration-300 border border-[#00f3ff]"
+                className="bg-white border-2 border-slate-200 text-slate-700 font-bold px-6 py-3 rounded-xl hover:bg-slate-50 transition-all text-sm uppercase tracking-wider shadow-sm"
               >
                 Manage Teams
               </button>
               <button
                 onClick={() => navigate('view-accounts')}
-                className="glass-panel text-white font-bold py-3 px-6 rounded-full hover:bg-red-500 hover:border-red-500 transition duration-300 border border-red-500/50"
+                className="bg-pink-50 text-pink-600 border border-pink-100 font-bold px-6 py-3 rounded-xl hover:bg-pink-100 transition-all text-sm uppercase tracking-wider"
               >
                 Accounts
               </button>
@@ -109,92 +104,116 @@ function BowlersTable(props: any) {
         </div>
 
         {error && (
-          <div className="p-4 mb-8 bg-red-900/20 border border-red-500 text-red-400 rounded-xl text-center font-bold">
+          <div className="p-4 mb-8 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl font-bold">
             {error}
           </div>
         )}
 
-        {/* Hiển thị Loading */}
         {isLoading && !error ? (
-          <div className="text-center p-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#00f3ff] mx-auto"></div>
-            <p className="mt-4 text-[#00f3ff] font-bold text-lg animate-pulse">LOADING DATA...</p>
+          <div className="flex flex-col items-center justify-center py-24">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-100 border-t-purple-600"></div>
+            <p className="mt-4 text-slate-400 font-bold tracking-widest uppercase text-xs">
+              Synchronizing Data...
+            </p>
           </div>
         ) : (
-          // Datat
-          <div className="overflow-x-auto glass-panel rounded-2xl neon-border">
-            <table className="min-w-full divide-y divide-[#2a2c39]">
-              <thead className="bg-[#1a1c29]">
-                <tr>
-                  {['Last Name', 'First Name', 'Address', 'Phone', 'Team'].map((head) => (
-                    <th
-                      key={head}
-                      className="px-6 py-4 text-xs font-bold text-[#00f3ff] uppercase tracking-wider text-left"
-                    >
-                      {head}
-                    </th>
-                  ))}
-                  {props.isAuth && (
-                    <th className="px-6 py-4 text-center text-xs font-bold text-[#ff0055] uppercase tracking-wider">
-                      Actions
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#2a2c39] bg-transparent">
-                {filteredBowlers.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-lg text-gray-400">
-                      {search ? `No bowlers found for "${search}".` : 'No bowler data available.'}
-                    </td>
+          <div className="overflow-hidden bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)]">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-[#1a1c2e]">
+                    {['Player Name', 'Location', 'Phone', 'Team'].map((head) => (
+                      <th
+                        key={head}
+                        className="px-8 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-[0.2em]"
+                      >
+                        {head}
+                      </th>
+                    ))}
+                    {props.isAuth && (
+                      <th className="px-8 py-5 text-right text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                        Actions
+                      </th>
+                    )}
                   </tr>
-                ) : (
-                  filteredBowlers.map((b) => (
-                    <tr key={b.bowlerId} className="hover:bg-[#ff0055]/10 transition duration-200">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">
-                        {b.bowlerLastName}
+                </thead>
+                <tbody className="divide-y divide-slate-50 bg-white">
+                  {filteredBowlers.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-8 py-20 text-center text-slate-400 italic">
+                        {search ? `No results found for "${search}"` : 'No player data available.'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {b.bowlerFirstName} {b.bowlerMiddleInit ? b.bowlerMiddleInit + '.' : ''}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-400 max-w-xs truncate">
-                        {b.bowlerAddress}, {b.bowlerCity}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#00f3ff]">
-                        {b.bowlerPhoneNumber}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          type="button"
-                          onClick={() => handleTeam(b.teamId)}
-                          className="text-white hover:text-[#00f3ff] hover:underline font-bold transition"
-                        >
-                          {b?.team?.teamName || 'N/A'}
-                        </button>
-                      </td>
-                      {props.isAuth && (
-                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                    </tr>
+                  ) : (
+                    filteredBowlers.map((b) => (
+                      <tr key={b.bowlerId} className="hover:bg-slate-50/80 transition-all group">
+                        {/* Name Column */}
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 text-xs group-hover:from-blue-600 group-hover:to-purple-600 group-hover:text-white transition-all">
+                              {b.bowlerLastName.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="text-sm font-bold text-slate-800 tracking-tight">
+                                {b.bowlerLastName}, {b.bowlerFirstName}
+                              </div>
+                              <div className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">
+                                ID: #{b.bowlerId}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Address Column */}
+                        <td className="px-8 py-5 text-sm text-slate-500">
+                          <span className="font-medium text-slate-700">{b.bowlerCity}</span>
+                          <div className="text-xs opacity-60 truncate max-w-[150px]">
+                            {b.bowlerAddress}
+                          </div>
+                        </td>
+
+                        {/* Phone Column */}
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                            {b.bowlerPhoneNumber}
+                          </span>
+                        </td>
+
+                        {/* Team Column */}
+                        <td className="px-8 py-5 whitespace-nowrap">
                           <button
                             type="button"
-                            onClick={() => handleEdit(b.bowlerId)}
-                            className="text-[#00f3ff] hover:text-white mr-4 transition"
+                            onClick={() => handleTeam(b.teamId)}
+                            className="text-slate-800 hover:text-purple-600 font-bold text-sm flex items-center gap-2 transition-all"
                           >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(b.bowlerId)}
-                            className="text-[#ff0055] hover:text-white transition"
-                          >
-                            Delete
+                            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                            {b?.team?.teamName || 'N/A'}
                           </button>
                         </td>
-                      )}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+
+                        {/* Action Column */}
+                        {props.isAuth && (
+                          <td className="px-8 py-5 text-right whitespace-nowrap">
+                            <button
+                              onClick={() => handleEdit(b.bowlerId)}
+                              className="text-xs font-extrabold uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors mr-6"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(b.bowlerId)}
+                              className="text-xs font-extrabold uppercase tracking-widest text-slate-400 hover:text-pink-600 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

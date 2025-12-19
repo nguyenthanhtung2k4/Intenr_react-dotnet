@@ -10,6 +10,7 @@ function getTeamId(t: any): number | null {
   const n = Number(raw);
   return Number.isFinite(n) ? n : null;
 }
+
 function ViewTeams() {
   const navigate = useNavigate();
   const [dataTeams, setDataTeams] = useState<Team[]>([]);
@@ -25,9 +26,7 @@ function ViewTeams() {
         const teams = await fetchTeams();
         setDataTeams(teams || []);
       } catch (ex: any) {
-        console.error('Lỗi khi tải danh sách đội:', ex);
-        setError(ex.message || 'Lỗi: Không thể tải danh sách đội từ API.');
-        setDataTeams([]);
+        setError(ex.message || 'Lỗi tải dữ liệu.');
       } finally {
         setIsLoading(false);
       }
@@ -35,113 +34,108 @@ function ViewTeams() {
     loadTeams();
   }, []);
 
-  const handleViewBowlers = (teamId: any) => {
-    const idTeam = getTeamId(teamId);
-    console.log('idTeam : ', idTeam);
-    navigate(`/team/${idTeam}`);
-  };
-  const handleTeamBowlers = (teamId: any, type: String) => {
-    const idTeam = getTeamId(teamId);
-    if (type === 'edit') {
-      navigate(`/edit-team/${idTeam}`);
-    }
-    if (type === 'delete') {
-      navigate(`/delete-team/${idTeam}`);
-    }
+  const handleAction = (team: any, path: string) => {
+    const id = getTeamId(team);
+    if (id) navigate(`/${path}/${id}`);
   };
 
   return (
-    <div
-      className="p-4 sm:p-8 min-h-screen font-inter pt-24"
-      style={{ backgroundColor: 'var(--color-bg)' }}
-    >
+    // Nền trắng sáng, padding top lớn để tránh đè Header
+    <div className="min-h-screen bg-white pt-32 pb-12 px-6 font-sans text-slate-900">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8 flex items-center justify-between">
-          <h1
-            className="text-4xl font-black text-white italic tracking-tighter"
-            style={{ textShadow: '0 0 10px #00f3ff' }}
-          >
-            LEAGUE TEAMS
-          </h1>
-          <div className="space-x-4">
-            <button onClick={() => navigate('/create-team')} className="btn-primary">
+        {/* Header Section với Gradient giống trang chính */}
+        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="relative">
+            <h1 className="text-6xl font-black italic tracking-tighter leading-none uppercase">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 p-5">
+                League
+              </span>
+              <br />
+              <span className="text-slate-900">Teams</span>
+            </h1>
+            <div className="h-2 w-32 bg-gradient-to-r from-pink-500 to-purple-500 mt-4 rounded-full"></div>
+          </div>
+
+          <div className="flex gap-4">
+            <button
+              onClick={() => navigate('/create-team')}
+              className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold px-8 py-3.5 rounded-full shadow-lg shadow-purple-500/30 transition-all hover:-translate-y-1 active:scale-95 text-sm uppercase tracking-wider"
+            >
               + Create Team
             </button>
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-3 rounded-full border border-white/20 text-white font-bold hover:bg-white/10 transition"
+              className="bg-white border-2 border-slate-200 text-slate-700 font-bold px-8 py-3.5 rounded-full hover:bg-slate-50 transition-all text-sm uppercase tracking-wider"
             >
               Back Home
             </button>
           </div>
         </div>
 
-        {error && (
-          <div className="text-red-400 p-4 mb-4 bg-red-900/20 border border-red-500 rounded-lg text-center font-bold">
-            {error}
-          </div>
-        )}
-
-        {isLoading && !error ? (
-          <div className="text-center p-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#00f3ff] mx-auto"></div>
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-100 border-t-purple-600"></div>
           </div>
         ) : (
-          <div className="overflow-x-auto glass-panel rounded-2xl neon-border">
-            <table className="min-w-full divide-y divide-[#2a2c39]">
-              <thead className="bg-[#1a1c29]">
-                <tr>
-                  <th className="px-6 py-4 text-center text-xs font-bold text-[#00f3ff] uppercase tracking-wider">
+          /* Bảng thiết kế lại theo phong cách hiện đại */
+          <div className="overflow-hidden bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
+            <table className="min-w-full">
+              <thead>
+                {/* Header bảng dùng màu tối pha gradient nhẹ */}
+                <tr className="bg-[#1a1c2e]">
+                  <th className="px-8 py-6 text-left text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
                     Team Name
                   </th>
-                  <th className="px-6 py-4 text-center text-xs font-bold text-[#00f3ff] uppercase tracking-wider">
-                    Details
+                  <th className="px-8 py-6 text-center text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                    Roster
                   </th>
                   {isAuthenticated && (
-                    <th className="px-6 py-4 text-center text-xs font-bold text-[#ff0055] uppercase tracking-wider">
-                      Actions
+                    <th className="px-8 py-6 text-right text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                      Management
                     </th>
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#2a2c39] bg-transparent">
+              <tbody className="divide-y divide-slate-50">
                 {dataTeams.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="px-6 py-12 text-center text-lg text-gray-400">
-                      No teams found.
+                    <td colSpan={3} className="px-8 py-20 text-center text-slate-400 italic">
+                      No teams registered yet.
                     </td>
                   </tr>
                 ) : (
                   dataTeams.map((team) => (
-                    <tr key={team.TeamId} className="hover:bg-[#00f3ff]/10 transition duration-200">
-                      <td className="px-6 py-4 whitespace-nowrap text-lg font-bold text-white text-center">
-                        {team.teamName}
+                    <tr key={team.TeamId} className="hover:bg-slate-50/80 transition-all group">
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-5">
+                          {/* Icon Team với Gradient */}
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md transform group-hover:rotate-6 transition-transform">
+                            {team.teamName.charAt(0)}
+                          </div>
+                          <span className="text-xl font-bold text-slate-800 tracking-tight group-hover:text-blue-600 transition-colors">
+                            {team.teamName}
+                          </span>
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                      <td className="px-8 py-6 text-center">
                         <button
-                          type="button"
-                          id={`${team.TeamId}`}
-                          onClick={() => handleViewBowlers(team)}
-                          className="text-[#00f3ff] hover:text-white font-bold underline transition"
+                          onClick={() => handleAction(team, 'team')}
+                          className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-black text-sm uppercase tracking-widest border-b-2 border-purple-200 hover:border-purple-600 transition-all"
                         >
                           View Roster
                         </button>
                       </td>
                       {isAuthenticated && (
-                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                        <td className="px-8 py-6 text-right space-x-6">
                           <button
-                            type="button"
-                            id={`${team.TeamId}`}
-                            onClick={() => handleTeamBowlers(team, 'edit')}
-                            className="text-white hover:text-[#00f3ff] transition mr-4"
+                            onClick={() => handleAction(team, 'edit-team')}
+                            className="font-bold text-sm text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-widest"
                           >
                             Edit
                           </button>
                           <button
-                            type="button"
-                            id={`${team.TeamId}`}
-                            onClick={() => handleTeamBowlers(team, 'delete')}
-                            className="text-[#ff0055] hover:text-white transition"
+                            onClick={() => handleAction(team, 'delete-team')}
+                            className="font-bold text-sm text-slate-400 hover:text-pink-600 transition-colors uppercase tracking-widest"
                           >
                             Delete
                           </button>

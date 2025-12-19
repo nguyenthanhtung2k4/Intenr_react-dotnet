@@ -24,8 +24,7 @@ function Header(props: HeaderProps) {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'
-        }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'}`}
     >
       <div className="container-custom flex items-center justify-between h-16">
         {/* Logo Area */}
@@ -40,8 +39,7 @@ function Header(props: HeaderProps) {
           </div>
           <div>
             <h1 className="text-xl font-black uppercase text-slate-900 tracking-tighter leading-none">
-              Bowling<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600">League</span>
+              Bowling
             </h1>
           </div>
         </Link>
@@ -95,7 +93,12 @@ function Header(props: HeaderProps) {
         {/* Mobile Menu Button (Placeholder) */}
         <button className="md:hidden p-2 text-slate-900">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16m-7 6h7"
+            />
           </svg>
         </button>
       </div>

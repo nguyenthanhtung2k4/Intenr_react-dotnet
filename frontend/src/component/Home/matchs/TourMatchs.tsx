@@ -47,13 +47,14 @@ const TourMatch = () => {
     fetchData();
   }, []);
 
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-pink-600"></div>
-          <p className="mt-4 text-lg font-bold text-slate-800 tracking-wider uppercase">Loading Season Data...</p>
+          <p className="mt-4 text-lg font-bold text-slate-800 tracking-wider uppercase">
+            Loading Season Data...
+          </p>
         </div>
       </div>
     );
@@ -71,24 +72,32 @@ const TourMatch = () => {
         <div className="container-custom relative z-10 grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 animate-fade-in-up">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-600/20 border border-pink-500/30 rounded-full">
-              <span className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></span>
-              <span className="text-pink-400 font-bold text-sm tracking-widest uppercase">Season 2025 Live</span>
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse text-red-500"></span>
+              <span className="text-white font-bold text-sm tracking-widest uppercase">
+                Season 2025 Live
+              </span>
             </div>
 
             <h1 className="text-6xl md:text-8xl font-black text-white leading-none tracking-tighter italic">
               LEAGUE <br />
-              {/* <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">LEGENDS</span> */}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600 p-2">
+                Bowling
+              </span>
             </h1>
 
             <p className="text-xl text-slate-300 max-w-lg leading-relaxed font-light">
-              Experience the thrill of the strike. Join the elite bowling community and track your path to glory.
+              Trải nghiệm cảm giác hồi hộp của cuộc đình công. Tham gia cộng đồng bowling ưu tú và
+              theo dõi con đường dẫn đến vinh quang của bạn
             </p>
 
             <div className="flex flex-wrap gap-4">
               <Link to="/fixtures" className="btn-sports btn-gradient shadow-lg shadow-pink-500/30">
                 View Matches
               </Link>
-              <Link to="/standings" className="btn-sports btn-outline border-slate-600 text-white hover:border-white">
+              <Link
+                to="/standings"
+                className="bg-red-600 btn-sports btn-outline border-slate-600 text-white hover:border-white"
+              >
                 Standings
               </Link>
             </div>
@@ -99,10 +108,16 @@ const TourMatch = () => {
             <div className="relative z-10 bg-slate-800/50 backdrop-blur-xl border border-slate-700 p-8 rounded-3xl transform rotate-3 hover:rotate-0 transition-transform duration-500 shadow-2xl">
               <div className="flex justify-between items-end mb-6">
                 <div>
-                  <p className="text-slate-400 text-sm uppercase font-bold tracking-wider">Top Scorer</p>
-                  <h3 className="text-4xl font-black text-white italic">{topBowlers[0]?.bowlerFirstName || 'TB'}</h3>
+                  <p className="text-slate-400 text-sm uppercase font-bold tracking-wider">
+                    Top Scorer
+                  </p>
+                  <h3 className="text-4xl font-black text-white italic">
+                    {topBowlers[0]?.bowlerFirstName || 'TB'}
+                  </h3>
                 </div>
-                <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-t from-pink-600 to-purple-400">#1</div>
+                <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-t from-pink-600 to-purple-400">
+                  #1
+                </div>
               </div>
               <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                 <div className="h-full w-[92%] bg-gradient-to-r from-pink-500 to-purple-600"></div>
@@ -124,9 +139,19 @@ const TourMatch = () => {
               <h2 className="section-title">Top Athletes</h2>
               <div className="h-2 w-24 bg-pink-600 mt-2"></div>
             </div>
-            <Link to="/stats" className="hidden md:flex items-center gap-2 font-bold text-slate-900 hover:text-pink-600 transition-colors uppercase tracking-wider">
+            <Link
+              to="/stats"
+              className="hidden md:flex items-center gap-2 font-bold text-slate-900 hover:text-pink-600 transition-colors uppercase tracking-wider"
+            >
               Full Rankings
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
             </Link>
           </div>
 
@@ -143,7 +168,8 @@ const TourMatch = () => {
                 <div className="relative mb-6">
                   <div className="w-20 h-20 rounded-full bg-slate-200 mx-auto overflow-hidden ring-4 ring-white shadow-lg group-hover:ring-pink-100 transition-all">
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-300 to-slate-400 text-slate-600 font-bold text-2xl">
-                      {bowler.bowlerFirstName[0]}{bowler.bowlerLastName[0]}
+                      {bowler.bowlerFirstName[0]}
+                      {bowler.bowlerLastName[0]}
                     </div>
                   </div>
                   {index < 3 && (
@@ -176,19 +202,25 @@ const TourMatch = () => {
               <div className="text-5xl md:text-7xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500">
                 {topBowlers.length}+
               </div>
-              <p className="text-pink-500 font-bold uppercase tracking-widest text-sm">Professional Athletes</p>
+              <p className="text-pink-500 font-bold uppercase tracking-widest text-sm">
+                Professional Athletes
+              </p>
             </div>
             <div className="text-center p-8">
               <div className="text-5xl md:text-7xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500">
                 {recentMatches.length}
               </div>
-              <p className="text-blue-500 font-bold uppercase tracking-widest text-sm">Matches This Season</p>
+              <p className="text-blue-500 font-bold uppercase tracking-widest text-sm">
+                Matches This Season
+              </p>
             </div>
             <div className="text-center p-8">
               <div className="text-5xl md:text-7xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500">
                 12
               </div>
-              <p className="text-purple-500 font-bold uppercase tracking-widest text-sm">Official Teams</p>
+              <p className="text-purple-500 font-bold uppercase tracking-widest text-sm">
+                Official Teams
+              </p>
             </div>
           </div>
         </div>
@@ -199,12 +231,20 @@ const TourMatch = () => {
         <div className="container-custom">
           <div className="flex justify-between items-end mb-12">
             <h2 className="section-title text-slate-900">Match Centre</h2>
-            <Link to="/fixtures" className="text-slate-600 hover:text-slate-900 font-bold uppercase text-sm tracking-wider underline decoration-2 decoration-pink-500 underline-offset-4">View All Matches</Link>
+            <Link
+              to="/fixtures"
+              className="text-slate-600 hover:text-slate-900 font-bold uppercase text-sm tracking-wider underline decoration-2 decoration-pink-500 underline-offset-4"
+            >
+              View All Matches
+            </Link>
           </div>
 
           <div className="grid gap-6">
             {recentMatches.map((match) => (
-              <div key={match.matchId} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-l-4 border-pink-500 flex flex-col md:flex-row items-center justify-between gap-6 group">
+              <div
+                key={match.matchId}
+                className="bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-l-4 border-pink-500 flex flex-col md:flex-row items-center justify-between gap-6 group"
+              >
                 <div className="flex items-center gap-6 w-full md:w-auto">
                   <div className="flex flex-col items-center min-w-[80px]">
                     <span className="text-sm font-bold text-slate-400 uppercase">
@@ -216,7 +256,9 @@ const TourMatch = () => {
                   </div>
 
                   <div className="flex-1 md:text-left">
-                    <div className="text-xs font-bold text-pink-600 uppercase tracking-wider mb-1">League Match</div>
+                    <div className="text-xs font-bold text-pink-600 uppercase tracking-wider mb-1">
+                      League Match
+                    </div>
                     <h3 className="text-xl font-bold text-slate-900 group-hover:text-pink-600 transition-colors">
                       {match.tourneyLocation}
                     </h3>
