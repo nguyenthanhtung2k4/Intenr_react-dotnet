@@ -10,3 +10,5 @@
   -  MatchGame
 
 Sửa lại login  chưa  update UI ! 
+
+THỰC HIỆN NHANH CHÓNG HOÀN THÀNH ! 
