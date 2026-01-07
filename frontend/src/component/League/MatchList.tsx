@@ -1,24 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-
-interface Match {
-  matchId: number;
-  tourneyLocation: string;
-  tourneyDate: string;
-  oddLaneTeam: string;
-  evenLaneTeam: string;
-  lanes: string;
-}
+import { fetchGlobalMatches, MatchData } from '../../services/api.services';
 
 const MatchList = () => {
-  const [matches, setMatches] = useState<Match[]>([]);
+  const [matches, setMatches] = useState<MatchData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const response = await axios.get('http://localhost:5292/api/Matchs/matches');
-        setMatches(response.data);
+        const data = await fetchGlobalMatches();
+        setMatches(data);
       } catch (error) {
         console.error('Error fetching matches:', error);
       } finally {

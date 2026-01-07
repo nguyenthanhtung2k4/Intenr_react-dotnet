@@ -238,3 +238,42 @@ export const logoutAccount = async (): Promise<void> => {
     setAuthToken(null);
   }
 };
+
+// --- MATCHES & STANDINGS API ---
+
+export interface MatchData {
+  matchId: number;
+  tourneyLocation: string;
+  tourneyDate: string;
+  oddLaneTeam: string;
+  evenLaneTeam: string;
+  lanes: string;
+}
+
+export interface StandingData {
+  teamId: number;
+  teamName: string;
+  played: number;
+  won: number;
+  points: number;
+}
+
+// 11. Fetch Matches
+export const fetchGlobalMatches = async (): Promise<MatchData[]> => {
+  try {
+    const response = await api.get('/matches');
+    return response.data || [];
+  } catch (error) {
+    throw handleApiError(error, 'fetchGlobalMatches');
+  }
+};
+
+// 12. Fetch Standings
+export const fetchLeagueStandings = async (): Promise<StandingData[]> => {
+  try {
+    const response = await api.get('/standings');
+    return response.data || [];
+  } catch (error) {
+    throw handleApiError(error, 'fetchLeagueStandings');
+  }
+};

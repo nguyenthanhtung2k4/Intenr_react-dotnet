@@ -1,23 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-
-interface Standing {
-  teamId: number;
-  teamName: string;
-  played: number;
-  won: number;
-  points: number;
-}
+import { fetchLeagueStandings, StandingData } from '../../services/api.services';
 
 const StandingsTable = () => {
-  const [standings, setStandings] = useState<Standing[]>([]);
+  const [standings, setStandings] = useState<StandingData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStandings = async () => {
       try {
-        const response = await axios.get('http://localhost:5292/api/Matchs/standings');
-        setStandings(response.data);
+        const data = await fetchLeagueStandings();
+        setStandings(data);
       } catch (error) {
         console.error('Error fetching standings:', error);
       } finally {

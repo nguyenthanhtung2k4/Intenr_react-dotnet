@@ -1,41 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-
-interface Bowler {
-  bowlerId: number;
-  bowlerFirstName: string;
-  bowlerLastName: string;
-  team: {
-    teamName: string;
-  };
-}
-
-interface Match {
-  matchId: number;
-  tourneyDate: string;
-  tourneyLocation: string;
-  oddLaneTeam: string;
-  evenLaneTeam: string;
-  lanes: string;
-}
+import { fetchAllBowlers, fetchGlobalMatches, MatchData } from '../../../services/api.services';
+import { Bowler } from '../../../types/Bowler';
 
 const TourMatch = () => {
   const [topBowlers, setTopBowlers] = useState<Bowler[]>([]);
-  const [recentMatches, setRecentMatches] = useState<Match[]>([]);
+  const [recentMatches, setRecentMatches] = useState<MatchData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch top bowlers
-        const bowlersResponse = await axios.get('http://localhost:5292/api/Bowlers');
-        const allBowlers = bowlersResponse.data;
+        const allBowlers = await fetchAllBowlers();
         setTopBowlers(allBowlers.slice(0, 10));
 
         // Fetch recent matches
-        const matchesResponse = await axios.get('http://localhost:5292/api/Matchs/matches');
-        setRecentMatches(matchesResponse.data.slice(0, 3));
+        const allMatches = await fetchGlobalMatches();
+        setRecentMatches(allMatches.slice(0, 3));
 
         setLoading(false);
       } catch (error) {
