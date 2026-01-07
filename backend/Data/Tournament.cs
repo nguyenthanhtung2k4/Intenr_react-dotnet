@@ -10,6 +10,7 @@ public partial class Tournament
     public DateOnly? TourneyDate { get; set; }
 
     public string? TourneyLocation { get; set; }
+    public bool? IsDelete { get; set; } = false;
 
     public virtual ICollection<TourneyMatch> TourneyMatches { get; set; } = new List<TourneyMatch>();
 }

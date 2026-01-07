@@ -29,5 +29,6 @@
         void CreateAcounts(Accounts accounts);
         void CreateBowler(Bowler bowler);
         void CreateTeam(Team team);
+        void CreateTournament(Tournament tournament);
     }
 }

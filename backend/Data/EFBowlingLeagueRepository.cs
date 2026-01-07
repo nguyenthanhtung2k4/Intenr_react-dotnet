@@ -139,5 +139,18 @@ namespace Backend.Data
             }
         }
 
+        public void CreateTournament(Tournament tournament)
+        {
+            try
+            {
+                _bowlingContext.Tournaments.Add(tournament);
+                _bowlingContext.SaveChanges();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Lỗi lưu Tournament: {dbEx.InnerException?.Message ?? dbEx.Message}");
+            }
+        }
+
     }
 }
