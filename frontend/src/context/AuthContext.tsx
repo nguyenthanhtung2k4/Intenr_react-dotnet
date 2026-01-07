@@ -5,6 +5,7 @@ import { loginAccount, logoutAccount, checkAuthStatus } from '../services/api.se
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  role: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -21,12 +23,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const response = await checkAuthStatus();
         setIsAuthenticated(response.isAuthenticated);
-        console.log('Is Authenticated:', response.isAuthenticated);
+        setRole(response.role || null);
+        console.log('Is Authenticated:', response.isAuthenticated, 'Role:', response.role);
       } catch (error) {
         setIsAuthenticated(false);
+        setRole(null);
       } finally {
         setIsLoading(false);
-        console.log('Is Authenticated:', isLoading);
       }
     };
     checkStatus();
@@ -36,7 +39,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     try {
       await loginAccount({ email, password });
-      setIsAuthenticated(true);
+      // Re-check status to get role
+      const response = await checkAuthStatus();
+      setIsAuthenticated(response.isAuthenticated);
+      setRole(response.role || null);
     } catch (error) {
       throw error;
     } finally {
@@ -49,13 +55,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await logoutAccount();
       setIsAuthenticated(false);
+      setRole(null);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, role, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

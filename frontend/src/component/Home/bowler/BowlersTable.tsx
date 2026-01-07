@@ -2,23 +2,27 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bowler } from '../../../types/Bowler';
 import { fetchAllBowlers } from '../../../services/api.services';
+import { useAuth } from '../../../context/AuthContext';
 
 function BowlersTable(props: any) {
   const navigate = useNavigate();
+  const { role, isAuthenticated } = useAuth();
   const [bowlerData, setBowlerData] = useState<Bowler[]>([]);
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const handleTeam = (ID: number) => navigate(`team/${ID}`);
-  const handleEdit = (ID: number) => navigate(`bowler/${ID}`);
-  const handleDelete = (ID: number) => navigate(`delete/${ID}`);
+  const isAdmin = isAuthenticated && role === 'Admin';
+
+  const handleTeam = (ID: number) => navigate(`/team/${ID}`);
+  const handleEdit = (ID: number) => navigate(`/bowler/${ID}`);
+  const handleDelete = (ID: number) => navigate(`/delete/${ID}`);
 
   const handleCreate = (type: string) => {
     if (type === 'create') {
-      navigate(`bowler/new`);
+      navigate(`/bowler/new`);
     } else {
-      navigate(`view-teams`);
+      navigate(`/view-teams`);
     }
   };
 
@@ -79,7 +83,7 @@ function BowlersTable(props: any) {
             <span className="absolute left-4 top-3.5 text-slate-400 text-xl">🔍</span>
           </div>
 
-          {props.isAuth && (
+          {isAdmin && (
             <div className="flex flex-wrap justify-center gap-3 w-full lg:w-auto">
               <button
                 onClick={() => handleCreate('create')}
@@ -94,7 +98,7 @@ function BowlersTable(props: any) {
                 Manage Teams
               </button>
               <button
-                onClick={() => navigate('view-accounts')}
+                onClick={() => navigate('/view-accounts')}
                 className="bg-pink-50 text-pink-600 border border-pink-100 font-bold px-6 py-3 rounded-xl hover:bg-pink-100 transition-all text-sm uppercase tracking-wider"
               >
                 Accounts
@@ -130,7 +134,7 @@ function BowlersTable(props: any) {
                         {head}
                       </th>
                     ))}
-                    {props.isAuth && (
+                    {isAdmin && (
                       <th className="px-8 py-5 text-right text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
                         Actions
                       </th>
@@ -192,7 +196,7 @@ function BowlersTable(props: any) {
                         </td>
 
                         {/* Action Column */}
-                        {props.isAuth && (
+                        {isAdmin && (
                           <td className="px-8 py-5 text-right whitespace-nowrap">
                             <button
                               onClick={() => handleEdit(b.bowlerId)}

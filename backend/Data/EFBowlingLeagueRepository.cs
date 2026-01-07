@@ -6,151 +6,187 @@ using System.Linq;
 
 namespace Backend.Data
 {
-    public class EFBowlingLeagueRepository : IBowlingLeagueRepository
-    {
-        private readonly BowlingLeagueContext _bowlingContext;
+      public class EFBowlingLeagueRepository : IBowlingLeagueRepository
+      {
+            private readonly BowlingLeagueContext _bowlingContext;
 
-        public EFBowlingLeagueRepository(BowlingLeagueContext temp)
-        {
-            _bowlingContext = temp;
-        }
-
-        public IEnumerable<Bowler> Bowlers => _bowlingContext.Bowlers.Include(x => x.Team).ToList();
-        public IEnumerable<Accounts> Accounts => _bowlingContext.Accounts;
-
-        public IEnumerable<BowlerScore> Scores => _bowlingContext.Scores;
-
-        public IEnumerable<MatchGame> MatchGames => _bowlingContext.MatchGames.Include(x => x.Match).ToList();
-
-        public IEnumerable<Team> Teams => _bowlingContext.Teams;
-
-        public IEnumerable<Tournament> Tournaments => _bowlingContext.Tournaments;
-
-        public IEnumerable<TourneyMatch> TourneyMatches => _bowlingContext.TourneyMatches
-            .Include(x => x.Tourney)
-            .Include(x => x.OddLaneTeam)
-            .Include(x => x.EvenLaneTeam)
-            .ToList();
-
-        public IEnumerable<ZtblBowlerRating> ZtblBowlerRatings => _bowlingContext.ZtblBowlerRatings;
-
-        public IEnumerable<ZtblSkipLabel> ZtblSkipLabels => _bowlingContext.ZtblSkipLabels;
-
-        public IEnumerable<ZtblWeek> ZtblWeek => _bowlingContext.ZtblWeeks;
-
-        // 🔹 Update
-        public void UpdateBowler(Bowler bowler)
-        {
-            try
+            public EFBowlingLeagueRepository(BowlingLeagueContext temp)
             {
-                _bowlingContext.Bowlers.Update(bowler);
-                _bowlingContext.SaveChanges();
-            }
-            catch (DbUpdateException dbEx)
-            {
-                throw new Exception($"Lỗi cập nhật Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
-            }
-        }
-        public void UpdateAccounts(Accounts accounts)
-        {
-            try
-            {
-                _bowlingContext.Accounts.Update(accounts);
-                _bowlingContext.SaveChanges();
-            }
-            catch (DbUpdateException dbEx)
-            {
-                throw new Exception($"Lỗi cập nhật Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
-            }
-        }
-
-        public void Update<T>(T entity)
-        {
-            try
-            {
-                _bowlingContext.Update(entity);
-                _bowlingContext.SaveChanges();
-            }
-            catch (DbUpdateException dbEx)
-            {
-                throw new Exception($"Lỗi cập nhật Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
-            }
-        }
-
-// 🔹 Create
-        public void CreateAcounts(Accounts accounts)
-        {
-            try
-            {
-                
-                _bowlingContext.Accounts.Add(accounts);
-                _bowlingContext.SaveChanges();
-            }
-            catch (DbUpdateException dbEx)
-            {
-                throw new Exception($"Lỗi lưu Accounts: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  _bowlingContext = temp;
             }
 
+            public IEnumerable<Bowler> Bowlers => _bowlingContext.Bowlers.Include(x => x.Team).ToList();
+            public IEnumerable<Accounts> Accounts => _bowlingContext.Accounts;
 
-        }
+            public IEnumerable<BowlerScore> Scores => _bowlingContext.Scores;
 
-        // 🔹 Create
-        public void CreateBowler(Bowler bowler)
-        {
-            try
+            public IEnumerable<MatchGame> MatchGames => _bowlingContext.MatchGames.Include(x => x.Match).ToList();
+
+            public IEnumerable<Team> Teams => _bowlingContext.Teams;
+
+            public IEnumerable<Tournament> Tournaments => _bowlingContext.Tournaments;
+
+            public IEnumerable<TourneyMatch> TourneyMatches => _bowlingContext.TourneyMatches
+                .Include(x => x.Tourney)
+                .Include(x => x.OddLaneTeam)
+                .Include(x => x.EvenLaneTeam)
+                .ToList();
+
+            public IEnumerable<ZtblBowlerRating> ZtblBowlerRatings => _bowlingContext.ZtblBowlerRatings;
+
+            public IEnumerable<ZtblSkipLabel> ZtblSkipLabels => _bowlingContext.ZtblSkipLabels;
+
+            public IEnumerable<ZtblWeek> ZtblWeek => _bowlingContext.ZtblWeeks;
+
+            // 🔹 Update
+            public void UpdateBowler(Bowler bowler)
             {
-                // ⚠️ Bỏ ID cũ để EF tự tăng
-                bowler.BowlerId = 0;
-
-                if (bowler.TeamId.HasValue)
-                {
-                    var existingTeam = _bowlingContext.Teams
-                        .FirstOrDefault(t => t.TeamId == bowler.TeamId.Value);
-
-                    if (existingTeam == null)
-                    {
-                        throw new Exception($"Không tìm thấy Team với ID {bowler.TeamId}");
-                    }
-
-                    bowler.Team = existingTeam;
-                }
-
-                _bowlingContext.Bowlers.Add(bowler);
-                _bowlingContext.SaveChanges();
+                  try
+                  {
+                        _bowlingContext.Bowlers.Update(bowler);
+                        _bowlingContext.SaveChanges();
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi cập nhật Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
             }
-            catch (DbUpdateException dbEx)
+            public void UpdateAccounts(Accounts accounts)
             {
-                throw new Exception($"Lỗi lưu Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  try
+                  {
+                        _bowlingContext.Accounts.Update(accounts);
+                        _bowlingContext.SaveChanges();
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi cập nhật Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
             }
-        }
 
-
-        public void CreateTeam(Team team)
-        {
-            try
+            public void Update<T>(T entity)
             {
+                  try
+                  {
+                        _bowlingContext.Update(entity);
+                        _bowlingContext.SaveChanges();
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi cập nhật Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
+            }
 
-                _bowlingContext.Teams.Add(team);
-                _bowlingContext.SaveChanges();
-            }
-            catch (DbUpdateException dbEx)
+            // 🔹 Create
+            public void CreateAcounts(Accounts accounts)
             {
-                throw new Exception($"Lỗi lưu Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
-            }
-        }
+                  try
+                  {
 
-        public void CreateTournament(Tournament tournament)
-        {
-            try
-            {
-                _bowlingContext.Tournaments.Add(tournament);
-                _bowlingContext.SaveChanges();
-            }
-            catch (DbUpdateException dbEx)
-            {
-                throw new Exception($"Lỗi lưu Tournament: {dbEx.InnerException?.Message ?? dbEx.Message}");
-            }
-        }
+                        _bowlingContext.Accounts.Add(accounts);
+                        _bowlingContext.SaveChanges();
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi lưu Accounts: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
 
-    }
+
+            }
+
+            // 🔹 Create
+            public void CreateBowler(Bowler bowler)
+            {
+                  try
+                  {
+                        // ⚠️ Bỏ ID cũ để EF tự tăng
+                        bowler.BowlerId = 0;
+
+                        if (bowler.TeamId.HasValue)
+                        {
+                              var existingTeam = _bowlingContext.Teams
+                                  .FirstOrDefault(t => t.TeamId == bowler.TeamId.Value);
+
+                              if (existingTeam == null)
+                              {
+                                    throw new Exception($"Không tìm thấy Team với ID {bowler.TeamId}");
+                              }
+
+                              bowler.Team = existingTeam;
+                        }
+
+                        _bowlingContext.Bowlers.Add(bowler);
+                        _bowlingContext.SaveChanges();
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi lưu Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
+            }
+
+
+            public void CreateTeam(Team team)
+            {
+                  try
+                  {
+
+                        _bowlingContext.Teams.Add(team);
+                        _bowlingContext.SaveChanges();
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi lưu Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
+            }
+
+            public void CreateTournament(Tournament tournament)
+            {
+                  try
+                  {
+                        _bowlingContext.Tournaments.Add(tournament);
+                        _bowlingContext.SaveChanges();
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi lưu Tournament: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
+            }
+
+            public void CreateMatch(TourneyMatch match)
+            {
+                  try
+                  {
+                        _bowlingContext.TourneyMatches.Add(match);
+                        _bowlingContext.SaveChanges();
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi lưu Match: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
+            }
+
+
+
+            public void DeleteMatch(int matchId)
+            {
+                  try
+                  {
+                        var match = _bowlingContext.TourneyMatches.FirstOrDefault(m => m.MatchId == matchId);
+                        if (match != null)
+                        {
+                              _bowlingContext.TourneyMatches.Remove(match);
+                              _bowlingContext.SaveChanges();
+                        }
+                        else
+                        {
+                              throw new Exception($"Match with ID {matchId} not found");
+                        }
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi xóa Match: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
+            }
+
+      }
 }

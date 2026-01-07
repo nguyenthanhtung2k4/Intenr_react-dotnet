@@ -67,12 +67,6 @@ function Header(props: HeaderProps) {
           {/* Auth Section */}
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
-              <Link
-                to="/bowlers"
-                className="font-bold text-sm uppercase text-slate-900 hover:text-blue-600"
-              >
-                Dashboard
-              </Link>
               <button
                 onClick={logout}
                 className="btn-sports btn-outline px-6 py-2 text-xs border-2 hover:bg-slate-900 hover:text-white"

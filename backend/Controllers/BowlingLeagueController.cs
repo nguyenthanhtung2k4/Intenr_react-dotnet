@@ -321,6 +321,71 @@ namespace Backend.Controllers
             }
 
 
+            [HttpPost("matches")]
+            [Authorize(Roles = "Admin")]
+            public IActionResult CreateMatch([FromBody] MatchCreateDto matchDto)
+            {
+                  try
+                  {
+                        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                        var match = new TourneyMatch
+                        {
+                              TourneyId = matchDto.TourneyId,
+                              Lanes = matchDto.Lanes,
+                              OddLaneTeamId = matchDto.OddLaneTeamId,
+                              EvenLaneTeamId = matchDto.EvenLaneTeamId
+                        };
+
+                        _bowlingLeagueRepository.CreateMatch(match);
+                        return Ok(new { message = "Lên lịch trận đấu thành công!", matchId = match.MatchId });
+                  }
+                  catch (Exception ex)
+                  {
+                        return StatusCode(500, $"Lỗi server: {ex.Message}");
+                  }
+            }
+
+            [HttpPut("matches/{id}")]
+            [Authorize(Roles = "Admin")]
+            public IActionResult UpdateMatch(int id, [FromBody] MatchCreateDto matchDto)
+            {
+                  try
+                  {
+                        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                        var match = _bowlingLeagueRepository.TourneyMatches.FirstOrDefault(m => m.MatchId == id);
+                        if (match == null) return NotFound("Match not found");
+
+                        match.TourneyId = matchDto.TourneyId;
+                        match.Lanes = matchDto.Lanes;
+                        match.OddLaneTeamId = matchDto.OddLaneTeamId;
+                        match.EvenLaneTeamId = matchDto.EvenLaneTeamId;
+
+                        _bowlingLeagueRepository.Update(match);
+                        return Ok(new { message = "Cập nhật trận đấu thành công!", matchId = match.MatchId });
+                  }
+                  catch (Exception ex)
+                  {
+                        return StatusCode(500, $"Lỗi server: {ex.Message}");
+                  }
+            }
+
+            [HttpDelete("matches/{id}")]
+            [Authorize(Roles = "Admin")]
+            public IActionResult DeleteMatch(int id)
+            {
+                  try
+                  {
+                        _bowlingLeagueRepository.DeleteMatch(id);
+                        return Ok(new { message = "Xóa trận đấu thành công!" });
+                  }
+                  catch (Exception ex)
+                  {
+                        return StatusCode(500, $"Lỗi server: {ex.Message}");
+                  }
+            }
+
             [HttpGet("matches")]
             [AllowAnonymous]
             public IActionResult GetMatches()
@@ -334,7 +399,10 @@ namespace Backend.Controllers
                               TourneyDate = m.Tourney?.TourneyDate,
                               OddLaneTeam = m.OddLaneTeam?.TeamName,
                               EvenLaneTeam = m.EvenLaneTeam?.TeamName,
-                              Lanes = m.Lanes
+                              Lanes = m.Lanes,
+                              TourneyId = m.TourneyId,
+                              OddLaneTeamId = m.OddLaneTeamId,
+                              EvenLaneTeamId = m.EvenLaneTeamId
                         }).ToList();
 
                         return Ok(matches);
@@ -423,15 +491,16 @@ namespace Backend.Controllers
                         }
 
                         var userId = acc.Id;
-                        var token = _tokenService.GenerateJwtToken(userId); // Sử dụng Id của tài khoản
+                        var role = acc.Role;
+                        var token = _tokenService.GenerateJwtToken(userId, role); // Sử dụng Id và Role của tài khoản
 
                         return Ok(new
                         {
                               message = "Đăng nhập thành công!",
                               userid = userId,
+                              role = role,
                               token = token
                         });
-
                   }
                   catch (Exception ex)
                   {
@@ -462,7 +531,7 @@ namespace Backend.Controllers
 
             // Tạo mới account
             [HttpPost("accounts")]
-            [Authorize]
+            [AllowAnonymous]
             public IActionResult CreateAccount([FromBody] AccountsDto accountsDto)
             {
                   try
@@ -613,10 +682,12 @@ namespace Backend.Controllers
             {
                   // Lấy ID từ Claims (Payload của JWT)
                   var userIdClaim = User.FindFirst("Id");
+                  var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role);
                   return Ok(new
                   {
                         isAuthenticated = true,
-                        userId = userIdClaim?.Value
+                        userId = userIdClaim?.Value,
+                        role = roleClaim?.Value
                   });
             }
       }

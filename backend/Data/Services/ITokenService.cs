@@ -1,6 +1,7 @@
-namespace Backend.Data.Services {
-    public interface ITokenService
+namespace Backend.Data.Services
+{
+      public interface ITokenService
       {
-            string GenerateJwtToken(int userId);
+            string GenerateJwtToken(int userId, string role);
       }
 }

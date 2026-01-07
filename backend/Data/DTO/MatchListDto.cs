@@ -8,4 +8,7 @@ public class MatchListDto
       public string? OddLaneTeam { get; set; }
       public string? EvenLaneTeam { get; set; }
       public string? Lanes { get; set; }
+      public int? TourneyId { get; set; }
+      public int? OddLaneTeamId { get; set; }
+      public int? EvenLaneTeamId { get; set; }
 }

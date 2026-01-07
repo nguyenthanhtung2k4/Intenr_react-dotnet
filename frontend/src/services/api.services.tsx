@@ -215,6 +215,7 @@ export const loginAccount = async (credentials: LoginCredentials): Promise<void>
 export const checkAuthStatus = async (): Promise<{
   isAuthenticated: boolean;
   userId?: string;
+  role?: string;
 }> => {
   if (!authToken) {
     return { isAuthenticated: false };
@@ -248,6 +249,16 @@ export interface MatchData {
   oddLaneTeam: string;
   evenLaneTeam: string;
   lanes: string;
+  tourneyId?: number;
+  oddLaneTeamId?: number;
+  evenLaneTeamId?: number;
+}
+
+export interface MatchCreateData {
+  tourneyId: number;
+  lanes: string;
+  oddLaneTeamId: number;
+  evenLaneTeamId: number;
 }
 
 export interface StandingData {
@@ -256,6 +267,12 @@ export interface StandingData {
   played: number;
   won: number;
   points: number;
+}
+
+export interface TournamentData {
+  tourneyId: number;
+  tourneyLocation: string;
+  tourneyDate: string;
 }
 
 // 11. Fetch Matches
@@ -268,7 +285,47 @@ export const fetchGlobalMatches = async (): Promise<MatchData[]> => {
   }
 };
 
-// 12. Fetch Standings
+// 12. Create Match
+export const createMatch = async (matchData: MatchCreateData) => {
+  try {
+    const response = await api.post('/matches', matchData);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'createMatch');
+  }
+};
+
+// 12.1 Update Match
+export const updateMatch = async (id: number, matchData: MatchCreateData) => {
+  try {
+    const response = await api.put(`/matches/${id}`, matchData);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'updateMatch');
+  }
+};
+
+// 12.2 Delete Match
+export const deleteMatch = async (id: number) => {
+  try {
+    const response = await api.delete(`/matches/${id}`);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'deleteMatch');
+  }
+};
+
+// 13. Fetch Tournaments
+export const fetchTournaments = async (): Promise<TournamentData[]> => {
+  try {
+    const response = await api.get('/tournaments');
+    return response.data || [];
+  } catch (error) {
+    throw handleApiError(error, 'fetchTournaments');
+  }
+};
+
+// 14. Fetch Standings
 export const fetchLeagueStandings = async (): Promise<StandingData[]> => {
   try {
     const response = await api.get('/standings');
