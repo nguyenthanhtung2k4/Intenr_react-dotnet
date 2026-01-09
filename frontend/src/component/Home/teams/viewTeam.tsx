@@ -1,157 +1,138 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchTeams } from '../../../services/api.services';
-import { Team } from '../../../types/Team';
+import { fetchTeams, createTeam, deleteTeam, Team } from '../../../services/api.services';
 import { useAuth } from '../../../context/AuthContext';
+import { useToast } from '../../../context/ToastContext';
 
-function getTeamId(t: any): number | null {
-  const raw = t?.TeamId ?? t?.teamId ?? t?.id;
-  if (raw === undefined || raw === null) return null;
-  const n = Number(raw);
-  return Number.isFinite(n) ? n : null;
-}
-
-function ViewTeams() {
+const ViewTeams = () => {
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { role } = useAuth();
+  const isAdmin = role === 'Admin';
+  const toast = useToast();
   const navigate = useNavigate();
-  const [dataTeams, setDataTeams] = useState<Team[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated } = useAuth();
+
+  // Create Form State
+  const [showCreate, setShowCreate] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+
+  const loadTeams = async () => {
+    try {
+      const data = await fetchTeams();
+      setTeams(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadTeams = async () => {
-      try {
-        setError(null);
-        setIsLoading(true);
-        const teams = await fetchTeams();
-        setDataTeams(teams || []);
-      } catch (ex: any) {
-        setError(ex.message || 'Lỗi tải dữ liệu.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadTeams();
   }, []);
 
-  const handleAction = (team: any, path: string) => {
-    const id = getTeamId(team);
-    if (id) navigate(`/${path}/${id}`);
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTeamName.trim()) return;
+    try {
+      await createTeam({ TeamName: newTeamName, CaptainId: null });
+      toast.showToast('Team created successfully', 'success');
+      setNewTeamName('');
+      setShowCreate(false);
+      loadTeams();
+    } catch (error) {
+      toast.showToast('Failed to create team', 'error');
+    }
   };
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Delete this team?')) return;
+    try {
+      await deleteTeam(id);
+      toast.showToast('Team deleted', 'success');
+      loadTeams();
+    } catch (error) {
+      toast.showToast('Failed to delete team', 'error');
+    }
+  };
+
+  if (loading) return <div className="p-20 text-center">Loading Teams...</div>;
+
   return (
-    // Nền trắng sáng, padding top lớn để tránh đè Header
-    <div className="min-h-screen  pt-32 pb-12 px-6 font-sans text-slate-900">
-      <div className="max-w-6xl mx-auto">
-        {/* Header Section với Gradient giống trang chính */}
-
-        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="relative">
-            <h1 className="text-6xl font-black italic tracking-tighter leading-none uppercase">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 p-5">
-                League
-              </span>
-              <br />
-              <span className="text-slate-900">Teams</span>
-            </h1>
-            <div className="h-2 w-32 bg-gradient-to-r from-pink-500 to-purple-500 mt-4 rounded-full"></div>
+    <div className="min-h-screen pt-24 pb-12 bg-slate-50">
+      <div className="container-custom">
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Teams</h1>
+            <p className="text-slate-500 mt-1">League participating squads</p>
           </div>
-
-          <div className="flex gap-4">
-            <button
-              onClick={() => navigate('/create-team')}
-              className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold px-8 py-3.5 rounded-full shadow-lg shadow-purple-500/30 transition-all hover:-translate-y-1 active:scale-95 text-sm uppercase tracking-wider"
-            >
-              + Create Team
+          {isAdmin && (
+            <button onClick={() => setShowCreate(!showCreate)} className="btn btn-primary">
+              {showCreate ? 'Cancel' : '+ New Team'}
             </button>
-            <button
-              onClick={() => navigate('/')}
-              className="bg-white border-2 border-slate-200 text-slate-700 font-bold px-8 py-3.5 rounded-full hover:bg-slate-50 transition-all text-sm uppercase tracking-wider"
-            >
-              Back Home
-            </button>
-          </div>
+          )}
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-100 border-t-purple-600"></div>
-          </div>
-        ) : (
-          /* Bảng thiết kế lại theo phong cách hiện đại */
-          <div className="overflow-hidden bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
-            <table className="min-w-full">
-              <thead>
-                {/* Header bảng dùng màu tối pha gradient nhẹ */}
-                <tr className="bg-[#1a1c2e]">
-                  <th className="px-8 py-6 text-left text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
-                    Team Name
-                  </th>
-                  <th className="px-8 py-6 text-center text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
-                    Roster
-                  </th>
-                  {isAuthenticated && (
-                    <th className="px-8 py-6 text-right text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
-                      Management
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {dataTeams.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="px-8 py-20 text-center text-slate-400 italic">
-                      No teams registered yet.
-                    </td>
-                  </tr>
-                ) : (
-                  dataTeams.map((team) => (
-                    <tr key={team.TeamId} className="hover:bg-slate-50/80 transition-all group">
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-5">
-                          {/* Icon Team với Gradient */}
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md transform group-hover:rotate-6 transition-transform">
-                            {team.teamName.charAt(0)}
-                          </div>
-                          <span className="text-xl font-bold text-slate-800 tracking-tight group-hover:text-blue-600 transition-colors">
-                            {team.teamName}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6 text-center">
-                        <button
-                          onClick={() => handleAction(team, 'team')}
-                          className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-black text-sm uppercase tracking-widest border-b-2 border-purple-200 hover:border-purple-600 transition-all"
-                        >
-                          View Roster
-                        </button>
-                      </td>
-                      {isAuthenticated && (
-                        <td className="px-8 py-6 text-right space-x-6">
-                          <button
-                            onClick={() => handleAction(team, 'edit-team')}
-                            className="font-bold text-sm text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-widest"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleAction(team, 'delete-team')}
-                            className="font-bold text-sm text-slate-400 hover:text-pink-600 transition-colors uppercase tracking-widest"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        {showCreate && (
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8 animate-fade-in-up max-w-lg">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Create New Team</h3>
+            <form onSubmit={handleCreate} className="flex gap-4">
+              <input
+                type="text"
+                placeholder="Enter team name"
+                className="input-field flex-1"
+                value={newTeamName}
+                onChange={(e) => setNewTeamName(e.target.value)}
+              />
+              <button type="submit" className="btn btn-primary">
+                Save
+              </button>
+            </form>
           </div>
         )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {teams.map((team) => (
+            <div
+              key={team.TeamId}
+              className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all group relative"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl">
+                  {team.teamName.charAt(0)}
+                </div>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDelete(team.TeamId)}
+                    className="text-slate-300 hover:text-red-500"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-700 transition-colors mb-2">
+                {team.teamName}
+              </h3>
+              <div className="text-sm text-slate-500 font-medium flex items-center gap-2">
+                <span>Captain:</span>
+                <span className="text-slate-800">
+                  {/* Ideally fetch captain name */}
+                  {team.captainId ? `#${team.captainId}` : 'None'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default ViewTeams;

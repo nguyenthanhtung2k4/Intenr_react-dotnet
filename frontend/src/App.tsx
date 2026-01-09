@@ -1,92 +1,69 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import Header from './Header';
+import Footer from './Footer';
 import TourMatch from './component/Home/matchs/TourMatchs';
-import BowlersTable from './component/Home/bowler/BowlersTable';
-import ViewTeams from './component/Home/teams/viewTeam';
-import BowlerForm from './component/Home/bowler/BowlerForm';
-import CreateTeams from './component/Home/bowler/createTeams';
-import Delete from './component/Home/bowler/Delete';
 import Login from './component/account/Login';
 import Register from './component/account/register';
-import ViewAccounts from './component/account/accounts';
-import AccountDetails from './component/account/AccountDetail';
-import { useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Accounts from './component/account/accounts';
+import CreateTeams from './component/Home/bowler/createTeams';
+import Delete from './component/Home/bowler/Delete';
+import ViewTeams from './component/Home/teams/viewTeam';
+import TeamDetail from './component/Home/teams/team';
+import BowlersTable from './component/Home/bowler/BowlersTable';
+import BowlerForm from './component/Home/bowler/BowlerForm';
+import Logout from './component/account/Logout';
+import AccountDetail from './component/account/AccountDetail';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { ToastProvider, useToast } from './context/ToastContext';
+
+import TournamentList from './component/League/TournamentList';
 import MatchList from './component/League/MatchList';
+import TournamentDetail from './component/League/TournamentDetail';
 import StandingsTable from './component/League/StandingsTable';
-import Footer from './Footer';
-import Team from './component/Home/teams/team';
 
 function App() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="App min-h-screen" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
-      {/* <Header title="Bowling League" description="Official Tournament" /> */}
-      <Header title="Bowling League" description="Official Tournament" />
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+      <Header title="LeaguePals" description="Professional Bowling Management" />
       <Routes>
         {/* Public League Routes */}
         <Route path="/" element={<TourMatch />} />
+        <Route path="/tournaments" element={<TournamentList />} />
+        <Route path="/tournaments/:id" element={<TournamentDetail />} />
         <Route path="/fixtures" element={<MatchList />} />
         <Route path="/standings" element={<StandingsTable />} />
-        <Route path="/stats" element={<BowlersTable isAuth={isAuthenticated} />} />
-        <Route path="/teams" element={<ViewTeams />} />
-        <Route path="/team/:id" element={<Team />} />
 
-        {/* Auth Routes */}
+        {/* Existing Routes */}
         <Route path="/login" element={<Login />} />
-        <Route path="/create-account" element={<Register />} />
-
-        {/* Protected Admin Routes */}
-        <Route
-          path="/bowlers"
-          element={isAuthenticated ? <BowlersTable isAuth={true} /> : <Navigate to="/login" />}
-        />
+        <Route path="/register" element={<Register />} />
+        <Route path="/view-accounts" element={<Accounts />} />
+        <Route path="/create-team" element={<CreateTeams />} />
+        <Route path="/delete/:id" element={<Delete />} />
+        <Route path="/teams" element={<ViewTeams />} />
         <Route path="/view-teams" element={<ViewTeams />} />
-        <Route
-          path="/bowler/new"
-          element={isAuthenticated ? <BowlerForm /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/bowler/:id"
-          element={isAuthenticated ? <BowlerForm /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/create-team"
-          element={isAuthenticated ? <CreateTeams /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/edit-team/:id"
-          element={isAuthenticated ? <CreateTeams /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/delete/:id"
-          element={isAuthenticated ? <Delete /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/delete-team/:id"
-          element={isAuthenticated ? <Delete /> : <Navigate to="/login" />}
-        />
-
-        <Route
-          path="/view-accounts"
-          element={isAuthenticated ? <ViewAccounts /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/accounts/details/:id"
-          element={isAuthenticated ? <AccountDetails /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/account/edit/:id"
-          element={isAuthenticated ? <Register /> : <Navigate to="/login" />}
-        />
-
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/team/:id" element={<TeamDetail />} />
+        <Route path="/stats" element={<BowlersTable />} />
+        <Route path="/bowlers" element={<BowlersTable />} />
+        <Route path="/bowler/new" element={<BowlerForm />} />
+        <Route path="/bowler/:id" element={<BowlerForm />} />
+        <Route path="/logout" element={<Logout />} />
+        <Route path="/account/:username" element={<AccountDetail />} />
       </Routes>
       <Footer />
     </div>
   );
 }
 
-export default App;
+export default function AppWrapper() {
+  return (
+    <AuthProvider>
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    </AuthProvider>
+  );
+}

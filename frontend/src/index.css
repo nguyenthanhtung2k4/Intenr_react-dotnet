@@ -2,168 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================
-   SPORTS LEAGUE DESIGN SYSTEM (La Liga Inspired)
-   ============================================ */
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-800 font-sans antialiased;
+  }
 
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;700;900&display=swap');
-
-:root {
-  /* Brand Colors */
-  --color-brand-black: #0f172a;
-  /* Deep Navy/Black */
-  --color-brand-red: #ff2882;
-  /* Vibrant Sports Red/Pink */
-  --color-brand-blue: #3b82f6;
-  /* Bright Blue */
-  --color-brand-gradient: linear-gradient(135deg, #ff2882 0%, #7c3aed 100%);
-
-  /* Text Colors */
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-inverse: #ffffff;
-
-  /* Backgrounds */
-  --color-bg-primary: #f5f5f5;
-  --color-bg-secondary: #c4cad0;
-  --color-bg-tertiary: #f1f5f9;
-  --color-bg-dark: #0f172a;
-
-  /* UI Elements */
-  --color-border: #e2e8f0;
-  --color-divider: #cbd5e1;
-
-  /* Typography */
-  --font-display: 'Inter', sans-serif;
-  /* For headings */
-  --font-body: 'Inter', sans-serif;
-
-  /* Spacing */
-  --spacing-container: 1280px;
-
-  /* Shadows */
-  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-card-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-glow: 0 0 20px rgba(255, 40, 130, 0.3);
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold text-slate-900;
+  }
 }
 
-/* ============================================
-   BASE STYLES
-   ============================================ */
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
 
-body {
-  font-family: var(--font-body);
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-primary);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200;
+  }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-display);
-  font-weight: 900;
-  /* Extra bold for sports feel */
-  letter-spacing: -0.025em;
-  color: var(--color-brand-black);
-  text-transform: uppercase;
-}
+  .btn-primary {
+    @apply bg-blue-700 text-white hover:bg-blue-800 focus:ring-blue-500;
+  }
 
-/* ============================================
-   COMPONENTS
-   ============================================ */
+  .btn-accent {
+    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
 
-.container-custom {
-  max-width: var(--spacing-container);
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
+  .btn-white {
+    @apply bg-white text-slate-700 hover:bg-slate-50 border-slate-300 focus:ring-slate-500;
+  }
 
-/* Buttons */
-.btn-sports {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 2rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-radius: 9999px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden;
+  }
 
-.btn-primary {
-  background: var(--color-brand-black);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--color-brand-red);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
-}
-
-.btn-gradient {
-  background: var(--color-brand-gradient);
-  color: white;
-  border: none;
-}
-
-.btn-gradient:hover {
-  filter: brightness(1.1);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
-}
-
-.btn-outline {
-  background: transparent;
-  border: 2px solid var(--color-brand-black);
-  color: var(--color-brand-black);
-}
-
-.btn-outline:hover {
-  background: var(--color-brand-black);
-  color: white;
-}
-
-/* Cards */
-.card {
-  background: white;
-  border-radius: 1rem;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  border: 1px solid var(--color-bg-secondary);
-}
-
-.card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-card-hover);
-}
-
-/* Headings */
-.section-title {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  background: var(--color-brand-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
-}
-
-/* Utilities */
-.text-gradient {
-  background: var(--color-brand-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.bg-pattern {
-  background-image: radial-gradient(var(--color-bg-tertiary) 1px, transparent 1px);
-  background-size: 24px 24px;
+  .input-field {
+    @apply block w-full rounded-lg border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2.5;
+  }
 }

@@ -4,6 +4,8 @@ import { Bowler } from '../types/Bowler';
 import { Team } from '../types/Team';
 import { Acc } from '../types/Accounts';
 
+export type { Bowler, Team, Acc };
+
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -42,9 +44,7 @@ const handleApiError = (error: any, functionName: string): never => {
   let errorMessage = `Lỗi khi giao tiếp với API (${functionName}).`;
   if (axios.isAxiosError(error)) {
     if (error.response) {
-      errorMessage += ` Status: ${error.response.status}. Chi tiết: ${
-        error.response.data.message || JSON.stringify(error.response.data)
-      }`;
+      errorMessage += ` Status: ${error.response.status}. Chi tiết: ${error.response.data.message || JSON.stringify(error.response.data)}`;
       if (error.response.status === 401) {
         setAuthToken(null);
       }
@@ -94,7 +94,7 @@ export const saveBowler = async (bowlerData: any, id?: string | number) => {
 };
 
 // 4. Xóa mềm (Soft Delete) Bowler
-export const softDeleteBowler = async (id: string) => {
+export const softDeleteBowler = async (id: string | number) => {
   try {
     const payload = { isDeleted: true };
     const response = await api.patch(`/${id}`, payload);
@@ -103,6 +103,8 @@ export const softDeleteBowler = async (id: string) => {
     throw handleApiError(error, 'softDeleteBowler');
   }
 };
+
+export const deleteBowler = softDeleteBowler;
 
 // --- TEAM API FUNCTIONS ---
 
@@ -133,6 +135,16 @@ export const createTeam = async (teamData: { TeamName: string; CaptainId: number
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'createTeam');
+  }
+};
+
+// 7.x Delete Team
+export const deleteTeam = async (id: number) => {
+  try {
+    const response = await api.delete(`/teams/${id}`);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'deleteTeam');
   }
 };
 
@@ -322,6 +334,48 @@ export const fetchTournaments = async (): Promise<TournamentData[]> => {
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchTournaments');
+  }
+};
+
+// 13.1 Create Tournament
+export const createTournament = async (tournamentData: {
+  tourneyLocation: string;
+  tourneyDate: string;
+}) => {
+  try {
+    const response = await api.post('/tournaments', tournamentData);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'createTournament');
+  }
+};
+
+// 13.2 Update Tournament
+export const updateTournament = async (
+  id: number,
+  tournamentData: { tourneyLocation: string; tourneyDate: string },
+) => {
+  try {
+    const response = await api.put(`/tournaments/${id}`, {
+      tourneyId: id,
+      ...tournamentData,
+    });
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'updateTournament');
+  }
+};
+
+// 13.3 Delete Tournament (Soft Delete)
+export const deleteTournament = async (id: number) => {
+  try {
+    const response = await api.put(`/tournaments/${id}`, {
+      tourneyId: id,
+      isDelete: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'deleteTournament');
   }
 };
 
