@@ -43,8 +43,8 @@ const TourMatch = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-white">
         <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-30"></div>
-        <div className="container-custom relative z-10 py-20 lg:py-32">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="container-custom relative z-10 py-20 lg:py-32 bg-blue-50">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center ">
             {/* Left Content */}
             <div className="animate-fade-in-up">
               <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border border-blue-100">
@@ -183,7 +183,7 @@ const TourMatch = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {topBowlers.map((bowler, index) => (
               <div
-                key={bowler.bowlerId}
+                key={bowler.BowlerId}
                 className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 group"
               >
                 <div className="flex items-start justify-between mb-4">

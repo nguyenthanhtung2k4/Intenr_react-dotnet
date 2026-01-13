@@ -28,7 +28,7 @@ const StandingsTable = () => {
   const sortedTeams = [...teams];
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-slate-50">
+    <div className="mt-28 min-h-screen pt-24 pb-12 bg-slate-50">
       <div className="container-custom">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tight mb-2">

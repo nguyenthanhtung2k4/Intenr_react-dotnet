@@ -46,6 +46,7 @@ function App() {
         <Route path="/teams" element={<ViewTeams />} />
         <Route path="/view-teams" element={<ViewTeams />} />
         <Route path="/team/:id" element={<TeamDetail />} />
+        <Route path="/teams/:id" element={<TeamDetail />} />
         <Route path="/stats" element={<BowlersTable />} />
         <Route path="/bowlers" element={<BowlersTable />} />
         <Route path="/bowler/new" element={<BowlerForm />} />

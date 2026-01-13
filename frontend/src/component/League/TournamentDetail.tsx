@@ -106,7 +106,7 @@ const TournamentDetail = () => {
   if (!tournament) return null;
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-slate-50">
+    <div className="mt-28 min-h-screen pt-24 pb-12 bg-slate-50">
       <div className="container-custom">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-slate-500 mb-6 font-medium">

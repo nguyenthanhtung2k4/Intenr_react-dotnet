@@ -103,7 +103,7 @@ const TournamentList = () => {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-slate-50">
+    <div className="mt-28 min-h-screen pt-24 pb-12 bg-slate-50">
       <div className="container-custom">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">

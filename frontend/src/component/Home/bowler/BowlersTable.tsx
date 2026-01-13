@@ -39,7 +39,7 @@ function BowlersTable() {
     if (!window.confirm('Are you sure?')) return;
     try {
       await deleteBowler(id);
-      setBowlers(bowlers.filter((b) => b.bowlerId !== id));
+      setBowlers(bowlers.filter((b) => b.BowlerId !== id));
       toast.showToast('Bowler deleted', 'success');
     } catch (error) {
       toast.showToast('Failed to delete', 'error');
@@ -47,7 +47,7 @@ function BowlersTable() {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-slate-50">
+    <div className="mt-28 min-h-screen pt-24 pb-12 bg-slate-50">
       <div className="container-custom">
         <div className="flex flex-col md:flex-row items-end justify-between gap-6 mb-8">
           <div>
@@ -126,7 +126,7 @@ function BowlersTable() {
                   </tr>
                 ) : (
                   filteredBowlers.map((bowler) => (
-                    <tr key={bowler.bowlerId} className="hover:bg-slate-50 transition-colors">
+                    <tr key={bowler.BowlerId} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
@@ -137,7 +137,7 @@ function BowlersTable() {
                             <div className="font-bold text-slate-900">
                               {bowler.bowlerFirstName} {bowler.bowlerLastName}
                             </div>
-                            <div className="text-xs text-slate-400">ID: {bowler.bowlerId}</div>
+                            <div className="text-xs text-slate-400">ID: {bowler.BowlerId}</div>
                           </div>
                         </div>
                       </td>
@@ -156,13 +156,13 @@ function BowlersTable() {
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => navigate(`/bowler/${bowler.bowlerId}`)}
+                              onClick={() => navigate(`/bowler/${bowler.BowlerId}`)}
                               className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
                             >
                               Edit
                             </button>
                             <button
-                              onClick={() => handleDelete(bowler.bowlerId)}
+                              onClick={() => handleDelete(bowler.BowlerId)}
                               className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
                             >
                               Delete

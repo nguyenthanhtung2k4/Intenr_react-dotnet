@@ -49,7 +49,7 @@ const MatchList = () => {
   if (loading) return <div className="p-20 text-center">Loading Fixtures...</div>;
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-slate-50">
+    <div className="mt-28 min-h-screen pt-24 pb-12 bg-slate-50">
       <div className="container-custom">
         <div className="flex flex-col md:flex-row items-end justify-between gap-6 mb-10">
           <div>

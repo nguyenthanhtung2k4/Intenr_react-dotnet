@@ -58,11 +58,17 @@ const handleApiError = (error: any, functionName: string): never => {
   throw new Error(errorMessage);
 };
 
+const normalizeBowler = (b: any): Bowler => ({
+  ...b,
+  BowlerId: b?.BowlerId ?? b?.bowlerId ?? b?.id,
+});
+
 // 1. Lấy danh sách Bowlers
 export const fetchAllBowlers = async (): Promise<Bowler[]> => {
   try {
     const response = await api.get('/');
-    return response.data || [];
+    const data = response.data || [];
+    return data.map(normalizeBowler);
   } catch (error) {
     throw handleApiError(error, 'fetchAllBowlers');
   }
@@ -72,7 +78,7 @@ export const fetchAllBowlers = async (): Promise<Bowler[]> => {
 export const fetchBowlerDetails = async (id: string): Promise<Bowler> => {
   try {
     const response = await api.get(`/${id}`);
-    return response.data;
+    return normalizeBowler(response.data);
   } catch (error) {
     throw handleApiError(error, 'fetchBowlerDetails');
   }
@@ -83,10 +89,10 @@ export const saveBowler = async (bowlerData: any, id?: string | number) => {
   try {
     if (id && id !== 'new') {
       const response = await api.patch(`/${id}`, bowlerData);
-      return response.data;
+      return normalizeBowler(response.data);
     } else {
       const response = await api.post('/', bowlerData);
-      return response.data;
+      return normalizeBowler(response.data);
     }
   } catch (error) {
     throw handleApiError(error, 'saveBowler');
@@ -96,6 +102,11 @@ export const saveBowler = async (bowlerData: any, id?: string | number) => {
 // 4. Xóa mềm (Soft Delete) Bowler
 export const softDeleteBowler = async (id: string | number) => {
   try {
+    // Validate ID
+    if (!id || id === 0 || id === '0') {
+      throw new Error('ID không hợp lệ để xóa');
+    }
+
     const payload = { isDeleted: true };
     const response = await api.patch(`/${id}`, payload);
     return response.data;
@@ -108,26 +119,33 @@ export const deleteBowler = softDeleteBowler;
 
 // --- TEAM API FUNCTIONS ---
 
+const normalizeTeam = (team: any): Team => ({
+  TeamId: team?.TeamId ?? team?.teamId ?? team?.id,
+  teamName: team?.teamName ?? team?.TeamName ?? team?.name ?? '',
+  captainId: team?.captainId ?? team?.CaptainId ?? null,
+});
+
 // 5. Lấy danh sách Teams
 export const fetchTeams = async (): Promise<Team[]> => {
   try {
     const response = await api.get(`/teams`);
-    return response.data || [];
+    const teams = response.data || [];
+    console.log('Teams:', teams);
+    return teams.map(normalizeTeam);
   } catch (error) {
     throw handleApiError(error, 'fetchTeams');
   }
 };
-
-// 6. Lấy danh sách Bowlers theo Team ID
+// 6. Lấy danh sách Bowlers theo Team
 export const fetchTeamBowlers = async (teamId: string): Promise<Bowler[]> => {
   try {
     const response = await api.get(`/teams/${teamId}/bowlers`);
-    return response.data || [];
+    const data = response.data || [];
+    return data.map(normalizeBowler);
   } catch (error) {
     throw handleApiError(error, 'fetchTeamBowlers');
   }
 };
-
 // 7. Tạo mới Team
 export const createTeam = async (teamData: { TeamName: string; CaptainId: number | null }) => {
   try {
@@ -141,10 +159,30 @@ export const createTeam = async (teamData: { TeamName: string; CaptainId: number
 // 7.x Delete Team
 export const deleteTeam = async (id: number) => {
   try {
-    const response = await api.delete(`/teams/${id}`);
+    const payload = { isDelete: true };
+    const response = await api.patch(`/teams/${id}`, payload);
+    console.log('Team deleted:', response.data);
     return response.data;
   } catch (error) {
-    throw handleApiError(error, 'deleteTeam');
+    throw handleApiError(error, 'softDeleteTeam');
+  }
+};
+
+// 7.y Update Team
+export const updateTeam = async (
+  id: number,
+  teamData: { teamName?: string; captainId?: number | null },
+) => {
+  try {
+    const payload: any = {};
+    if (teamData.teamName !== undefined) payload.teamName = teamData.teamName;
+    if (teamData.captainId !== undefined) payload.captainId = teamData.captainId;
+
+    const response = await api.patch(`/teams/${id}`, payload);
+    console.log('Team updated:', response.data);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'updateTeam');
   }
 };
 

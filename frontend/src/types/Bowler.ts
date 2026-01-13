@@ -1,5 +1,5 @@
 export type Bowler = {
-  bowlerId: number;
+  BowlerId: number;
   isDelete: boolean;
   bowlerLastName: string;
   bowlerFirstName: string;
