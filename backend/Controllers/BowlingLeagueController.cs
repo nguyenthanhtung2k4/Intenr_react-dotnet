@@ -149,7 +149,7 @@ namespace Backend.Controllers
                         {
                               return NotFound("Không tìm thấy danh sách đội.");
                         }
-                        var DES = teams.OrderByDescending(t => t.TeamId).ToList();
+                        var DES = teams.OrderByDescending(t => t.TeamId).Where(t => t.IsDelete == false).ToList();
                         return Ok(DES);
                   }
                   catch (System.Exception ex)
@@ -168,12 +168,19 @@ namespace Backend.Controllers
                         return BadRequest(ModelState);
                   }
 
+                  // Validate TeamName is required for creating a new team
+                  if (string.IsNullOrEmpty(newTeamDto.TeamName))
+                  {
+                        return BadRequest(new { message = "TeamName is required." });
+                  }
+
                   try
                   {
                         var team = new Team
                         {
                               TeamName = newTeamDto.TeamName,
-                              CaptainId = newTeamDto.CaptainId
+                              CaptainId = newTeamDto.CaptainId,
+                              IsDelete = false
                         };
 
                         _bowlingLeagueRepository.CreateTeam(team);
@@ -189,6 +196,51 @@ namespace Backend.Controllers
                         return StatusCode(500, $"Lỗi server khi tạo đội: {e.Message}");
                   }
             }
+
+            [HttpPatch("teams/{teamId}")]
+            [Authorize]
+
+            public IActionResult UpdateTeam(int teamId, [FromBody] TeamPostDto teamDto)
+            {
+                  if (!ModelState.IsValid)
+                  {
+                        return BadRequest(ModelState);
+                  }
+
+                  try
+                  {
+                        var team = _bowlingLeagueRepository.Teams.FirstOrDefault(t => t.TeamId == teamId);
+
+                        if (team == null)
+                        {
+                              return NotFound("Không tìm thấy đội để cập nhật.");
+                        }
+
+                        // Chỉ cập nhật các trường được gửi lên (không null)
+                        if (!string.IsNullOrEmpty(teamDto.TeamName))
+                        {
+                              team.TeamName = teamDto.TeamName;
+                        }
+
+                        if (teamDto.CaptainId.HasValue)
+                        {
+                              team.CaptainId = teamDto.CaptainId;
+                        }
+
+                        // IsDelete luôn được cập nhật vì nó là bool (không nullable trong DTO)
+                        team.IsDelete = teamDto.IsDelete;
+
+                        _bowlingLeagueRepository.Update(team);
+
+                        return Ok(team);
+                  }
+                  catch (Exception e)
+                  {
+                        return StatusCode(500, $"Lỗi server khi cập nhật đội: {e.Message}");
+                  }
+            }
+
+
 
             [HttpGet("teams/{teamId}/bowlers")]
             [AllowAnonymous]

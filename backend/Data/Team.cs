@@ -14,5 +14,6 @@ public partial class Team
     public string? TeamName { get; set; } = null!;
 
     public int? CaptainId { get; set; }
+    public bool IsDelete { get; set; } = false;
 
 }
