@@ -1,22 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchAllBowlers, fetchGlobalMatches, MatchData } from '../../../services/api.services';
+import {
+  fetchAllBowlers,
+  fetchGlobalMatches,
+  fetchTeams,
+  MatchData,
+  Team,
+} from '../../../services/api.services';
 import { Bowler } from '../../../types/Bowler';
 
 const TourMatch = () => {
   const [topBowlers, setTopBowlers] = useState<Bowler[]>([]);
   const [recentMatches, setRecentMatches] = useState<MatchData[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [allBowlers, allMatches] = await Promise.all([
+        const [allBowlers, allMatches, allTeams] = await Promise.all([
           fetchAllBowlers(),
           fetchGlobalMatches(),
+          fetchTeams(),
         ]);
         setTopBowlers(allBowlers.slice(0, 8));
         setRecentMatches(allMatches.slice(0, 4));
+        setTeams(allTeams.slice(0, 10));
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -26,6 +35,8 @@ const TourMatch = () => {
 
     fetchData();
   }, []);
+
+  console.log('TOP: ', topBowlers);
 
   if (loading) {
     return (
@@ -141,13 +152,13 @@ const TourMatch = () => {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-black text-slate-900">{recentMatches.length}</div>
+              <div className="text-3xl font-black text-slate-900">{recentMatches.length}+</div>
               <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
                 Matches Played
               </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-black text-slate-900">12</div>
+              <div className="text-3xl font-black text-slate-900">{teams.length}+</div>
               <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
                 Teams
               </div>

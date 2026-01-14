@@ -302,6 +302,11 @@ export interface MatchData {
   tourneyId?: number;
   oddLaneTeamId?: number;
   evenLaneTeamId?: number;
+  hasResult?: boolean;
+  winningTeamId?: number;
+  winningTeamName?: string;
+  oddLaneWins?: number;
+  evenLaneWins?: number;
 }
 
 export interface MatchCreateData {

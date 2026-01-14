@@ -15,6 +15,10 @@ const MatchList = () => {
   // Filter State
   const [selectedTournament, setSelectedTournament] = useState<string>('all');
 
+  // Modal state for viewing match result
+  const [selectedMatch, setSelectedMatch] = useState<MatchData | null>(null);
+  const [showResultModal, setShowResultModal] = useState(false);
+
   useEffect(() => {
     Promise.all([fetchGlobalMatches(), fetchTournaments()])
       .then(([matchesData, tournamentsData]) => {
@@ -45,6 +49,11 @@ const MatchList = () => {
       groupedMatches[tId].push(match);
     }
   });
+
+  const handleViewResult = (match: MatchData) => {
+    setSelectedMatch(match);
+    setShowResultModal(true);
+  };
 
   if (loading) return <div className="p-20 text-center">Loading Fixtures...</div>;
 
@@ -107,45 +116,186 @@ const MatchList = () => {
 
                 {/* Matches List */}
                 <div className="divide-y divide-slate-100">
-                  {tourneyMatches.map((match) => (
-                    <div
-                      key={match.matchId}
-                      className="p-6 hover:bg-blue-50/30 transition-colors flex flex-col md:flex-row items-center justify-between gap-4"
-                    >
-                      <div className="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
-                        <div className="flex flex-col items-center justify-center w-12 h-12 bg-white border border-slate-200 rounded text-center shadow-sm">
-                          <div className="text-[10px] text-slate-400 font-bold uppercase">Lane</div>
-                          <div className="text-lg font-black text-blue-600 leading-none">
-                            {match.lanes}
+                  {tourneyMatches.map((match) => {
+                    const hasResult = match.hasResult || false;
+                    const isPastDate = new Date(match.tourneyDate) < new Date();
+
+                    return (
+                      <div
+                        key={match.matchId}
+                        className={`p-6 transition-colors flex flex-col md:flex-row items-center justify-between gap-4 ${
+                          hasResult ? 'hover:bg-green-50/30 cursor-pointer' : 'hover:bg-blue-50/30'
+                        }`}
+                        onClick={() => hasResult && handleViewResult(match)}
+                      >
+                        <div className="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
+                          <div className="flex flex-col items-center justify-center w-12 h-12 bg-white border border-slate-200 rounded text-center shadow-sm">
+                            <div className="text-[10px] text-slate-400 font-bold uppercase">
+                              Lane
+                            </div>
+                            <div className="text-lg font-black text-blue-600 leading-none">
+                              {match.lanes}
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex-1 flex items-center justify-between w-full md:px-8">
-                        <div className="text-lg font-bold text-slate-900 w-5/12 text-right">
-                          {match.oddLaneTeam}
+                        <div className="flex-1 flex items-center justify-between w-full md:px-8">
+                          <div
+                            className={`text-lg font-bold w-5/12 text-right ${
+                              hasResult && match.winningTeamId === match.oddLaneTeamId
+                                ? 'text-green-600'
+                                : 'text-slate-900'
+                            }`}
+                          >
+                            {match.oddLaneTeam}
+                            {hasResult && (
+                              <span className="ml-2 text-sm">({match.oddLaneWins || 0})</span>
+                            )}
+                          </div>
+                          <div className="w-2/12 text-center text-xs font-bold text-slate-300 uppercase">
+                            VS
+                          </div>
+                          <div
+                            className={`text-lg font-bold w-5/12 text-left ${
+                              hasResult && match.winningTeamId === match.evenLaneTeamId
+                                ? 'text-green-600'
+                                : 'text-slate-900'
+                            }`}
+                          >
+                            {match.evenLaneTeam}
+                            {hasResult && (
+                              <span className="ml-2 text-sm">({match.evenLaneWins || 0})</span>
+                            )}
+                          </div>
                         </div>
-                        <div className="w-2/12 text-center text-xs font-bold text-slate-300 uppercase">
-                          VS
-                        </div>
-                        <div className="text-lg font-bold text-slate-900 w-5/12 text-left">
-                          {match.evenLaneTeam}
-                        </div>
-                      </div>
 
-                      <div className="w-full md:w-auto text-right">
-                        <span className="inline-block px-3 py-1 bg-slate-100 text-slate-500 text-xs font-bold rounded-full uppercase">
-                          Scheduled
-                        </span>
+                        <div className="w-full md:w-auto text-right">
+                          {hasResult ? (
+                            <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase">
+                              ✓ Completed
+                            </span>
+                          ) : isPastDate ? (
+                            <span className="inline-block px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full uppercase">
+                              Pending Result
+                            </span>
+                          ) : (
+                            <span className="inline-block px-3 py-1 bg-slate-100 text-slate-500 text-xs font-bold rounded-full uppercase">
+                              Scheduled
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Result Modal */}
+      {showResultModal && selectedMatch && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setShowResultModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl p-8 max-w-lg w-full mx-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-start mb-6">
+              <h3 className="text-2xl font-bold text-slate-900">Match Result</h3>
+              <button
+                onClick={() => setShowResultModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Tournament Info */}
+              <div className="text-center pb-4 border-b border-slate-200">
+                <div className="text-sm text-slate-500 font-bold uppercase">
+                  {selectedMatch.tourneyLocation}
+                </div>
+                <div className="text-xs text-slate-400 mt-1">
+                  {new Date(selectedMatch.tourneyDate).toLocaleDateString()}
+                </div>
+              </div>
+
+              {/* Match Result */}
+              <div className="bg-slate-50 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-center flex-1">
+                    <div
+                      className={`text-2xl font-black mb-2 ${
+                        selectedMatch.winningTeamId === selectedMatch.oddLaneTeamId
+                          ? 'text-green-600'
+                          : 'text-slate-700'
+                      }`}
+                    >
+                      {selectedMatch.oddLaneTeam}
+                    </div>
+                    <div className="text-4xl font-black text-blue-600">
+                      {selectedMatch.oddLaneWins || 0}
+                    </div>
+                  </div>
+
+                  <div className="text-slate-300 font-bold text-xl px-4">VS</div>
+
+                  <div className="text-center flex-1">
+                    <div
+                      className={`text-2xl font-black mb-2 ${
+                        selectedMatch.winningTeamId === selectedMatch.evenLaneTeamId
+                          ? 'text-green-600'
+                          : 'text-slate-700'
+                      }`}
+                    >
+                      {selectedMatch.evenLaneTeam}
+                    </div>
+                    <div className="text-4xl font-black text-blue-600">
+                      {selectedMatch.evenLaneWins || 0}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Winner Badge */}
+                {selectedMatch.winningTeamName && (
+                  <div className="text-center mt-6 pt-4 border-t border-slate-200">
+                    <div className="inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full font-bold">
+                      🏆 Winner: {selectedMatch.winningTeamName}
+                    </div>
+                  </div>
+                )}
+
+                {/* Draw */}
+                {selectedMatch.oddLaneWins === selectedMatch.evenLaneWins &&
+                  selectedMatch.oddLaneWins! > 0 && (
+                    <div className="text-center mt-6 pt-4 border-t border-slate-200">
+                      <div className="inline-block px-4 py-2 bg-slate-100 text-slate-700 rounded-full font-bold">
+                        🤝 Draw
+                      </div>
+                    </div>
+                  )}
+              </div>
+
+              {/* Lane Info */}
+              <div className="text-center text-sm text-slate-500">
+                <span className="font-bold">Lanes:</span> {selectedMatch.lanes}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowResultModal(false)}
+              className="btn btn-primary w-full mt-6"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

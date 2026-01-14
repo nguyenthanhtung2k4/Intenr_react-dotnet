@@ -360,7 +360,7 @@ namespace Backend.Controllers
                   try
                   {
                         var tournamentMatches = _bowlingLeagueRepository.TourneyMatches.ToList();
-                        if (tournamentMatches == null || !tournamentMatches.Any())
+                        if (tournamentMatches == null || tournamentMatches.Count == 0)
                         {
                               return Ok(new List<TourneyMatch>());
                         }
@@ -444,17 +444,49 @@ namespace Backend.Controllers
             {
                   try
                   {
-                        var matches = _bowlingLeagueRepository.TourneyMatches.Select(m => new MatchListDto
+                        var matchGames = _bowlingLeagueRepository.MatchGames.ToList();
+
+                        var matches = _bowlingLeagueRepository.TourneyMatches.Select(m =>
                         {
-                              MatchId = m.MatchId,
-                              TourneyLocation = m.Tourney?.TourneyLocation,
-                              TourneyDate = m.Tourney?.TourneyDate,
-                              OddLaneTeam = m.OddLaneTeam?.TeamName,
-                              EvenLaneTeam = m.EvenLaneTeam?.TeamName,
-                              Lanes = m.Lanes,
-                              TourneyId = m.TourneyId,
-                              OddLaneTeamId = m.OddLaneTeamId,
-                              EvenLaneTeamId = m.EvenLaneTeamId
+                              // Get all games for this match
+                              var games = matchGames.Where(mg => mg.MatchId == m.MatchId).ToList();
+
+                              // Count wins for each team
+                              int oddLaneWins = games.Count(g => g.WinningTeamId == m.OddLaneTeamId);
+                              int evenLaneWins = games.Count(g => g.WinningTeamId == m.EvenLaneTeamId);
+
+                              // Determine overall winner (best of games)
+                              int? winningTeamId = null;
+                              string? winningTeamName = null;
+
+                              if (oddLaneWins > evenLaneWins)
+                              {
+                                    winningTeamId = m.OddLaneTeamId;
+                                    winningTeamName = m.OddLaneTeam?.TeamName;
+                              }
+                              else if (evenLaneWins > oddLaneWins)
+                              {
+                                    winningTeamId = m.EvenLaneTeamId;
+                                    winningTeamName = m.EvenLaneTeam?.TeamName;
+                              }
+
+                              return new MatchListDto
+                              {
+                                    MatchId = m.MatchId,
+                                    TourneyLocation = m.Tourney?.TourneyLocation,
+                                    TourneyDate = m.Tourney?.TourneyDate,
+                                    OddLaneTeam = m.OddLaneTeam?.TeamName,
+                                    EvenLaneTeam = m.EvenLaneTeam?.TeamName,
+                                    Lanes = m.Lanes,
+                                    TourneyId = m.TourneyId,
+                                    OddLaneTeamId = m.OddLaneTeamId,
+                                    EvenLaneTeamId = m.EvenLaneTeamId,
+                                    HasResult = games.Any(),
+                                    WinningTeamId = winningTeamId,
+                                    WinningTeamName = winningTeamName,
+                                    OddLaneWins = oddLaneWins,
+                                    EvenLaneWins = evenLaneWins
+                              };
                         }).ToList();
 
                         return Ok(matches);

@@ -11,4 +11,11 @@ public class MatchListDto
       public int? TourneyId { get; set; }
       public int? OddLaneTeamId { get; set; }
       public int? EvenLaneTeamId { get; set; }
+      
+      // Match result info
+      public bool HasResult { get; set; }
+      public int? WinningTeamId { get; set; }
+      public string? WinningTeamName { get; set; }
+      public int OddLaneWins { get; set; }
+      public int EvenLaneWins { get; set; }
 }
