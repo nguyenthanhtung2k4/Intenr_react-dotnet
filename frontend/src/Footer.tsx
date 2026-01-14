@@ -67,10 +67,10 @@ const Footer = () => {
             </h4>
             <div className="flex flex-col gap-3">
               <a
-                href="mailto:info@leaguepals.com"
+                href="mailto:tungnt@gmail.com"
                 className="text-sm text-slate-500 hover:text-blue-600 transition-colors"
               >
-                info@leaguepals.com
+                tungnt@gmail.com
               </a>
               <span className="text-sm text-slate-500">(555) 123-4567</span>
               <div className="flex gap-4 mt-2">

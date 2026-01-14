@@ -316,6 +316,7 @@ export interface StandingData {
   teamName: string;
   played: number;
   won: number;
+  lost: number;
   points: number;
 }
 
@@ -424,5 +425,18 @@ export const fetchLeagueStandings = async (): Promise<StandingData[]> => {
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchLeagueStandings');
+  }
+};
+
+// 15. Update Team Standing (Admin only)
+export const updateTeamStanding = async (
+  teamId: number,
+  data: { manualWins?: number; manualLosses?: number; manualPoints?: number },
+) => {
+  try {
+    const response = await api.put(`/standings/${teamId}`, data);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'updateTeamStanding');
   }
 };
