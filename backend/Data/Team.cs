@@ -7,13 +7,17 @@ namespace Backend.Data;
 
 public partial class Team
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int TeamId { get; set; }
+      [Key]
+      [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+      public int TeamId { get; set; }
 
-    public string? TeamName { get; set; } = null!;
+      public string? TeamName { get; set; } = null!;
 
-    public int? CaptainId { get; set; }
-    public bool IsDelete { get; set; } = false;
+      public int? CaptainId { get; set; }
+      public bool IsDelete { get; set; } = false;
 
+      // Manual override fields for standings (Admin can set these manually)
+      public int? ManualPoints { get; set; }
+      public int? ManualWins { get; set; }
+      public int? ManualLosses { get; set; }
 }

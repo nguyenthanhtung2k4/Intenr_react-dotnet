@@ -471,7 +471,7 @@ namespace Backend.Controllers
             {
                   try
                   {
-                        var teams = _bowlingLeagueRepository.Teams.ToList();
+                        var teams = _bowlingLeagueRepository.Teams.Where(t => !t.IsDelete).ToList();
                         var standings = new List<StandingDto>();
 
                         var matchGames = _bowlingLeagueRepository.MatchGames.ToList();
@@ -479,19 +479,26 @@ namespace Backend.Controllers
 
                         foreach (var team in teams)
                         {
-                              // Played: Number of TourneyMatches where this team is Odd or Even
-                              int played = tourneyMatches.Count(m => m.OddLaneTeamId == team.TeamId || m.EvenLaneTeamId == team.TeamId);
+                              // Calculate actual stats from matches
+                              int actualPlayed = tourneyMatches.Count(m => m.OddLaneTeamId == team.TeamId || m.EvenLaneTeamId == team.TeamId);
+                              int actualWon = matchGames.Count(mg => mg.WinningTeamId == team.TeamId);
+                              int actualLost = actualPlayed - actualWon;
+                              int actualPoints = actualWon * 2;
 
-                              // Won: Number of MatchGames where WinningTeamId == TeamId
-                              int won = matchGames.Count(mg => mg.WinningTeamId == team.TeamId);
+                              // Use manual override if set by Admin, otherwise use calculated values
+                              int finalWon = team.ManualWins ?? actualWon;
+                              int finalLost = team.ManualLosses ?? actualLost;
+                              int finalPoints = team.ManualPoints ?? actualPoints;
+                              int finalPlayed = finalWon + finalLost;
 
                               standings.Add(new StandingDto
                               {
                                     TeamId = team.TeamId,
                                     TeamName = team.TeamName ?? "Unknown",
-                                    Played = played,
-                                    Won = won,
-                                    Points = won * 2
+                                    Played = finalPlayed,
+                                    Won = finalWon,
+                                    Lost = finalLost,
+                                    Points = finalPoints
                               });
                         }
 
@@ -505,7 +512,36 @@ namespace Backend.Controllers
 
 
 
+            [HttpPut("standings/{teamId}")]
+            [Authorize(Roles = "Admin")]
+            public IActionResult UpdateStanding(int teamId, [FromBody] UpdateStandingDto dto)
+            {
+                  try
+                  {
+                        var team = _bowlingLeagueRepository.Teams.FirstOrDefault(t => t.TeamId == teamId);
+                        if (team == null || team.IsDelete)
+                        {
+                              return NotFound(new { message = "Không tìm thấy đội" });
+                        }
+
+                        // Update manual override fields
+                        team.ManualWins = dto.ManualWins;
+                        team.ManualLosses = dto.ManualLosses;
+                        team.ManualPoints = dto.ManualPoints;
+
+                        _bowlingLeagueRepository.Update(team);
+
+                        return Ok(new { message = "Cập nhật điểm thành công", team });
+                  }
+                  catch (Exception ex)
+                  {
+                        return StatusCode(500, $"Lỗi server: {ex.Message}");
+                  }
+            }
+
+
             ///////////////////////////////////////////////////////////
+
             ///////////////////////////////////////////////////////////
             ///////////////////////////////////////////////////////////
 
