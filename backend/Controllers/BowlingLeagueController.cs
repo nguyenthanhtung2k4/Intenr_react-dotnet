@@ -473,11 +473,11 @@ namespace Backend.Controllers
                                           // Odd Team Score
                                           long oddScore = gameScores
                                                 .Where(s => bowlers.Any(b => b.BowlerId == s.BowlerId && b.TeamId == m.OddLaneTeamId))
-                                                .Sum(s => (long)(s.HandiCapScore ?? s.RawScore ?? 0));
+                                                .Sum(s => (long)((s.RawScore ?? 0) + (s.HandiCapScore ?? 0)));
 
                                           long evenScore = gameScores
                                                 .Where(s => bowlers.Any(b => b.BowlerId == s.BowlerId && b.TeamId == m.EvenLaneTeamId))
-                                                .Sum(s => (long)(s.HandiCapScore ?? s.RawScore ?? 0));
+                                                .Sum(s => (long)((s.RawScore ?? 0) + (s.HandiCapScore ?? 0)));
 
                                           if (oddScore > evenScore) oddLaneWins++;
                                           else if (evenScore > oddScore) evenLaneWins++;
@@ -993,10 +993,10 @@ namespace Backend.Controllers
 
                               int oddTeamTotal = gameScores
                                     .Where(s => oddTeamBowlerIds.Contains(s.BowlerId))
-                                    .Sum(s => s.HandiCapScore ?? s.RawScore ?? 0);
+                                    .Sum(s => (s.RawScore ?? 0) + (s.HandiCapScore ?? 0));
                               int evenTeamTotal = gameScores
                                     .Where(s => evenTeamBowlerIds.Contains(s.BowlerId))
-                                    .Sum(s => s.HandiCapScore ?? s.RawScore ?? 0);
+                                    .Sum(s => (s.RawScore ?? 0) + (s.HandiCapScore ?? 0));
 
                               int? winningTeamId = null;
                               if (oddTeamTotal > evenTeamTotal) winningTeamId = match.OddLaneTeamId;
@@ -1077,10 +1077,10 @@ namespace Backend.Controllers
                         // Calculate team totals to determine winner
                         int oddTeamTotal = dto.Scores
                               .Where(s => oddTeamBowlerIds.Contains(s.BowlerId))
-                              .Sum(s => s.HandicapScore ?? s.RawScore);
+                              .Sum(s => s.RawScore + (s.HandicapScore ?? 0));
                         int evenTeamTotal = dto.Scores
                               .Where(s => evenTeamBowlerIds.Contains(s.BowlerId))
-                              .Sum(s => s.HandicapScore ?? s.RawScore);
+                              .Sum(s => s.RawScore + (s.HandicapScore ?? 0));
 
                         int? winningTeamId = null;
                         if (oddTeamTotal > evenTeamTotal) winningTeamId = match.OddLaneTeamId;

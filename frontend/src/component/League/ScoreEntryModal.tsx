@@ -23,7 +23,9 @@ const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({ match, onClose, onSuc
   const toast = useToast();
 
   // Scores state: Map gameNumber -> bowlerId -> { raw, handicap }
-  const [scores, setScores] = useState<Record<number, Record<number, { raw: string; handicap: string }>>>({
+  const [scores, setScores] = useState<
+    Record<number, Record<number, { raw: string; handicap: string }>>
+  >({
     1: {},
     2: {},
     3: {},
@@ -128,8 +130,9 @@ const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({ match, onClose, onSuc
     return teamBowlers.reduce((sum, b) => {
       const s = currentGameScores[b.BowlerId];
       if (!s) return sum;
-      const val = s.handicap ? Number(s.handicap) : s.raw ? Number(s.raw) : 0;
-      return sum + val;
+      const raw = s.raw ? Number(s.raw) : 0;
+      const handicap = s.handicap ? Number(s.handicap) : 0;
+      return sum + raw + handicap;
     }, 0);
   };
 

@@ -159,7 +159,6 @@ const MatchList = () => {
                             </div>
                           </div>
                         </div>
-
                         <div className="flex-1 flex items-center justify-between w-full md:px-8">
                           <div
                             className={`text-lg font-bold w-5/12 text-right ${
