@@ -8,6 +8,7 @@ import {
 } from '../../services/api.services';
 import { useAuth } from '../../context/AuthContext';
 import ScoreEntryModal from './ScoreEntryModal';
+import MatchResultModal from './MatchResultModal';
 
 const MatchList = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
@@ -223,78 +224,9 @@ const MatchList = () => {
         </div>
       </div>
 
-      {/* Result Modal - Simple View (Summary) */}
+      {/* Result Modal - Detailed View */}
       {showResultModal && selectedMatch && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => setShowResultModal(false)}
-        >
-          <div
-            className="bg-white rounded-xl p-8 max-w-lg w-full mx-4 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-start mb-6">
-              <h3 className="text-2xl font-bold text-slate-900">Match Result</h3>
-              <button
-                onClick={() => setShowResultModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-2xl"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              <div className="text-center pb-4 border-b border-slate-200">
-                <div className="text-sm text-slate-500 font-bold uppercase">
-                  {selectedMatch.tourneyLocation}
-                </div>
-                <div className="text-xs text-slate-400 mt-1">
-                  {new Date(selectedMatch.tourneyDate).toLocaleDateString()}
-                </div>
-              </div>
-
-              <div className="bg-slate-50 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-center flex-1">
-                    <div
-                      className={`text-2xl font-black mb-2 ${selectedMatch.winningTeamId === selectedMatch.oddLaneTeamId ? 'text-green-600' : 'text-slate-700'}`}
-                    >
-                      {selectedMatch.oddLaneTeam}
-                    </div>
-                    <div className="text-4xl font-black text-blue-600">
-                      {selectedMatch.oddLaneWins || 0}
-                    </div>
-                  </div>
-                  <div className="text-slate-300 font-bold text-xl px-4">VS</div>
-                  <div className="text-center flex-1">
-                    <div
-                      className={`text-2xl font-black mb-2 ${selectedMatch.winningTeamId === selectedMatch.evenLaneTeamId ? 'text-green-600' : 'text-slate-700'}`}
-                    >
-                      {selectedMatch.evenLaneTeam}
-                    </div>
-                    <div className="text-4xl font-black text-blue-600">
-                      {selectedMatch.evenLaneWins || 0}
-                    </div>
-                  </div>
-                </div>
-                {selectedMatch.winningTeamName && (
-                  <div className="text-center mt-6 pt-4 border-t border-slate-200">
-                    <div className="inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full font-bold">
-                      🏆 Winner: {selectedMatch.winningTeamName}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowResultModal(false)}
-              className="btn btn-primary w-full mt-6"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+        <MatchResultModal match={selectedMatch} onClose={() => setShowResultModal(false)} />
       )}
 
       {/* Score Entry Modal */}
