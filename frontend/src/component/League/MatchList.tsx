@@ -6,20 +6,27 @@ import {
   MatchData,
   TournamentData,
 } from '../../services/api.services';
+import { useAuth } from '../../context/AuthContext';
+import ScoreEntryModal from './ScoreEntryModal';
 
 const MatchList = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
   const [tournaments, setTournaments] = useState<TournamentData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { role } = useAuth();
+  const isAdmin = role === 'Admin';
 
   // Filter State
   const [selectedTournament, setSelectedTournament] = useState<string>('all');
 
-  // Modal state for viewing match result
+  // Modal states
   const [selectedMatch, setSelectedMatch] = useState<MatchData | null>(null);
   const [showResultModal, setShowResultModal] = useState(false);
 
-  useEffect(() => {
+  const [entryMatch, setEntryMatch] = useState<MatchData | null>(null);
+  const [showEntryModal, setShowEntryModal] = useState(false);
+
+  const loadData = () => {
     Promise.all([fetchGlobalMatches(), fetchTournaments()])
       .then(([matchesData, tournamentsData]) => {
         setMatches(matchesData);
@@ -30,6 +37,10 @@ const MatchList = () => {
         console.error(err);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
 
   // Filtering
@@ -53,6 +64,16 @@ const MatchList = () => {
   const handleViewResult = (match: MatchData) => {
     setSelectedMatch(match);
     setShowResultModal(true);
+  };
+
+  const handleEnterScore = (match: MatchData, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent opening result modal if clicking this button
+    setEntryMatch(match);
+    setShowEntryModal(true);
+  };
+
+  const handleEntrySuccess = () => {
+    loadData(); // Refresh data to show new results/status
   };
 
   if (loading) return <div className="p-20 text-center">Loading Fixtures...</div>;
@@ -169,7 +190,16 @@ const MatchList = () => {
                           </div>
                         </div>
 
-                        <div className="w-full md:w-auto text-right">
+                        <div className="w-full md:w-auto text-right flex items-center gap-3 justify-end">
+                          {isAdmin && (
+                            <button
+                              onClick={(e) => handleEnterScore(match, e)}
+                              className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded hover:bg-blue-200 transition-colors"
+                            >
+                              Enter Scores
+                            </button>
+                          )}
+
                           {hasResult ? (
                             <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase">
                               ✓ Completed
@@ -194,7 +224,7 @@ const MatchList = () => {
         </div>
       </div>
 
-      {/* Result Modal */}
+      {/* Result Modal - Simple View (Summary) */}
       {showResultModal && selectedMatch && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -215,7 +245,6 @@ const MatchList = () => {
             </div>
 
             <div className="space-y-6">
-              {/* Tournament Info */}
               <div className="text-center pb-4 border-b border-slate-200">
                 <div className="text-sm text-slate-500 font-bold uppercase">
                   {selectedMatch.tourneyLocation}
@@ -225,16 +254,11 @@ const MatchList = () => {
                 </div>
               </div>
 
-              {/* Match Result */}
               <div className="bg-slate-50 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-center flex-1">
                     <div
-                      className={`text-2xl font-black mb-2 ${
-                        selectedMatch.winningTeamId === selectedMatch.oddLaneTeamId
-                          ? 'text-green-600'
-                          : 'text-slate-700'
-                      }`}
+                      className={`text-2xl font-black mb-2 ${selectedMatch.winningTeamId === selectedMatch.oddLaneTeamId ? 'text-green-600' : 'text-slate-700'}`}
                     >
                       {selectedMatch.oddLaneTeam}
                     </div>
@@ -242,16 +266,10 @@ const MatchList = () => {
                       {selectedMatch.oddLaneWins || 0}
                     </div>
                   </div>
-
                   <div className="text-slate-300 font-bold text-xl px-4">VS</div>
-
                   <div className="text-center flex-1">
                     <div
-                      className={`text-2xl font-black mb-2 ${
-                        selectedMatch.winningTeamId === selectedMatch.evenLaneTeamId
-                          ? 'text-green-600'
-                          : 'text-slate-700'
-                      }`}
+                      className={`text-2xl font-black mb-2 ${selectedMatch.winningTeamId === selectedMatch.evenLaneTeamId ? 'text-green-600' : 'text-slate-700'}`}
                     >
                       {selectedMatch.evenLaneTeam}
                     </div>
@@ -260,8 +278,6 @@ const MatchList = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Winner Badge */}
                 {selectedMatch.winningTeamName && (
                   <div className="text-center mt-6 pt-4 border-t border-slate-200">
                     <div className="inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full font-bold">
@@ -269,21 +285,6 @@ const MatchList = () => {
                     </div>
                   </div>
                 )}
-
-                {/* Draw */}
-                {selectedMatch.oddLaneWins === selectedMatch.evenLaneWins &&
-                  selectedMatch.oddLaneWins! > 0 && (
-                    <div className="text-center mt-6 pt-4 border-t border-slate-200">
-                      <div className="inline-block px-4 py-2 bg-slate-100 text-slate-700 rounded-full font-bold">
-                        🤝 Draw
-                      </div>
-                    </div>
-                  )}
-              </div>
-
-              {/* Lane Info */}
-              <div className="text-center text-sm text-slate-500">
-                <span className="font-bold">Lanes:</span> {selectedMatch.lanes}
               </div>
             </div>
 
@@ -295,6 +296,15 @@ const MatchList = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Score Entry Modal */}
+      {showEntryModal && entryMatch && (
+        <ScoreEntryModal
+          match={entryMatch}
+          onClose={() => setShowEntryModal(false)}
+          onSuccess={handleEntrySuccess}
+        />
       )}
     </div>
   );

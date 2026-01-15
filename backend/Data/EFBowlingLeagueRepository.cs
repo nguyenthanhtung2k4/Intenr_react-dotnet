@@ -188,5 +188,64 @@ namespace Backend.Data
                   }
             }
 
+            public void CreateBowlerScore(BowlerScore bowlerScore)
+            {
+                  try
+                  {
+                        // Check if score already exists for this bowler/match/game combination
+                        var existing = _bowlingContext.Scores
+                              .FirstOrDefault(s => s.MatchId == bowlerScore.MatchId
+                                    && s.GameNumber == bowlerScore.GameNumber
+                                    && s.BowlerId == bowlerScore.BowlerId);
+
+                        if (existing != null)
+                        {
+                              // Update existing score
+                              existing.RawScore = bowlerScore.RawScore;
+                              existing.HandiCapScore = bowlerScore.HandiCapScore;
+                              existing.WonGame = bowlerScore.WonGame;
+                        }
+                        else
+                        {
+                              // Add new score
+                              _bowlingContext.Scores.Add(bowlerScore);
+                        }
+                        _bowlingContext.SaveChanges();
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi lưu BowlerScore: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
+            }
+
+            public void CreateOrUpdateMatchGame(int matchId, short gameNumber, int? winningTeamId)
+            {
+                  try
+                  {
+                        var existing = _bowlingContext.MatchGames
+                              .FirstOrDefault(mg => mg.MatchId == matchId && mg.GameNumber == gameNumber);
+
+                        if (existing != null)
+                        {
+                              existing.WinningTeamId = winningTeamId;
+                        }
+                        else
+                        {
+                              var matchGame = new MatchGame
+                              {
+                                    MatchId = matchId,
+                                    GameNumber = gameNumber,
+                                    WinningTeamId = winningTeamId
+                              };
+                              _bowlingContext.MatchGames.Add(matchGame);
+                        }
+                        _bowlingContext.SaveChanges();
+                  }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi lưu MatchGame: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
+            }
+
       }
 }

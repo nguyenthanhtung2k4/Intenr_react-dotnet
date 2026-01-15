@@ -323,6 +323,8 @@ export interface StandingData {
   won: number;
   lost: number;
   points: number;
+  totalPins?: number;
+  average?: number;
 }
 
 export interface TournamentData {
@@ -443,5 +445,83 @@ export const updateTeamStanding = async (
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'updateTeamStanding');
+  }
+};
+
+// --- NEW ENDPOINTS FOR OPTION B ---
+
+export interface BowlerStatsData {
+  bowlerId: number;
+  bowlerName: string;
+  teamId?: number;
+  teamName?: string;
+  totalGames: number;
+  averageScore: number;
+  highScore: number;
+  totalPins: number;
+  gamesWon: number;
+}
+
+export interface GameScoreDetail {
+  gameNumber: number;
+  oddTeamTotalScore: number;
+  evenTeamTotalScore: number;
+  winningTeamId?: number;
+  bowlerScores: {
+    bowlerId: number;
+    bowlerName: string;
+    teamId?: number;
+    rawScore: number;
+    handicapScore?: number;
+    wonGame: boolean;
+  }[];
+}
+
+export interface MatchScoreDetail {
+  matchId: number;
+  oddLaneTeam?: string;
+  evenLaneTeam?: string;
+  oddLaneTeamId?: number;
+  evenLaneTeamId?: number;
+  games: GameScoreDetail[];
+}
+
+export interface MatchScoreInput {
+  matchId: number;
+  gameNumber: number;
+  scores: {
+    bowlerId: number;
+    rawScore: number;
+    handicapScore?: number;
+  }[];
+}
+
+// 16. Fetch Bowler Stats
+export const fetchBowlerStats = async (): Promise<BowlerStatsData[]> => {
+  try {
+    const response = await api.get('/bowler-stats');
+    return response.data || [];
+  } catch (error) {
+    throw handleApiError(error, 'fetchBowlerStats');
+  }
+};
+
+// 17. Get Match Scores Detail
+export const fetchMatchScores = async (matchId: number): Promise<MatchScoreDetail> => {
+  try {
+    const response = await api.get(`/matches/${matchId}/scores`);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'fetchMatchScores');
+  }
+};
+
+// 18. Submit Match Scores (Admin)
+export const submitMatchScores = async (data: MatchScoreInput) => {
+  try {
+    const response = await api.post('/match-scores', data);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'submitMatchScores');
   }
 };

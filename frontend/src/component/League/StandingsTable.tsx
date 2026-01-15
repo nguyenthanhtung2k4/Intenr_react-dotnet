@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  fetchLeagueStandings,
-  updateTeamStanding,
-  StandingData,
-} from '../../services/api.services';
+import { fetchLeagueStandings, StandingData } from '../../services/api.services';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
@@ -12,15 +8,6 @@ const StandingsTable = () => {
   const [loading, setLoading] = useState(true);
   const { role } = useAuth();
   const toast = useToast();
-
-  // Edit Modal State
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingTeam, setEditingTeam] = useState<StandingData | null>(null);
-  const [editForm, setEditForm] = useState({
-    manualWins: '',
-    manualLosses: '',
-    manualPoints: '',
-  });
 
   const loadStandings = async () => {
     setLoading(true);
@@ -38,35 +25,6 @@ const StandingsTable = () => {
   useEffect(() => {
     loadStandings();
   }, []);
-
-  const handleEditClick = (standing: StandingData) => {
-    setEditingTeam(standing);
-    setEditForm({
-      manualWins: standing.won.toString(),
-      manualLosses: standing.lost.toString(),
-      manualPoints: standing.points.toString(),
-    });
-    setShowEditModal(true);
-  };
-
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingTeam) return;
-
-    try {
-      const data: any = {};
-      if (editForm.manualWins) data.manualWins = parseInt(editForm.manualWins);
-      if (editForm.manualLosses) data.manualLosses = parseInt(editForm.manualLosses);
-      if (editForm.manualPoints) data.manualPoints = parseInt(editForm.manualPoints);
-
-      await updateTeamStanding(editingTeam.teamId, data);
-      toast.showToast('Cập nhật điểm thành công!', 'success');
-      setShowEditModal(false);
-      loadStandings();
-    } catch (error) {
-      toast.showToast('Lỗi khi cập nhật điểm', 'error');
-    }
-  };
 
   if (loading) {
     return (
@@ -107,13 +65,14 @@ const StandingsTable = () => {
                     Lost
                   </th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                    Total Pins
+                  </th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                    Avg
+                  </th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
                     Points
                   </th>
-                  {role === 'Admin' && (
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
-                      Actions
-                    </th>
-                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -156,19 +115,15 @@ const StandingsTable = () => {
                     <td className="px-6 py-4 text-center text-red-600 font-medium">
                       {standing.lost}
                     </td>
+                    <td className="px-6 py-4 text-center text-slate-600 font-medium">
+                      {standing.totalPins?.toLocaleString() || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-center text-slate-600 font-medium">
+                      {standing.average || '-'}
+                    </td>
                     <td className="px-6 py-4 text-center">
                       <span className="font-black text-slate-900 text-lg">{standing.points}</span>
                     </td>
-                    {role === 'Admin' && (
-                      <td className="px-6 py-4 text-center">
-                        <button
-                          onClick={() => handleEditClick(standing)}
-                          className="px-3 py-1 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    )}
                   </tr>
                 ))}
               </tbody>
@@ -179,58 +134,6 @@ const StandingsTable = () => {
           )}
         </div>
       </div>
-
-      {/* Edit Modal */}
-      {showEditModal && editingTeam && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <h3 className="text-2xl font-bold text-slate-900 mb-6">
-              Edit Standings - {editingTeam.teamName}
-            </h3>
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Wins</label>
-                <input
-                  type="number"
-                  className="input-field"
-                  value={editForm.manualWins}
-                  onChange={(e) => setEditForm({ ...editForm, manualWins: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Losses</label>
-                <input
-                  type="number"
-                  className="input-field"
-                  value={editForm.manualLosses}
-                  onChange={(e) => setEditForm({ ...editForm, manualLosses: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Points</label>
-                <input
-                  type="number"
-                  className="input-field"
-                  value={editForm.manualPoints}
-                  onChange={(e) => setEditForm({ ...editForm, manualPoints: e.target.value })}
-                />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="btn btn-white flex-1"
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary flex-1">
-                  Update
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

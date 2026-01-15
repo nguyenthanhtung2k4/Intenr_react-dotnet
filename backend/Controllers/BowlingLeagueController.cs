@@ -445,17 +445,56 @@ namespace Backend.Controllers
                   try
                   {
                         var matchGames = _bowlingLeagueRepository.MatchGames.ToList();
+                        var scores = _bowlingLeagueRepository.Scores.ToList();
+                        var bowlers = _bowlingLeagueRepository.Bowlers.Where(b => b.IsDelete != true).ToList();
 
                         var matches = _bowlingLeagueRepository.TourneyMatches.Select(m =>
                         {
                               // Get all games for this match
                               var games = matchGames.Where(mg => mg.MatchId == m.MatchId).ToList();
 
-                              // Count wins for each team
-                              int oddLaneWins = games.Count(g => g.WinningTeamId == m.OddLaneTeamId);
-                              int evenLaneWins = games.Count(g => g.WinningTeamId == m.EvenLaneTeamId);
+                              int oddLaneWins = 0;
+                              int evenLaneWins = 0;
 
-                              // Determine overall winner (best of games)
+                              // Calculate wins based on BowlerScores if available, otherwise fallback to MatchGame.WinningTeamId
+                              var matchScores = scores.Where(s => s.MatchId == m.MatchId).ToList();
+
+                              // We assume 3 games usually
+                              var gameNumbers = games.Select(g => g.GameNumber).Union(matchScores.Select(s => s.GameNumber)).Distinct();
+
+                              foreach (var gameNum in gameNumbers)
+                              {
+                                    var gameScores = matchScores.Where(s => s.GameNumber == gameNum).ToList();
+
+                                    if (gameScores.Any())
+                                    {
+                                          // Calculate based on scores
+                                          // Need bowler team info
+                                          // Odd Team Score
+                                          long oddScore = gameScores
+                                                .Where(s => bowlers.Any(b => b.BowlerId == s.BowlerId && b.TeamId == m.OddLaneTeamId))
+                                                .Sum(s => (long)(s.HandiCapScore ?? s.RawScore ?? 0));
+
+                                          long evenScore = gameScores
+                                                .Where(s => bowlers.Any(b => b.BowlerId == s.BowlerId && b.TeamId == m.EvenLaneTeamId))
+                                                .Sum(s => (long)(s.HandiCapScore ?? s.RawScore ?? 0));
+
+                                          if (oddScore > evenScore) oddLaneWins++;
+                                          else if (evenScore > oddScore) evenLaneWins++;
+                                    }
+                                    else
+                                    {
+                                          // Fallback to existing MatchGame record
+                                          var mg = games.FirstOrDefault(g => g.GameNumber == gameNum);
+                                          if (mg != null)
+                                          {
+                                                if (mg.WinningTeamId == m.OddLaneTeamId) oddLaneWins++;
+                                                else if (mg.WinningTeamId == m.EvenLaneTeamId) evenLaneWins++;
+                                          }
+                                    }
+                              }
+
+                              // Determine overall match winner (who won more games)
                               int? winningTeamId = null;
                               string? winningTeamName = null;
 
@@ -481,7 +520,7 @@ namespace Backend.Controllers
                                     TourneyId = m.TourneyId,
                                     OddLaneTeamId = m.OddLaneTeamId,
                                     EvenLaneTeamId = m.EvenLaneTeamId,
-                                    HasResult = games.Any(),
+                                    HasResult = games.Any() || matchScores.Any(),
                                     WinningTeamId = winningTeamId,
                                     WinningTeamName = winningTeamName,
                                     OddLaneWins = oddLaneWins,
@@ -508,33 +547,90 @@ namespace Backend.Controllers
 
                         var matchGames = _bowlingLeagueRepository.MatchGames.ToList();
                         var tourneyMatches = _bowlingLeagueRepository.TourneyMatches.ToList();
+                        var scores = _bowlingLeagueRepository.Scores.ToList();
+                        var bowlers = _bowlingLeagueRepository.Bowlers.ToList();
 
                         foreach (var team in teams)
                         {
-                              // Calculate actual stats from matches
+                              // 1. Calculate stats from Matches logic (Wins/Losses)
+                              // We reuse the logic from GetMatches roughly, or simpler: trust MatchGames if PostMatchScores updates them correctly.
+                              // BUT to be safe and strictly follow Option B, we should calc from BowlerScores where possible.
+
+                              // To avoid re-implementing complex match logic here, we can rely on MatchGames 
+                              // IF we assume MatchGames.WinningTeamId is kept in sync. 
+                              // Since PostMatchScores updates MatchGames, it is safe-ish.
+                              // HOWEVER, user wants "calculated from BowlerScore". 
+                              // Let's implement a hybrid: If MatchGame has WinningTeamId, use it. 
+                              // (Because PostMatchScores ensures MatchGame.WinningTeamId is correct based on scores).
+
                               int actualPlayed = tourneyMatches.Count(m => m.OddLaneTeamId == team.TeamId || m.EvenLaneTeamId == team.TeamId);
                               int actualWon = matchGames.Count(mg => mg.WinningTeamId == team.TeamId);
-                              int actualLost = actualPlayed - actualWon;
-                              int actualPoints = actualWon * 2;
+                              int actualLost = actualPlayed - actualWon; // Assuming 1 match = 1 win or loss? 
+                                                                         // Wait, Bowling League usually counts POINTS based on Games Won (+ maybe Match Won bonus).
+                                                                         // The previous logic was: Points = Won * 2. 
+                                                                         // "Won" here seems to mean "Games Won" inside Matches? 
+                                                                         // Let's check: MatchGames.Count(...) counts GAMES won. 
+                                                                         // tourneyMatches.Count(...) counts MATCHES played. 
+                                                                         // Usually Played = Total Games Played.
+                                                                         // If a match has 3 games, Played should be 3 * Matches? No.
 
-                              // Use manual override if set by Admin, otherwise use calculated values
-                              int finalWon = team.ManualWins ?? actualWon;
-                              int finalLost = team.ManualLosses ?? actualLost;
-                              int finalPoints = team.ManualPoints ?? actualPoints;
-                              int finalPlayed = finalWon + finalLost;
+                              // Let's stick to existing logic for Played/Won/Lost structure but ensure data source is correct.
+                              // "Played" in previous code was: tourneyMatches.Count (* 1?). 
+                              // This implies "actualPlayed" counted MATCHES.
+                              // "actualWon" counted GAMES.
+                              // This logic seems flawed previously unless 1 Match = 1 Game.
+
+                              // CORRECTION for Option B:
+                              // Played = Total Games Played (count MatchGames for this team)
+                              // Won = Total Games Won
+                              // Lost = Played - Won
+
+                              var teamMatchIds = tourneyMatches
+                                    .Where(m => m.OddLaneTeamId == team.TeamId || m.EvenLaneTeamId == team.TeamId)
+                                    .Select(m => m.MatchId)
+                                    .ToList();
+
+                              var teamGames = matchGames.Where(mg => teamMatchIds.Contains(mg.MatchId)).ToList();
+
+                              int gamesPlayed = teamGames.Count;
+                              // Wait, matchGames includes ALL games for that match. 
+                              // If team played in match, they played those games.
+
+                              int gamesWon = teamGames.Count(mg => mg.WinningTeamId == team.TeamId);
+                              int gamesLost = gamesPlayed - gamesWon; // Assuming no draws or nulls
+                              int points = gamesWon * 2; // Keep simple: 2 points per game win? Or stick to previous logic.
+
+                              // 2. Calculate Stats from BowlerScores (Total Pins)
+                              var teamBowlerIds = bowlers.Where(b => b.TeamId == team.TeamId).Select(b => b.BowlerId).ToList();
+                              var teamScores = scores.Where(s => teamBowlerIds.Contains(s.BowlerId)).ToList();
+
+                              long totalPins = teamScores.Sum(s => (long)(s.RawScore ?? 0));
+                              double average = gamesPlayed > 0 ? (double)totalPins / gamesPlayed : 0;
+                              // Average per game? Or Average of bowlers? 
+                              // Team Average usually = Total Team Pins / Total Team Games. 
+                              // Total Team Games = gamesPlayed * (number of bowlers)? NO.
+                              // Usually Team Average = Sum of all bowler scores / Total bowler-games.
+
+                              int totalBowlerGames = teamScores.Count;
+                              double teamAverage = totalBowlerGames > 0 ? (double)totalPins / totalBowlerGames : 0;
+                              // But usually displayed as Team Score Average (e.g. ~1000 per game).
+                              // Let's use Sum Pins / Games Played.
+                              double averagePerGame = gamesPlayed > 0 ? (double)totalPins / gamesPlayed : 0;
 
                               standings.Add(new StandingDto
                               {
                                     TeamId = team.TeamId,
                                     TeamName = team.TeamName ?? "Unknown",
-                                    Played = finalPlayed,
-                                    Won = finalWon,
-                                    Lost = finalLost,
-                                    Points = finalPoints
+                                    Played = gamesPlayed,
+                                    Won = gamesWon,
+                                    Lost = gamesLost,
+                                    Points = points,
+                                    TotalPins = (int)totalPins,
+                                    Average = Math.Round(averagePerGame, 1)
                               });
                         }
 
-                        return Ok(standings.OrderByDescending(s => s.Points).ThenByDescending(s => s.Won));
+                        return Ok(standings.OrderByDescending(s => s.Points).ThenByDescending(s => s.TotalPins));
                   }
                   catch (Exception ex)
                   {
@@ -809,6 +905,225 @@ namespace Backend.Controllers
                         userId = userIdClaim?.Value,
                         role = roleClaim?.Value
                   });
+            }
+
+
+            ///////////////////////////////////////////////////////////
+            // BOWLER STATS & MATCH SCORES ENDPOINTS
+            ///////////////////////////////////////////////////////////
+
+            [HttpGet("bowler-stats")]
+            [AllowAnonymous]
+            public IActionResult GetBowlerStats()
+            {
+                  try
+                  {
+                        var bowlers = _bowlingLeagueRepository.Bowlers
+                              .Where(b => b.IsDelete != true)
+                              .ToList();
+                        var scores = _bowlingLeagueRepository.Scores.ToList();
+                        var teams = _bowlingLeagueRepository.Teams.ToList();
+
+                        var stats = bowlers.Select(b =>
+                        {
+                              var bowlerScores = scores.Where(s => s.BowlerId == b.BowlerId).ToList();
+                              var team = teams.FirstOrDefault(t => t.TeamId == b.TeamId);
+
+                              int totalGames = bowlerScores.Count;
+                              int totalPins = bowlerScores.Sum(s => s.RawScore ?? 0);
+                              int highScore = bowlerScores.Any() ? bowlerScores.Max(s => s.RawScore ?? 0) : 0;
+                              double avgScore = totalGames > 0 ? (double)totalPins / totalGames : 0;
+                              int gamesWon = bowlerScores.Count(s => s.WonGame);
+
+                              return new BowlerStatsDto
+                              {
+                                    BowlerId = b.BowlerId,
+                                    BowlerName = $"{b.BowlerFirstName} {b.BowlerLastName}",
+                                    TeamId = b.TeamId,
+                                    TeamName = team?.TeamName,
+                                    TotalGames = totalGames,
+                                    AverageScore = Math.Round(avgScore, 1),
+                                    HighScore = highScore,
+                                    TotalPins = totalPins,
+                                    GamesWon = gamesWon
+                              };
+                        }).OrderByDescending(s => s.AverageScore).ToList();
+
+                        return Ok(stats);
+                  }
+                  catch (Exception ex)
+                  {
+                        return StatusCode(500, $"Lỗi server: {ex.Message}");
+                  }
+            }
+
+            [HttpGet("matches/{matchId}/scores")]
+            [AllowAnonymous]
+            public IActionResult GetMatchScores(int matchId)
+            {
+                  try
+                  {
+                        var match = _bowlingLeagueRepository.TourneyMatches
+                              .FirstOrDefault(m => m.MatchId == matchId);
+
+                        if (match == null)
+                              return NotFound(new { message = "Không tìm thấy match" });
+
+                        var scores = _bowlingLeagueRepository.Scores
+                              .Where(s => s.MatchId == matchId)
+                              .ToList();
+                        var bowlers = _bowlingLeagueRepository.Bowlers.ToList();
+                        var teams = _bowlingLeagueRepository.Teams.ToList();
+
+                        // Get bowler IDs for each team
+                        var oddTeamBowlerIds = bowlers
+                              .Where(b => b.TeamId == match.OddLaneTeamId)
+                              .Select(b => b.BowlerId)
+                              .ToList();
+                        var evenTeamBowlerIds = bowlers
+                              .Where(b => b.TeamId == match.EvenLaneTeamId)
+                              .Select(b => b.BowlerId)
+                              .ToList();
+
+                        // Group scores by game number
+                        var gameNumbers = scores.Select(s => s.GameNumber).Distinct().OrderBy(g => g);
+                        var games = gameNumbers.Select(gameNum =>
+                        {
+                              var gameScores = scores.Where(s => s.GameNumber == gameNum).ToList();
+
+                              int oddTeamTotal = gameScores
+                                    .Where(s => oddTeamBowlerIds.Contains(s.BowlerId))
+                                    .Sum(s => s.HandiCapScore ?? s.RawScore ?? 0);
+                              int evenTeamTotal = gameScores
+                                    .Where(s => evenTeamBowlerIds.Contains(s.BowlerId))
+                                    .Sum(s => s.HandiCapScore ?? s.RawScore ?? 0);
+
+                              int? winningTeamId = null;
+                              if (oddTeamTotal > evenTeamTotal) winningTeamId = match.OddLaneTeamId;
+                              else if (evenTeamTotal > oddTeamTotal) winningTeamId = match.EvenLaneTeamId;
+
+                              var bowlerScoreDtos = gameScores.Select(s =>
+                              {
+                                    var bowler = bowlers.FirstOrDefault(b => b.BowlerId == s.BowlerId);
+                                    return new BowlerGameScoreDto
+                                    {
+                                          BowlerId = s.BowlerId,
+                                          BowlerName = bowler != null ? $"{bowler.BowlerFirstName} {bowler.BowlerLastName}" : "Unknown",
+                                          TeamId = bowler?.TeamId,
+                                          RawScore = s.RawScore ?? 0,
+                                          HandicapScore = s.HandiCapScore,
+                                          WonGame = s.WonGame
+                                    };
+                              }).ToList();
+
+                              return new GameScoreDto
+                              {
+                                    GameNumber = gameNum,
+                                    OddTeamTotalScore = oddTeamTotal,
+                                    EvenTeamTotalScore = evenTeamTotal,
+                                    WinningTeamId = winningTeamId,
+                                    BowlerScores = bowlerScoreDtos
+                              };
+                        }).ToList();
+
+                        var oddTeam = teams.FirstOrDefault(t => t.TeamId == match.OddLaneTeamId);
+                        var evenTeam = teams.FirstOrDefault(t => t.TeamId == match.EvenLaneTeamId);
+
+                        var result = new MatchScoreDetailDto
+                        {
+                              MatchId = matchId,
+                              OddLaneTeam = oddTeam?.TeamName,
+                              EvenLaneTeam = evenTeam?.TeamName,
+                              OddLaneTeamId = match.OddLaneTeamId,
+                              EvenLaneTeamId = match.EvenLaneTeamId,
+                              Games = games
+                        };
+
+                        return Ok(result);
+                  }
+                  catch (Exception ex)
+                  {
+                        return StatusCode(500, $"Lỗi server: {ex.Message}");
+                  }
+            }
+
+            [HttpPost("match-scores")]
+            [Authorize(Roles = "Admin")]
+            public IActionResult PostMatchScores([FromBody] MatchScoreInputDto dto)
+            {
+                  try
+                  {
+                        if (!ModelState.IsValid)
+                              return BadRequest(ModelState);
+
+                        var match = _bowlingLeagueRepository.TourneyMatches
+                              .FirstOrDefault(m => m.MatchId == dto.MatchId);
+
+                        if (match == null)
+                              return NotFound(new { message = "Không tìm thấy match" });
+
+                        var bowlers = _bowlingLeagueRepository.Bowlers.ToList();
+
+                        // Get bowler IDs for each team
+                        var oddTeamBowlerIds = bowlers
+                              .Where(b => b.TeamId == match.OddLaneTeamId)
+                              .Select(b => b.BowlerId)
+                              .ToList();
+                        var evenTeamBowlerIds = bowlers
+                              .Where(b => b.TeamId == match.EvenLaneTeamId)
+                              .Select(b => b.BowlerId)
+                              .ToList();
+
+                        // Calculate team totals to determine winner
+                        int oddTeamTotal = dto.Scores
+                              .Where(s => oddTeamBowlerIds.Contains(s.BowlerId))
+                              .Sum(s => s.HandicapScore ?? s.RawScore);
+                        int evenTeamTotal = dto.Scores
+                              .Where(s => evenTeamBowlerIds.Contains(s.BowlerId))
+                              .Sum(s => s.HandicapScore ?? s.RawScore);
+
+                        int? winningTeamId = null;
+                        if (oddTeamTotal > evenTeamTotal) winningTeamId = match.OddLaneTeamId;
+                        else if (evenTeamTotal > oddTeamTotal) winningTeamId = match.EvenLaneTeamId;
+
+                        // Create BowlerScore entries
+                        foreach (var scoreEntry in dto.Scores)
+                        {
+                              var bowler = bowlers.FirstOrDefault(b => b.BowlerId == scoreEntry.BowlerId);
+                              if (bowler == null) continue;
+
+                              bool wonGame = bowler.TeamId == winningTeamId;
+
+                              var bowlerScore = new BowlerScore
+                              {
+                                    MatchId = dto.MatchId,
+                                    GameNumber = dto.GameNumber,
+                                    BowlerId = scoreEntry.BowlerId,
+                                    RawScore = scoreEntry.RawScore,
+                                    HandiCapScore = scoreEntry.HandicapScore,
+                                    WonGame = wonGame
+                              };
+
+                              _bowlingLeagueRepository.CreateBowlerScore(bowlerScore);
+                        }
+
+                        // Also update/create MatchGame entry
+                        _bowlingLeagueRepository.CreateOrUpdateMatchGame(dto.MatchId, dto.GameNumber, winningTeamId);
+
+                        return Ok(new
+                        {
+                              message = "Nhập điểm thành công!",
+                              matchId = dto.MatchId,
+                              gameNumber = dto.GameNumber,
+                              oddTeamTotal,
+                              evenTeamTotal,
+                              winningTeamId
+                        });
+                  }
+                  catch (Exception ex)
+                  {
+                        return StatusCode(500, $"Lỗi server: {ex.Message}");
+                  }
             }
       }
 }

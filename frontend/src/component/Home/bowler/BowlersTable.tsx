@@ -1,12 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bowler } from '../../../types/Bowler';
-import { fetchAllBowlers, deleteBowler, fetchTeams, Team } from '../../../services/api.services';
+import {
+  fetchAllBowlers,
+  deleteBowler,
+  fetchTeams,
+  fetchBowlerStats,
+  Team,
+  BowlerStatsData,
+} from '../../../services/api.services';
 import { useAuth } from '../../../context/AuthContext';
 import { useToast } from '../../../context/ToastContext';
 
 function BowlersTable() {
   const [bowlers, setBowlers] = useState<Bowler[]>([]);
+  const [stats, setStats] = useState<Map<number, BowlerStatsData>>(new Map());
   const [teams, setTeams] = useState<Team[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -16,10 +24,16 @@ function BowlersTable() {
   const toast = useToast();
 
   useEffect(() => {
-    Promise.all([fetchAllBowlers(), fetchTeams()])
-      .then(([bowlerData, teamData]) => {
+    Promise.all([fetchAllBowlers(), fetchTeams(), fetchBowlerStats()])
+      .then(([bowlerData, teamData, statsData]) => {
         setBowlers(bowlerData);
         setTeams(teamData);
+
+        // Convert stats array to Map for easy lookup
+        const statsMap = new Map<number, BowlerStatsData>();
+        statsData.forEach((s) => statsMap.set(s.bowlerId, s));
+        setStats(statsMap);
+
         setLoading(false);
       })
       .catch((err) => {
@@ -102,13 +116,19 @@ function BowlersTable() {
                     Name
                   </th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-left">
-                    Location
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-left">
                     Team
                   </th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-left">
-                    Contact
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                    Games
+                  </th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                    Avg
+                  </th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                    High
+                  </th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                    Pins
                   </th>
                   {isAdmin && (
                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
@@ -120,58 +140,67 @@ function BowlersTable() {
               <tbody className="divide-y divide-slate-100">
                 {filteredBowlers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-500">
+                    <td colSpan={7} className="p-8 text-center text-slate-500">
                       No players found.
                     </td>
                   </tr>
                 ) : (
-                  filteredBowlers.map((bowler) => (
-                    <tr key={bowler.BowlerId} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
-                            {bowler.bowlerFirstName.charAt(0)}
-                            {bowler.bowlerLastName.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="font-bold text-slate-900">
-                              {bowler.bowlerFirstName} {bowler.bowlerLastName}
+                  filteredBowlers.map((bowler) => {
+                    const stat = stats.get(bowler.BowlerId);
+                    return (
+                      <tr key={bowler.BowlerId} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
+                              {bowler.bowlerFirstName.charAt(0)}
+                              {bowler.bowlerLastName.charAt(0)}
                             </div>
-                            <div className="text-xs text-slate-400">ID: {bowler.BowlerId}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-slate-600 font-medium whitespace-nowrap">
-                        {bowler.bowlerCity}, {bowler.bowlerState}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                          {bowler.team?.teamName || 'Unassigned'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-slate-500 text-sm">
-                        {bowler.bowlerPhoneNumber}
-                      </td>
-                      {isAdmin && (
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => navigate(`/bowler/${bowler.BowlerId}`)}
-                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(bowler.BowlerId)}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
-                            >
-                              Delete
-                            </button>
+                            <div>
+                              <div className="font-bold text-slate-900">
+                                {bowler.bowlerFirstName} {bowler.bowlerLastName}
+                              </div>
+                              <div className="text-xs text-slate-400">ID: {bowler.BowlerId}</div>
+                            </div>
                           </div>
                         </td>
-                      )}
-                    </tr>
-                  ))
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                            {bowler.team?.teamName || 'Unassigned'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center text-slate-600 font-medium">
+                          {stat?.totalGames || 0}
+                        </td>
+                        <td className="px-6 py-4 text-center text-slate-900 font-bold">
+                          {stat?.averageScore?.toFixed(1) || '0.0'}
+                        </td>
+                        <td className="px-6 py-4 text-center text-green-600 font-medium">
+                          {stat?.highScore || 0}
+                        </td>
+                        <td className="px-6 py-4 text-center text-slate-600 font-medium">
+                          {stat?.totalPins?.toLocaleString() || 0}
+                        </td>
+                        {isAdmin && (
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => navigate(`/bowler/${bowler.BowlerId}`)}
+                                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDelete(bowler.BowlerId)}
+                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
