@@ -116,111 +116,118 @@ const MatchList = () => {
             </div>
           )}
 
-          {Object.entries(groupedMatches).map(([tourneyId, tourneyMatches]) => {
-            const tournament = tournaments.find((t) => t.tourneyId === Number(tourneyId));
-            if (!tournament) return null;
+          {Object.entries(groupedMatches)
+            .sort(([tourneyIdA], [tourneyIdB]) => {
+              const tourneyA = tournaments.find((t) => t.tourneyId === Number(tourneyIdA));
+              const tourneyB = tournaments.find((t) => t.tourneyId === Number(tourneyIdB));
+              const dateA = tourneyA ? new Date(tourneyA.tourneyDate).getTime() : 0;
+              const dateB = tourneyB ? new Date(tourneyB.tourneyDate).getTime() : 0;
+              return dateB - dateA;
+            })
+            .map(([tourneyId, tourneyMatches]) => {
+              const tournament = tournaments.find((t) => t.tourneyId === Number(tourneyId));
+              if (!tournament) return null;
 
-            return (
-              <div
-                key={tourneyId}
-                className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
-              >
-                {/* Tournament Header inside the card */}
-                <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex justify-between items-center">
-                  <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                    <span className="w-2 h-8 bg-blue-600 rounded-full"></span>
-                    {tournament.tourneyLocation}
-                  </h3>
-                  <span className="text-sm font-bold text-slate-500 uppercase">
-                    {new Date(tournament.tourneyDate).toLocaleDateString()}
-                  </span>
-                </div>
+              return (
+                <div
+                  key={tourneyId}
+                  className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+                >
+                  {/* Tournament Header inside the card */}
+                  <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex justify-between items-center">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                      <span className="w-2 h-8 bg-blue-600 rounded-full"></span>
+                      {tournament.tourneyLocation}
+                    </h3>
+                    <span className="text-sm font-bold text-slate-500 uppercase">
+                      {new Date(tournament.tourneyDate).toLocaleDateString()}
+                    </span>
+                  </div>
 
-                {/* Matches List */}
-                <div className="divide-y divide-slate-100">
-                  {tourneyMatches.map((match) => {
-                    const hasResult = match.hasResult || false;
-                    const isPastDate = new Date(match.tourneyDate) < new Date();
+                  {/* Matches List */}
+                  <div className="divide-y divide-slate-100">
+                    {tourneyMatches
+                      .sort((a, b) => new Date(b.tourneyDate).getTime() - new Date(a.tourneyDate).getTime())
+                      .map((match) => {
+                        const hasResult = match.hasResult || false;
+                        const isPastDate = new Date(match.tourneyDate) < new Date();
 
-                    return (
-                      <div
-                        key={match.matchId}
-                        className={`p-6 transition-colors flex flex-col md:flex-row items-center justify-between gap-4 ${
-                          hasResult ? 'hover:bg-green-50/30 cursor-pointer' : 'hover:bg-blue-50/30'
-                        }`}
-                        onClick={() => hasResult && handleViewResult(match)}
-                      >
-                        <div className="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
-                          <div className="flex flex-col items-center justify-center w-12 h-12 bg-white border border-slate-200 rounded text-center shadow-sm">
-                            <div className="text-[10px] text-slate-400 font-bold uppercase">
-                              Lane
-                            </div>
-                            <div className="text-lg font-black text-blue-600 leading-none">
-                              {match.lanes}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex-1 flex items-center justify-between w-full md:px-8">
+                        return (
                           <div
-                            className={`text-lg font-bold w-5/12 text-right ${
-                              hasResult && match.winningTeamId === match.oddLaneTeamId
-                                ? 'text-green-600'
-                                : 'text-slate-900'
-                            }`}
+                            key={match.matchId}
+                            className={`p-6 transition-colors flex flex-col md:flex-row items-center justify-between gap-4 ${hasResult ? 'hover:bg-green-50/30 cursor-pointer' : 'hover:bg-blue-50/30'
+                              }`}
+                            onClick={() => hasResult && handleViewResult(match)}
                           >
-                            {match.oddLaneTeam}
-                            {hasResult && (
-                              <span className="ml-2 text-sm">({match.oddLaneWins || 0})</span>
-                            )}
-                          </div>
-                          <div className="w-2/12 text-center text-xs font-bold text-slate-300 uppercase">
-                            VS
-                          </div>
-                          <div
-                            className={`text-lg font-bold w-5/12 text-left ${
-                              hasResult && match.winningTeamId === match.evenLaneTeamId
-                                ? 'text-green-600'
-                                : 'text-slate-900'
-                            }`}
-                          >
-                            {match.evenLaneTeam}
-                            {hasResult && (
-                              <span className="ml-2 text-sm">({match.evenLaneWins || 0})</span>
-                            )}
-                          </div>
-                        </div>
+                            <div className="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
+                              <div className="flex flex-col items-center justify-center w-12 h-12 bg-white border border-slate-200 rounded text-center shadow-sm">
+                                <div className="text-[10px] text-slate-400 font-bold uppercase">
+                                  Lane
+                                </div>
+                                <div className="text-lg font-black text-blue-600 leading-none">
+                                  {match.lanes}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex-1 flex items-center justify-between w-full md:px-8">
+                              <div
+                                className={`text-lg font-bold w-5/12 text-right ${hasResult && match.winningTeamId === match.oddLaneTeamId
+                                    ? 'text-green-600'
+                                    : 'text-slate-900'
+                                  }`}
+                              >
+                                {match.oddLaneTeam}
+                                {hasResult && (
+                                  <span className="ml-2 text-sm">({match.oddLaneWins || 0})</span>
+                                )}
+                              </div>
+                              <div className="w-2/12 text-center text-xs font-bold text-slate-300 uppercase">
+                                VS
+                              </div>
+                              <div
+                                className={`text-lg font-bold w-5/12 text-left ${hasResult && match.winningTeamId === match.evenLaneTeamId
+                                    ? 'text-green-600'
+                                    : 'text-slate-900'
+                                  }`}
+                              >
+                                {match.evenLaneTeam}
+                                {hasResult && (
+                                  <span className="ml-2 text-sm">({match.evenLaneWins || 0})</span>
+                                )}
+                              </div>
+                            </div>
 
-                        <div className="w-full md:w-auto text-right flex items-center gap-3 justify-end">
-                          {isAdmin && (
-                            <button
-                              onClick={(e) => handleEnterScore(match, e)}
-                              className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded hover:bg-blue-200 transition-colors"
-                            >
-                              Enter Scores
-                            </button>
-                          )}
+                            <div className="w-full md:w-auto text-right flex items-center gap-3 justify-end">
+                              {isAdmin && (
+                                <button
+                                  onClick={(e) => handleEnterScore(match, e)}
+                                  className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded hover:bg-blue-200 transition-colors"
+                                >
+                                  Enter Scores
+                                </button>
+                              )}
 
-                          {hasResult ? (
-                            <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase">
-                              ✓ Completed
-                            </span>
-                          ) : isPastDate ? (
-                            <span className="inline-block px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full uppercase">
-                              Pending Result
-                            </span>
-                          ) : (
-                            <span className="inline-block px-3 py-1 bg-slate-100 text-slate-500 text-xs font-bold rounded-full uppercase">
-                              Scheduled
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                              {hasResult ? (
+                                <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase">
+                                  ✓ Completed
+                                </span>
+                              ) : isPastDate ? (
+                                <span className="inline-block px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full uppercase">
+                                  Pending Result
+                                </span>
+                              ) : (
+                                <span className="inline-block px-3 py-1 bg-slate-100 text-slate-500 text-xs font-bold rounded-full uppercase">
+                                  Scheduled
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </div>
 

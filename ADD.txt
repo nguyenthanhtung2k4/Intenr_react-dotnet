@@ -1,0 +1,13 @@
+TASK TASK
+
+Edit : Cập nhật số lượng  thật trong UI  chính
+Edit:  Sắp  xếp  lại giải đấu trong UI chính (order)
+
+status : Trạng thái 
+order : Thứ tự 
+created_at : Thời gian tạo 
+updated_at : Thời gian cập nhật
+created_by : Người tạo
+updated_by : Người cập nhật 
+deleted_at : Thời gian xóa
+deleted_by : Người xóa
