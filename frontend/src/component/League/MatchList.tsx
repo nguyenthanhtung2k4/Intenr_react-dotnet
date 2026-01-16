@@ -147,7 +147,10 @@ const MatchList = () => {
                   {/* Matches List */}
                   <div className="divide-y divide-slate-100">
                     {tourneyMatches
-                      .sort((a, b) => new Date(b.tourneyDate).getTime() - new Date(a.tourneyDate).getTime())
+                      .sort(
+                        (a, b) =>
+                          new Date(b.tourneyDate).getTime() - new Date(a.tourneyDate).getTime(),
+                      )
                       .map((match) => {
                         const hasResult = match.hasResult || false;
                         const isPastDate = new Date(match.tourneyDate) < new Date();
@@ -155,8 +158,11 @@ const MatchList = () => {
                         return (
                           <div
                             key={match.matchId}
-                            className={`p-6 transition-colors flex flex-col md:flex-row items-center justify-between gap-4 ${hasResult ? 'hover:bg-green-50/30 cursor-pointer' : 'hover:bg-blue-50/30'
-                              }`}
+                            className={`p-6 transition-colors flex flex-col md:flex-row items-center justify-between gap-4 ${
+                              hasResult
+                                ? 'hover:bg-green-50/30 cursor-pointer'
+                                : 'hover:bg-blue-50/30'
+                            }`}
                             onClick={() => hasResult && handleViewResult(match)}
                           >
                             <div className="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
@@ -171,10 +177,11 @@ const MatchList = () => {
                             </div>
                             <div className="flex-1 flex items-center justify-between w-full md:px-8">
                               <div
-                                className={`text-lg font-bold w-5/12 text-right ${hasResult && match.winningTeamId === match.oddLaneTeamId
+                                className={`text-lg font-bold w-5/12 text-right ${
+                                  hasResult && match.winningTeamId === match.oddLaneTeamId
                                     ? 'text-green-600'
                                     : 'text-slate-900'
-                                  }`}
+                                }`}
                               >
                                 {match.oddLaneTeam}
                                 {hasResult && (
@@ -185,10 +192,11 @@ const MatchList = () => {
                                 VS
                               </div>
                               <div
-                                className={`text-lg font-bold w-5/12 text-left ${hasResult && match.winningTeamId === match.evenLaneTeamId
+                                className={`text-lg font-bold w-5/12 text-left ${
+                                  hasResult && match.winningTeamId === match.evenLaneTeamId
                                     ? 'text-green-600'
                                     : 'text-slate-900'
-                                  }`}
+                                }`}
                               >
                                 {match.evenLaneTeam}
                                 {hasResult && (
