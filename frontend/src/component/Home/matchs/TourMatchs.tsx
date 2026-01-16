@@ -1,30 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  BowlerStatsData,
   fetchAllBowlers,
   fetchGlobalMatches,
   fetchTeams,
+  fetchBowlerStats,
   MatchData,
   Team,
 } from '../../../services/api.services';
 import { Bowler } from '../../../types/Bowler';
+import { Stats } from 'fs';
 
 const TourMatch = () => {
   const [topBowlers, setTopBowlers] = useState<Bowler[]>([]);
   const [recentMatches, setRecentMatches] = useState<MatchData[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Map<number, BowlerStatsData>>(new Map());
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [allBowlers, allMatches, allTeams] = await Promise.all([
+        const [allBowlers, allMatches, allTeams, allStats] = await Promise.all([
           fetchAllBowlers(),
           fetchGlobalMatches(),
           fetchTeams(),
+          fetchBowlerStats(),
         ]);
-        setTopBowlers(allBowlers.slice(0, 8));
-        setRecentMatches(allMatches.slice(0, 4));
+
+        const statsMap = new Map<number, BowlerStatsData>();
+        allStats.forEach((s) => statsMap.set(s.bowlerId, s));
+        setStats(statsMap);
+
+        // Sort bowlers by Average Score descending
+        const sortedBowlers = [...allBowlers].sort((a, b) => {
+          const statA = statsMap.get(a.BowlerId)?.averageScore || 0;
+          const statB = statsMap.get(b.BowlerId)?.averageScore || 0;
+          return statB - statA;
+        });
+        const date_match = [...allMatches].sort(
+          (a, b) => new Date(b.tourneyDate).getTime() - new Date(a.tourneyDate).getTime(),
+        );
+        setTopBowlers(sortedBowlers.slice(0, 8));
+        setRecentMatches(date_match.slice(0, 8));
         setTeams(allTeams.slice(0, 10));
         setLoading(false);
       } catch (error) {
@@ -36,6 +55,9 @@ const TourMatch = () => {
     fetchData();
   }, []);
 
+  console.log('RECENT: ', recentMatches);
+  console.log('TEAMS: ', teams);
+  console.log('STATS: ', stats);
   console.log('TOP: ', topBowlers);
 
   if (loading) {
@@ -48,6 +70,14 @@ const TourMatch = () => {
       </div>
     );
   }
+
+  // Calculate top stats for display
+  const topBowler = topBowlers[0];
+  const topStats = topBowler ? stats.get(topBowler.BowlerId) : null;
+  const winRate = topStats?.totalGames
+    ? Math.round((topStats.gamesWon / topStats.totalGames) * 100)
+    : 0;
+  const avgScore = topStats?.averageScore ? Math.round(topStats.averageScore) : 0;
 
   return (
     <div className="pb-20 pt-20">
@@ -100,8 +130,7 @@ const TourMatch = () => {
                       Current Top Scorer
                     </h3>
                     <div className="text-2xl font-black text-slate-900">
-                      {topBowlers[0]?.bowlerFirstName || 'John'}{' '}
-                      {topBowlers[0]?.bowlerLastName || 'Doe'}
+                      {topBowler?.bowlerFirstName || 'John'} {topBowler?.bowlerLastName || 'Doe'}
                     </div>
                   </div>
                   <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 font-bold">
@@ -113,24 +142,24 @@ const TourMatch = () => {
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-500 mb-2">
                       <span>WIN RATE</span>
-                      <span className="text-slate-900">92%</span>
+                      <span className="text-slate-900">{winRate}%</span>
                     </div>
                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-blue-600 rounded-full"
-                        style={{ width: '92%' }}
+                        style={{ width: `${winRate}%` }}
                       ></div>
                     </div>
                   </div>
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-500 mb-2">
                       <span>AVERAGE SCORE</span>
-                      <span className="text-slate-900">245</span>
+                      <span className="text-slate-900">{avgScore}</span>
                     </div>
                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-blue-400 rounded-full"
-                        style={{ width: '88%' }}
+                        style={{ width: `${Math.min((avgScore / 300) * 100, 100)}%` }}
                       ></div>
                     </div>
                   </div>
@@ -192,32 +221,42 @@ const TourMatch = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {topBowlers.map((bowler, index) => (
-              <div
-                key={bowler.BowlerId}
-                className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
+            {topBowlers.map((bowler, index) => {
+              const stat = stats.get(bowler.BowlerId);
+              return (
+                <div
+                  key={bowler.BowlerId}
+                  className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 group"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
                     ${index < 3 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors'}
                   `}
-                  >
-                    {bowler.bowlerFirstName.charAt(0)}
-                    {bowler.bowlerLastName.charAt(0)}
+                    >
+                      {bowler.bowlerFirstName.charAt(0)}
+                      {bowler.bowlerLastName.charAt(0)}
+                    </div>
+                    <span className="text-4xl font-black text-slate-100 group-hover:text-slate-200 transition-colors">
+                      #{index + 1}
+                    </span>
                   </div>
-                  <span className="text-4xl font-black text-slate-100 group-hover:text-slate-200 transition-colors">
-                    #{index + 1}
-                  </span>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">
+                    {bowler.bowlerFirstName} {bowler.bowlerLastName}
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">
+                      {bowler.team?.teamName || 'Free Agent'}
+                    </p>
+                    {stat?.averageScore && (
+                      <span className="text-sm font-black text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                        {Math.round(stat.averageScore)} AVG
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  {bowler.bowlerFirstName} {bowler.bowlerLastName}
-                </h3>
-                <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">
-                  {bowler.team.teamName}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-8 text-center md:hidden">
