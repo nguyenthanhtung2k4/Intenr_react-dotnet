@@ -13,7 +13,6 @@ export interface LoginCredentials {
   password: string;
 }
 const URL_API = process.env.REACT_APP_API_URL;
-let currentSubPath = 'BowlingLeague';
 
 if (!URL_API) {
   console.error('Lỗi cấu hình: Không tìm thấy REACT_APP_API_URL trong .env.');
@@ -23,10 +22,9 @@ const api = axios.create({
   baseURL: URL_API,
 });
 
-// 2. SỬ DỤNG INTERCEPTOR ĐỂ CẬP NHẬT PATH ĐỘNG
+// 2. TOKEN INTERCEPTOR
 api.interceptors.request.use((config) => {
-  config.baseURL = `${URL_API}/${currentSubPath}`;
-  // Cập nhật token mới nhất từ localStorage (an toàn hơn biến authToken cũ)
+  // Cập nhật token mới nhất từ localStorage
   const token = localStorage.getItem('jwtToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -34,9 +32,11 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Deprecated: No-op as we use full paths now
 export const setApiContext = (path: string) => {
-  currentSubPath = path;
+  // currentSubPath = path;
 };
+
 // 1. KHỞI TẠO AXIOS INSTANCE VÀ QUẢN LÝ TOKEN
 let authToken = localStorage.getItem('jwtToken');
 
@@ -100,7 +100,7 @@ const normalizeBowler = (b: any): Bowler => {
 // 1. Lấy danh sách Bowlers
 export const fetchAllBowlers = async (): Promise<Bowler[]> => {
   try {
-    const response = await api.get('/');
+    const response = await api.get('/BowlingLeague');
     const data = response.data || [];
     return data.map(normalizeBowler);
   } catch (error) {
@@ -111,7 +111,7 @@ export const fetchAllBowlers = async (): Promise<Bowler[]> => {
 // 2. Lấy chi tiết Bowler theo ID
 export const fetchBowlerDetails = async (id: string): Promise<Bowler> => {
   try {
-    const response = await api.get(`/${id}`);
+    const response = await api.get(`/BowlingLeague/${id}`);
     return normalizeBowler(response.data);
   } catch (error) {
     throw handleApiError(error, 'fetchBowlerDetails');
@@ -122,10 +122,10 @@ export const fetchBowlerDetails = async (id: string): Promise<Bowler> => {
 export const saveBowler = async (bowlerData: any, id?: string | number) => {
   try {
     if (id && id !== 'new') {
-      const response = await api.patch(`/${id}`, bowlerData);
+      const response = await api.patch(`/BowlingLeague/${id}`, bowlerData);
       return normalizeBowler(response.data);
     } else {
-      const response = await api.post('/', bowlerData);
+      const response = await api.post('/BowlingLeague', bowlerData);
       return normalizeBowler(response.data);
     }
   } catch (error) {
@@ -142,7 +142,7 @@ export const softDeleteBowler = async (id: string | number) => {
     }
 
     const payload = { isDeleted: true };
-    const response = await api.patch(`/${id}`, payload);
+    const response = await api.patch(`/BowlingLeague/${id}`, payload);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'softDeleteBowler');
@@ -161,13 +161,9 @@ const normalizeTeam = (team: any): Team => ({
 
 // 5. Lấy danh sách Teams
 export const fetchTeams = async (): Promise<Team[]> => {
-  setApiContext('Teams');
-  console.log(currentSubPath);
   try {
-    // const response = await api.get(`/teams`);
-    const response = await api.get('/');
+    const response = await api.get('/Teams');
     const teams = response.data || [];
-    console.log('Teams:', teams);
     return teams.map(normalizeTeam);
   } catch (error) {
     throw handleApiError(error, 'fetchTeams');
@@ -175,9 +171,8 @@ export const fetchTeams = async (): Promise<Team[]> => {
 };
 // 6. Lấy danh sách Bowlers theo Team
 export const fetchTeamBowlers = async (teamId: string): Promise<Bowler[]> => {
-  setApiContext('Teams');
   try {
-    const response = await api.get(`${teamId}/bowlers`);
+    const response = await api.get(`/Teams/${teamId}/bowlers`);
     const data = response.data || [];
     return data.map(normalizeBowler);
   } catch (error) {
@@ -186,9 +181,8 @@ export const fetchTeamBowlers = async (teamId: string): Promise<Bowler[]> => {
 };
 // 7. Tạo mới Team
 export const createTeam = async (teamData: { TeamName: string; CaptainId: number | null }) => {
-  setApiContext('Teams');
   try {
-    const response = await api.post(`/`, teamData);
+    const response = await api.post(`/Teams`, teamData);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'createTeam');
@@ -197,11 +191,9 @@ export const createTeam = async (teamData: { TeamName: string; CaptainId: number
 
 // 7.x Delete Team
 export const deleteTeam = async (id: number) => {
-  setApiContext('Teams');
   try {
     const payload = { isDelete: true };
-    const response = await api.patch(`/${id}`, payload);
-    console.log('Team deleted:', response.data);
+    const response = await api.patch(`/Teams/${id}`, payload);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'softDeleteTeam');
@@ -213,14 +205,12 @@ export const updateTeam = async (
   id: number,
   teamData: { teamName?: string; captainId?: number | null },
 ) => {
-  setApiContext('Teams');
   try {
     const payload: any = {};
     if (teamData.teamName !== undefined) payload.teamName = teamData.teamName;
     if (teamData.captainId !== undefined) payload.captainId = teamData.captainId;
 
-    const response = await api.patch(`${id}`, payload);
-    console.log('Team updated:', response.data);
+    const response = await api.patch(`/Teams/${id}`, payload);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'updateTeam');
@@ -234,7 +224,7 @@ export const createAccounts = async (accountData: {
   Role: string | null;
 }) => {
   try {
-    const response = await api.post(`/accounts`, accountData);
+    const response = await api.post(`/BowlingLeague/accounts`, accountData);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'accounts');
@@ -246,7 +236,7 @@ export const createAccounts = async (accountData: {
 
 export const fetchAccounts = async (): Promise<Acc[]> => {
   try {
-    const response = await api.get(`/accounts`);
+    const response = await api.get(`/BowlingLeague/accounts`);
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchAccounts');
@@ -262,7 +252,7 @@ export const fetchAccountUpdate = async (
   },
 ): Promise<Acc[]> => {
   try {
-    const response = await api.post(`/accounts/${id}`, dataUpdate);
+    const response = await api.post(`/BowlingLeague/accounts/${id}`, dataUpdate);
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchAccountsDetails');
@@ -272,7 +262,7 @@ export const fetchAccountUpdate = async (
 export const fetchdeleteAccount = async (id: number) => {
   try {
     const dataDelete = { IsDelete: true };
-    const response = await api.post(`/accounts/${id}`, dataDelete);
+    const response = await api.post(`/BowlingLeague/accounts/${id}`, dataDelete);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'deleteAccount');
@@ -282,7 +272,7 @@ export const fetchdeleteAccount = async (id: number) => {
 // 7.4 Lấy accounts  chi  tiết
 export const fetchAccountsDetails = async (id: string): Promise<Acc> => {
   try {
-    const response = await api.get(`/accounts/details/${id}`);
+    const response = await api.get(`/BowlingLeague/accounts/details/${id}`);
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchAccountsDetails');
@@ -293,7 +283,7 @@ export const fetchAccountsDetails = async (id: string): Promise<Acc> => {
 // ENDPOINT: /api/BowlingLeague/login
 export const loginAccount = async (credentials: LoginCredentials): Promise<void> => {
   try {
-    const response = await api.post(`/login`, credentials);
+    const response = await api.post(`/BowlingLeague/login`, credentials);
     const token = response.data.token;
     if (token) {
       setAuthToken(token);
@@ -314,7 +304,7 @@ export const checkAuthStatus = async (): Promise<{
     return { isAuthenticated: false };
   }
   try {
-    const response = await api.get(`/is-authenticated`);
+    const response = await api.get(`/BowlingLeague/is-authenticated`);
     return response.data;
   } catch (error) {
     return { isAuthenticated: false };
@@ -325,7 +315,7 @@ export const checkAuthStatus = async (): Promise<{
 // ENDPOINT: /api/BowlingLeague/Logout
 export const logoutAccount = async (): Promise<void> => {
   try {
-    await api.post(`/Logout`);
+    await api.post(`/BowlingLeague/Logout`);
     setAuthToken(null);
   } catch (error) {
     console.warn('Logout API warning (might be already logged out):', error);
@@ -335,9 +325,8 @@ export const logoutAccount = async (): Promise<void> => {
 
 // 11. Fetch Matches
 export const fetchGlobalMatches = async (): Promise<MatchData[]> => {
-  setApiContext('Matches');
   try {
-    const response = await api.get('/');
+    const response = await api.get('/Matches');
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchGlobalMatches');
@@ -346,9 +335,8 @@ export const fetchGlobalMatches = async (): Promise<MatchData[]> => {
 
 // 12. Create Match
 export const createMatch = async (matchData: MatchCreateData) => {
-  setApiContext('Matches');
   try {
-    const response = await api.post('/', matchData);
+    const response = await api.post('/Matches', matchData);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'createMatch');
@@ -357,9 +345,8 @@ export const createMatch = async (matchData: MatchCreateData) => {
 
 // 12.1 Update Match
 export const updateMatch = async (id: number, matchData: MatchCreateData) => {
-  setApiContext('Matches');
   try {
-    const response = await api.put(`/${id}`, matchData);
+    const response = await api.put(`/Matches/${id}`, matchData);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'updateMatch');
@@ -368,9 +355,8 @@ export const updateMatch = async (id: number, matchData: MatchCreateData) => {
 
 // 12.2 Delete Match
 export const deleteMatch = async (id: number) => {
-
   try {
-    const response = await api.delete(`/${id}`);
+    const response = await api.delete(`/Matches/${id}`);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'deleteMatch');
@@ -379,9 +365,8 @@ export const deleteMatch = async (id: number) => {
 
 // 13. Fetch Tournaments
 export const fetchTournaments = async (): Promise<TournamentData[]> => {
-  setApiContext('Tournaments');
   try {
-    const response = await api.get('/');
+    const response = await api.get('/Tournaments');
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchTournaments');
@@ -393,9 +378,8 @@ export const createTournament = async (tournamentData: {
   tourneyLocation: string;
   tourneyDate: string;
 }) => {
-  setApiContext('Tournaments');
   try {
-    const response = await api.post('/', tournamentData);
+    const response = await api.post('/Tournaments', tournamentData);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'createTournament');
@@ -407,9 +391,8 @@ export const updateTournament = async (
   id: number,
   tournamentData: { tourneyLocation: string; tourneyDate: string },
 ) => {
-  setApiContext('Tournaments');
   try {
-    const response = await api.put(`/${id}`, {
+    const response = await api.put(`/Tournaments/${id}`, {
       tourneyId: id,
       ...tournamentData,
     });
@@ -421,9 +404,8 @@ export const updateTournament = async (
 
 // 13.3 Delete Tournament (Soft Delete)
 export const deleteTournament = async (id: number) => {
-  setApiContext('Tournaments');
   try {
-    const response = await api.put(`/${id}`, {
+    const response = await api.put(`/Tournaments/${id}`, {
       tourneyId: id,
       isDelete: true,
     });
@@ -435,9 +417,8 @@ export const deleteTournament = async (id: number) => {
 
 // 14. Fetch Standings
 export const fetchLeagueStandings = async (): Promise<StandingData[]> => {
-  setApiContext('Standings');
   try {
-    const response = await api.get('/standings');
+    const response = await api.get('/Standings');
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchLeagueStandings');
@@ -449,9 +430,8 @@ export const updateTeamStanding = async (
   teamId: number,
   data: { manualWins?: number; manualLosses?: number; manualPoints?: number },
 ) => {
-  setApiContext('Standings');
   try {
-    const response = await api.put(`/${teamId}`, data);
+    const response = await api.put(`/Standings/${teamId}`, data);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'updateTeamStanding');
@@ -461,7 +441,7 @@ export const updateTeamStanding = async (
 // 16. Fetch Bowler Stats
 export const fetchBowlerStats = async (): Promise<BowlerStatsData[]> => {
   try {
-    const response = await api.get('/bowler-stats');
+    const response = await api.get('/BowlingLeague/bowler-stats');
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchBowlerStats');
@@ -470,9 +450,8 @@ export const fetchBowlerStats = async (): Promise<BowlerStatsData[]> => {
 
 // 17. Get Match Scores Detail
 export const fetchMatchScores = async (matchId: number): Promise<MatchScoreDetail> => {
-  setApiContext('Matches');
   try {
-    const response = await api.get(`/${matchId}/scores`);
+    const response = await api.get(`/Matches/${matchId}/scores`);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'fetchMatchScores');
@@ -481,9 +460,8 @@ export const fetchMatchScores = async (matchId: number): Promise<MatchScoreDetai
 
 // 18. Submit Match Scores (Admin)
 export const submitMatchScores = async (data: MatchScoreInput) => {
-  setApiContext('Matches');
   try {
-    const response = await api.post('/match-scores', data);
+    const response = await api.post('/Matches/match-scores', data);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'submitMatchScores');
