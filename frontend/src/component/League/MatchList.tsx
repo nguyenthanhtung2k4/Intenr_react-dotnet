@@ -74,7 +74,13 @@ const MatchList = () => {
     loadData(); // Refresh data to show new results/status
   };
 
-  if (loading) return <div className="p-20 text-center">Loading Fixtures...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 bg-slate-50 flex justify-center items-center">
+        <div className="w-10 h-10 border-4 border-blue-600 rounded-full animate-spin border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-28 min-h-screen pt-24 pb-12 bg-slate-50">
