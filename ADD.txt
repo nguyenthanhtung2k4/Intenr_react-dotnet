@@ -5,6 +5,9 @@ Edit:  Sắp  xếp  lại giải đấu trong UI chính (order)
 
 status : Trạng thái 
 order : Thứ tự 
+
+
+BACKEND
 created_at : Thời gian tạo 
 updated_at : Thời gian cập nhật
 created_by : Người tạo

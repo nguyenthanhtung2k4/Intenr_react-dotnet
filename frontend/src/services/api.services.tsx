@@ -1,42 +1,54 @@
 // service/api.service.tsx
-import axios from 'axios';
-import { Bowler } from '../types/Bowler';
+import axios, { AxiosInstance } from 'axios';
+import { Bowler, BowlerStatsData } from '../types/Bowler';
 import { Team } from '../types/Team';
 import { Acc } from '../types/Accounts';
-
+import { MatchCreateData, MatchData, MatchScoreDetail, MatchScoreInput } from '../types/Match';
+import { TournamentData } from '../types/Tourname';
+import { StandingData } from '../types/Standing';
 export type { Bowler, Team, Acc };
 
 export interface LoginCredentials {
   email: string;
   password: string;
 }
-
 const URL_API = process.env.REACT_APP_API_URL;
-const BOWLING_API_URL = `${URL_API}/BowlingLeague`;
+let currentSubPath = 'BowlingLeague';
 
 if (!URL_API) {
   console.error('Lỗi cấu hình: Không tìm thấy REACT_APP_API_URL trong .env.');
 }
+// 1. Khởi tạo instance với URL gốc
+const api = axios.create({
+  baseURL: URL_API,
+});
 
+// 2. SỬ DỤNG INTERCEPTOR ĐỂ CẬP NHẬT PATH ĐỘNG
+api.interceptors.request.use((config) => {
+  config.baseURL = `${URL_API}/${currentSubPath}`;
+  // Cập nhật token mới nhất từ localStorage (an toàn hơn biến authToken cũ)
+  const token = localStorage.getItem('jwtToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const setApiContext = (path: string) => {
+  currentSubPath = path;
+};
 // 1. KHỞI TẠO AXIOS INSTANCE VÀ QUẢN LÝ TOKEN
 let authToken = localStorage.getItem('jwtToken');
-const api = axios.create({
-  // <--- TẠO CUSTOM AXIOS INSTANCE
-  baseURL: BOWLING_API_URL,
-  headers: {
-    Authorization: authToken ? `Bearer ${authToken}` : '',
-  },
-});
 
 export const setAuthToken = (token: string | null) => {
   if (token) {
     authToken = token;
     localStorage.setItem('jwtToken', token);
-    api.defaults.headers.Authorization = `Bearer ${token}`;
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
   } else {
     authToken = null;
     localStorage.removeItem('jwtToken');
-    api.defaults.headers.Authorization = '';
+    api.defaults.headers.common.Authorization = '';
   }
 };
 
@@ -58,10 +70,32 @@ const handleApiError = (error: any, functionName: string): never => {
   throw new Error(errorMessage);
 };
 
-const normalizeBowler = (b: any): Bowler => ({
-  ...b,
-  BowlerId: b?.BowlerId ?? b?.bowlerId ?? b?.id,
-});
+const normalizeBowler = (b: any): Bowler => {
+  const teamRaw = b?.team ?? b?.Team;
+  const rawZip = b?.bowlerZip ?? b?.BowlerZip;
+  const parsedZip = Number(rawZip);
+
+  return {
+    BowlerId: b?.BowlerId ?? b?.bowlerId ?? b?.id ?? 0,
+    isDelete: b?.isDelete ?? b?.IsDelete ?? false,
+    bowlerLastName: b?.bowlerLastName ?? b?.BowlerLastName ?? '',
+    bowlerFirstName: b?.bowlerFirstName ?? b?.BowlerFirstName ?? '',
+    bowlerMiddleInit: b?.bowlerMiddleInit ?? b?.BowlerMiddleInit ?? null,
+    bowlerAddress: b?.bowlerAddress ?? b?.BowlerAddress ?? '',
+    bowlerCity: b?.bowlerCity ?? b?.BowlerCity ?? '',
+    bowlerState: b?.bowlerState ?? b?.BowlerState ?? '',
+    bowlerZip: Number.isFinite(parsedZip) ? parsedZip : 0,
+    bowlerPhoneNumber: b?.bowlerPhoneNumber ?? b?.BowlerPhoneNumber ?? '',
+    teamId: b?.teamId ?? b?.TeamId ?? b?.TeamID ?? b?.teamID ?? 0,
+    team: teamRaw
+      ? {
+          teamID:
+            teamRaw.teamID ?? teamRaw.TeamId ?? teamRaw.TeamID ?? teamRaw.id ?? teamRaw.teamId ?? 0,
+          teamName: teamRaw.teamName ?? teamRaw.TeamName ?? teamRaw.name ?? '',
+        }
+      : { teamID: 0, teamName: '' },
+  };
+};
 
 // 1. Lấy danh sách Bowlers
 export const fetchAllBowlers = async (): Promise<Bowler[]> => {
@@ -127,8 +161,11 @@ const normalizeTeam = (team: any): Team => ({
 
 // 5. Lấy danh sách Teams
 export const fetchTeams = async (): Promise<Team[]> => {
+  setApiContext('Teams');
+  console.log(currentSubPath);
   try {
-    const response = await api.get(`/teams`);
+    // const response = await api.get(`/teams`);
+    const response = await api.get('/');
     const teams = response.data || [];
     console.log('Teams:', teams);
     return teams.map(normalizeTeam);
@@ -138,8 +175,9 @@ export const fetchTeams = async (): Promise<Team[]> => {
 };
 // 6. Lấy danh sách Bowlers theo Team
 export const fetchTeamBowlers = async (teamId: string): Promise<Bowler[]> => {
+  setApiContext('Teams');
   try {
-    const response = await api.get(`/teams/${teamId}/bowlers`);
+    const response = await api.get(`${teamId}/bowlers`);
     const data = response.data || [];
     return data.map(normalizeBowler);
   } catch (error) {
@@ -148,8 +186,9 @@ export const fetchTeamBowlers = async (teamId: string): Promise<Bowler[]> => {
 };
 // 7. Tạo mới Team
 export const createTeam = async (teamData: { TeamName: string; CaptainId: number | null }) => {
+  setApiContext('Teams');
   try {
-    const response = await api.post(`/teams`, teamData);
+    const response = await api.post(`/`, teamData);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'createTeam');
@@ -158,9 +197,10 @@ export const createTeam = async (teamData: { TeamName: string; CaptainId: number
 
 // 7.x Delete Team
 export const deleteTeam = async (id: number) => {
+  setApiContext('Teams');
   try {
     const payload = { isDelete: true };
-    const response = await api.patch(`/teams/${id}`, payload);
+    const response = await api.patch(`/${id}`, payload);
     console.log('Team deleted:', response.data);
     return response.data;
   } catch (error) {
@@ -173,12 +213,13 @@ export const updateTeam = async (
   id: number,
   teamData: { teamName?: string; captainId?: number | null },
 ) => {
+  setApiContext('Teams');
   try {
     const payload: any = {};
     if (teamData.teamName !== undefined) payload.teamName = teamData.teamName;
     if (teamData.captainId !== undefined) payload.captainId = teamData.captainId;
 
-    const response = await api.patch(`/teams/${id}`, payload);
+    const response = await api.patch(`${id}`, payload);
     console.log('Team updated:', response.data);
     return response.data;
   } catch (error) {
@@ -200,7 +241,9 @@ export const createAccounts = async (accountData: {
   }
 };
 
+// /////////////////////////////////////////////////
 // 7.2 Lấy danh sách Accounts
+
 export const fetchAccounts = async (): Promise<Acc[]> => {
   try {
     const response = await api.get(`/accounts`);
@@ -290,53 +333,11 @@ export const logoutAccount = async (): Promise<void> => {
   }
 };
 
-// --- MATCHES & STANDINGS API ---
-
-export interface MatchData {
-  matchId: number;
-  tourneyLocation: string;
-  tourneyDate: string;
-  oddLaneTeam: string;
-  evenLaneTeam: string;
-  lanes: string;
-  tourneyId?: number;
-  oddLaneTeamId?: number;
-  evenLaneTeamId?: number;
-  hasResult?: boolean;
-  winningTeamId?: number;
-  winningTeamName?: string;
-  oddLaneWins?: number;
-  evenLaneWins?: number;
-}
-
-export interface MatchCreateData {
-  tourneyId: number;
-  lanes: string;
-  oddLaneTeamId: number;
-  evenLaneTeamId: number;
-}
-
-export interface StandingData {
-  teamId: number;
-  teamName: string;
-  played: number;
-  won: number;
-  lost: number;
-  points: number;
-  totalPins?: number;
-  average?: number;
-}
-
-export interface TournamentData {
-  tourneyId: number;
-  tourneyLocation: string;
-  tourneyDate: string;
-}
-
 // 11. Fetch Matches
 export const fetchGlobalMatches = async (): Promise<MatchData[]> => {
+  setApiContext('Matches');
   try {
-    const response = await api.get('/matches');
+    const response = await api.get('/');
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchGlobalMatches');
@@ -345,8 +346,9 @@ export const fetchGlobalMatches = async (): Promise<MatchData[]> => {
 
 // 12. Create Match
 export const createMatch = async (matchData: MatchCreateData) => {
+  setApiContext('Matches');
   try {
-    const response = await api.post('/matches', matchData);
+    const response = await api.post('/', matchData);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'createMatch');
@@ -355,8 +357,9 @@ export const createMatch = async (matchData: MatchCreateData) => {
 
 // 12.1 Update Match
 export const updateMatch = async (id: number, matchData: MatchCreateData) => {
+  setApiContext('Matches');
   try {
-    const response = await api.put(`/matches/${id}`, matchData);
+    const response = await api.put(`/${id}`, matchData);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'updateMatch');
@@ -365,8 +368,9 @@ export const updateMatch = async (id: number, matchData: MatchCreateData) => {
 
 // 12.2 Delete Match
 export const deleteMatch = async (id: number) => {
+
   try {
-    const response = await api.delete(`/matches/${id}`);
+    const response = await api.delete(`/${id}`);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'deleteMatch');
@@ -375,8 +379,9 @@ export const deleteMatch = async (id: number) => {
 
 // 13. Fetch Tournaments
 export const fetchTournaments = async (): Promise<TournamentData[]> => {
+  setApiContext('Tournaments');
   try {
-    const response = await api.get('/tournaments');
+    const response = await api.get('/');
     return response.data || [];
   } catch (error) {
     throw handleApiError(error, 'fetchTournaments');
@@ -388,8 +393,9 @@ export const createTournament = async (tournamentData: {
   tourneyLocation: string;
   tourneyDate: string;
 }) => {
+  setApiContext('Tournaments');
   try {
-    const response = await api.post('/tournaments', tournamentData);
+    const response = await api.post('/', tournamentData);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'createTournament');
@@ -401,8 +407,9 @@ export const updateTournament = async (
   id: number,
   tournamentData: { tourneyLocation: string; tourneyDate: string },
 ) => {
+  setApiContext('Tournaments');
   try {
-    const response = await api.put(`/tournaments/${id}`, {
+    const response = await api.put(`/${id}`, {
       tourneyId: id,
       ...tournamentData,
     });
@@ -414,8 +421,9 @@ export const updateTournament = async (
 
 // 13.3 Delete Tournament (Soft Delete)
 export const deleteTournament = async (id: number) => {
+  setApiContext('Tournaments');
   try {
-    const response = await api.put(`/tournaments/${id}`, {
+    const response = await api.put(`/${id}`, {
       tourneyId: id,
       isDelete: true,
     });
@@ -427,6 +435,7 @@ export const deleteTournament = async (id: number) => {
 
 // 14. Fetch Standings
 export const fetchLeagueStandings = async (): Promise<StandingData[]> => {
+  setApiContext('Standings');
   try {
     const response = await api.get('/standings');
     return response.data || [];
@@ -440,61 +449,14 @@ export const updateTeamStanding = async (
   teamId: number,
   data: { manualWins?: number; manualLosses?: number; manualPoints?: number },
 ) => {
+  setApiContext('Standings');
   try {
-    const response = await api.put(`/standings/${teamId}`, data);
+    const response = await api.put(`/${teamId}`, data);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'updateTeamStanding');
   }
 };
-
-// --- NEW ENDPOINTS FOR OPTION B ---
-
-export interface BowlerStatsData {
-  bowlerId: number;
-  bowlerName: string;
-  teamId?: number;
-  teamName?: string;
-  totalGames: number;
-  averageScore: number;
-  highScore: number;
-  totalPins: number;
-  gamesWon: number;
-}
-
-export interface GameScoreDetail {
-  gameNumber: number;
-  oddTeamTotalScore: number;
-  evenTeamTotalScore: number;
-  winningTeamId?: number;
-  bowlerScores: {
-    bowlerId: number;
-    bowlerName: string;
-    teamId?: number;
-    rawScore: number;
-    handicapScore?: number;
-    wonGame: boolean;
-  }[];
-}
-
-export interface MatchScoreDetail {
-  matchId: number;
-  oddLaneTeam?: string;
-  evenLaneTeam?: string;
-  oddLaneTeamId?: number;
-  evenLaneTeamId?: number;
-  games: GameScoreDetail[];
-}
-
-export interface MatchScoreInput {
-  matchId: number;
-  gameNumber: number;
-  scores: {
-    bowlerId: number;
-    rawScore: number;
-    handicapScore?: number;
-  }[];
-}
 
 // 16. Fetch Bowler Stats
 export const fetchBowlerStats = async (): Promise<BowlerStatsData[]> => {
@@ -508,8 +470,9 @@ export const fetchBowlerStats = async (): Promise<BowlerStatsData[]> => {
 
 // 17. Get Match Scores Detail
 export const fetchMatchScores = async (matchId: number): Promise<MatchScoreDetail> => {
+  setApiContext('Matches');
   try {
-    const response = await api.get(`/matches/${matchId}/scores`);
+    const response = await api.get(`/${matchId}/scores`);
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'fetchMatchScores');
@@ -518,6 +481,7 @@ export const fetchMatchScores = async (matchId: number): Promise<MatchScoreDetai
 
 // 18. Submit Match Scores (Admin)
 export const submitMatchScores = async (data: MatchScoreInput) => {
+  setApiContext('Matches');
   try {
     const response = await api.post('/match-scores', data);
     return response.data;

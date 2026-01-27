@@ -7,13 +7,12 @@ import {
   updateMatch,
   deleteMatch,
   fetchTeams,
-  TournamentData,
-  MatchData,
-  MatchCreateData,
   Team,
 } from '../../services/api.services';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { TournamentData } from '../../types/Tourname';
+import { MatchData, MatchCreateData } from '../../types/Match';
 
 const TournamentDetail = () => {
   const { id } = useParams<{ id: string }>();

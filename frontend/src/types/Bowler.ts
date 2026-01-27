@@ -15,3 +15,15 @@ export type Bowler = {
     teamName: string;
   };
 };
+
+export interface BowlerStatsData {
+  bowlerId: number;
+  bowlerName: string;
+  teamId?: number;
+  teamName?: string;
+  totalGames: number;
+  averageScore: number;
+  highScore: number;
+  totalPins: number;
+  gamesWon: number;
+}

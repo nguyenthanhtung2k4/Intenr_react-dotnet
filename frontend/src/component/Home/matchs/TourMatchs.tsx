@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  BowlerStatsData,
   fetchAllBowlers,
   fetchGlobalMatches,
   fetchTeams,
   fetchBowlerStats,
-  MatchData,
   Team,
 } from '../../../services/api.services';
-import { Bowler } from '../../../types/Bowler';
+import { Bowler, BowlerStatsData } from '../../../types/Bowler';
 import { Stats } from 'fs';
+import { MatchData } from '../../../types/Match';
 
 const TourMatch = () => {
   const [topBowlers, setTopBowlers] = useState<Bowler[]>([]);

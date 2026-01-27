@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { fetchLeagueStandings, StandingData } from '../../services/api.services';
+import { fetchLeagueStandings } from '../../services/api.services';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { StandingData } from '../../types/Standing';
 
 const StandingsTable = () => {
   const [standings, setStandings] = useState<StandingData[]>([]);

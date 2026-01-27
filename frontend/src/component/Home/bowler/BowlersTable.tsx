@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bowler } from '../../../types/Bowler';
+import { Bowler, BowlerStatsData } from '../../../types/Bowler';
 import {
   fetchAllBowlers,
   deleteBowler,
   fetchTeams,
   fetchBowlerStats,
   Team,
-  BowlerStatsData,
 } from '../../../services/api.services';
 import { useAuth } from '../../../context/AuthContext';
 import { useToast } from '../../../context/ToastContext';

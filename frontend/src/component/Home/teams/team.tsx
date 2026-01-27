@@ -41,6 +41,8 @@ function Team() {
 
         // Fetch bowlers
         const bowlers = await fetchTeamBowlers(id);
+        // const bowlers = await
+
         setBowlerData(bowlers || []);
 
         // Fetch team info
@@ -125,7 +127,7 @@ function Team() {
     }
     setShowEditTeam(false);
   };
-
+  console.log('TEAM : ', bowlerData);
   return (
     <div className="mt-32 min-h-screen bg-white pt-24 pb-12 px-6 font-sans text-slate-900">
       <div className="max-w-6xl mx-auto">

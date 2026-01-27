@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  fetchGlobalMatches,
-  fetchTournaments,
-  MatchData,
-  TournamentData,
-} from '../../services/api.services';
+import { fetchGlobalMatches, fetchTournaments } from '../../services/api.services';
 import { useAuth } from '../../context/AuthContext';
 import ScoreEntryModal from './ScoreEntryModal';
 import MatchResultModal from './MatchResultModal';
+import { MatchData } from '../../types/Match';
+import { TournamentData } from '../../types/Tourname';
 
 const MatchList = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);

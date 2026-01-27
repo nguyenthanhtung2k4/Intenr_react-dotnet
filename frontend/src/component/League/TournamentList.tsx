@@ -5,10 +5,10 @@ import {
   createTournament,
   updateTournament,
   deleteTournament,
-  TournamentData,
 } from '../../services/api.services';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { TournamentData } from '../../types/Tourname';
 
 const TournamentList = () => {
   const { role } = useAuth();

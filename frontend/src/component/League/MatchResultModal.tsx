@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  MatchData,
-  MatchScoreDetail,
-  fetchMatchScores,
-  GameScoreDetail,
-} from '../../services/api.services';
+import { fetchMatchScores } from '../../services/api.services';
+import { GameScoreDetail, MatchData, MatchScoreDetail } from '../../types/Match';
 
 interface MatchResultModalProps {
   match: MatchData;

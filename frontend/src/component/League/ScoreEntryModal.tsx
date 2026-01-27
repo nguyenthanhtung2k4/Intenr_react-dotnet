@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  MatchData,
-  MatchScoreInput,
-  submitMatchScores,
-  fetchAllBowlers,
-  fetchMatchScores,
-} from '../../services/api.services';
+import { submitMatchScores, fetchAllBowlers, fetchMatchScores } from '../../services/api.services';
 import { Bowler } from '../../types/Bowler';
 import { useToast } from '../../context/ToastContext';
+import { MatchData } from '../../types/Match';
 
 interface ScoreEntryModalProps {
   match: MatchData;

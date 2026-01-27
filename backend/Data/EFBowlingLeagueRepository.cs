@@ -6,31 +6,27 @@ using System.Linq;
 
 namespace Backend.Data
 {
-      public class EFBowlingLeagueRepository : IBowlingLeagueRepository
+      public class EFBowlingLeagueRepository(BowlingLeagueContext temp) : IBowlingLeagueRepository
       {
-            private readonly BowlingLeagueContext _bowlingContext;
+            private readonly BowlingLeagueContext _bowlingContext = temp;
 
-            public EFBowlingLeagueRepository(BowlingLeagueContext temp)
-            {
-                  _bowlingContext = temp;
-            }
+            public IEnumerable<Bowler> Bowlers => [.._bowlingContext.Bowlers.Include(x => x.Team).ToList()];
+            public IEnumerable<Accounts> Accounts => [.._bowlingContext.Accounts];
 
-            public IEnumerable<Bowler> Bowlers => _bowlingContext.Bowlers.Include(x => x.Team).ToList();
-            public IEnumerable<Accounts> Accounts => _bowlingContext.Accounts;
+            public IEnumerable<BowlerScore> Scores => [.._bowlingContext.Scores];
 
-            public IEnumerable<BowlerScore> Scores => _bowlingContext.Scores;
+            public IEnumerable<MatchGame> MatchGames => [.._bowlingContext.MatchGames.Include(x =>    x.Match).ToList()];
 
-            public IEnumerable<MatchGame> MatchGames => _bowlingContext.MatchGames.Include(x => x.Match).ToList();
+            public IEnumerable<Team> Teams => [.._bowlingContext.Teams];
 
-            public IEnumerable<Team> Teams => _bowlingContext.Teams;
+            public IEnumerable<Tournament> Tournaments => [.._bowlingContext.Tournaments];
 
-            public IEnumerable<Tournament> Tournaments => _bowlingContext.Tournaments;
-
-            public IEnumerable<TourneyMatch> TourneyMatches => _bowlingContext.TourneyMatches
+            public IEnumerable<TourneyMatch> TourneyMatches => 
+            [.._bowlingContext.TourneyMatches
                 .Include(x => x.Tourney)
                 .Include(x => x.OddLaneTeam)
                 .Include(x => x.EvenLaneTeam)
-                .ToList();
+                .ToList()];   
 
             public IEnumerable<ZtblBowlerRating> ZtblBowlerRatings => _bowlingContext.ZtblBowlerRatings;
 
@@ -66,6 +62,11 @@ namespace Backend.Data
 
             public void Update<T>(T entity)
             {
+                  if (entity == null)
+                  {
+                        throw new ArgumentNullException(nameof(entity));
+                  }
+
                   try
                   {
                         _bowlingContext.Update(entity);
@@ -97,33 +98,29 @@ namespace Backend.Data
             // 🔹 Create
             public void CreateBowler(Bowler bowler)
             {
-                  try
+            ArgumentNullException.ThrowIfNull(bowler);
+
+            try
+            {
+                  bowler.BowlerId = 0;
+
+                  if (bowler.TeamId.HasValue)
                   {
-                        // ⚠️ Bỏ ID cũ để EF tự tăng
-                        bowler.BowlerId = 0;
+                        var existingTeam = _bowlingContext.Teams
+                        .FirstOrDefault(t => t.TeamId == bowler.TeamId.Value) 
+                        ?? throw new Exception($"Không tìm thấy Team với ID {bowler.TeamId}");
 
-                        if (bowler.TeamId.HasValue)
-                        {
-                              var existingTeam = _bowlingContext.Teams
-                                  .FirstOrDefault(t => t.TeamId == bowler.TeamId.Value);
-
-                              if (existingTeam == null)
-                              {
-                                    throw new Exception($"Không tìm thấy Team với ID {bowler.TeamId}");
-                              }
-
-                              bowler.Team = existingTeam;
-                        }
-
-                        _bowlingContext.Bowlers.Add(bowler);
-                        _bowlingContext.SaveChanges();
+                        bowler.Team = existingTeam;
                   }
-                  catch (DbUpdateException dbEx)
-                  {
-                        throw new Exception($"Lỗi lưu Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
-                  }
+
+                  _bowlingContext.Bowlers.Add(bowler);
+                  _bowlingContext.SaveChanges();
             }
-
+            catch (DbUpdateException dbEx)
+            {
+                  throw new Exception($"Lỗi lưu Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+            }
+            }
 
             public void CreateTeam(Team team)
             {
