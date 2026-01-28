@@ -3,6 +3,7 @@ using System;
 using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(BowlingLeagueContext))]
-    partial class BowlingLeagueContextModelSnapshot : ModelSnapshot
+    [Migration("20260128073822_EditBeackend_Data")]
+    partial class EditBeackend_Data
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.12");
@@ -31,7 +34,6 @@ namespace Backend.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("created_by");
 
@@ -40,7 +42,6 @@ namespace Backend.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("DeletedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("deleted_by");
 
@@ -52,8 +53,7 @@ namespace Backend.Migrations
                     b.Property<bool>("IsDelete")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_delete");
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -70,7 +70,6 @@ namespace Backend.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<string>("UpdatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_by");
 
@@ -119,7 +118,6 @@ namespace Backend.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("created_by");
 
@@ -128,15 +126,11 @@ namespace Backend.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("DeletedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("deleted_by");
 
-                    b.Property<bool>("IsDelete")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_delete");
+                    b.Property<bool?>("IsDelete")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("TeamId")
                         .HasColumnType("INT")
@@ -147,7 +141,6 @@ namespace Backend.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<string>("UpdatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_by");
 
@@ -180,7 +173,6 @@ namespace Backend.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("created_by");
 
@@ -189,7 +181,6 @@ namespace Backend.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("DeletedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("deleted_by");
 
@@ -197,12 +188,6 @@ namespace Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("smallint")
                         .HasDefaultValue((short)0);
-
-                    b.Property<bool>("IsDelete")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_delete");
 
                     b.Property<short?>("RawScore")
                         .ValueGeneratedOnAdd()
@@ -214,7 +199,6 @@ namespace Backend.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<string>("UpdatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_by");
 
@@ -246,7 +230,6 @@ namespace Backend.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("created_by");
 
@@ -255,22 +238,14 @@ namespace Backend.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("DeletedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("deleted_by");
-
-                    b.Property<bool>("IsDelete")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_delete");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_at");
 
                     b.Property<string>("UpdatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_by");
 
@@ -307,7 +282,6 @@ namespace Backend.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("created_by");
 
@@ -316,14 +290,11 @@ namespace Backend.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("DeletedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("deleted_by");
 
                     b.Property<bool>("IsDelete")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false);
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("ManualLosses")
                         .HasColumnType("INTEGER");
@@ -342,7 +313,6 @@ namespace Backend.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<string>("UpdatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_by");
 
@@ -368,7 +338,6 @@ namespace Backend.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("created_by");
 
@@ -377,14 +346,11 @@ namespace Backend.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("DeletedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("deleted_by");
 
                     b.Property<bool?>("IsDelete")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false);
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateOnly?>("TourneyDate")
                         .HasColumnType("date");
@@ -397,7 +363,6 @@ namespace Backend.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<string>("UpdatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_by");
 
@@ -420,7 +385,6 @@ namespace Backend.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("created_by");
 
@@ -429,7 +393,6 @@ namespace Backend.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("DeletedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("deleted_by");
 
@@ -438,12 +401,6 @@ namespace Backend.Migrations
                         .HasColumnType("INT")
                         .HasDefaultValue(0)
                         .HasColumnName("EvenLaneTeamID");
-
-                    b.Property<bool>("IsDelete")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_delete");
 
                     b.Property<string>("Lanes")
                         .HasColumnType("nvarchar (5)");
@@ -465,7 +422,6 @@ namespace Backend.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<string>("UpdatedBy")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_by");
 
@@ -509,10 +465,6 @@ namespace Backend.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("deleted_by");
 
-                    b.Property<bool>("IsDelete")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("is_delete");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_at");
@@ -549,10 +501,6 @@ namespace Backend.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("deleted_by");
 
-                    b.Property<bool>("IsDelete")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("is_delete");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_at");
@@ -588,10 +536,6 @@ namespace Backend.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("TEXT")
                         .HasColumnName("deleted_by");
-
-                    b.Property<bool>("IsDelete")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("is_delete");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT")

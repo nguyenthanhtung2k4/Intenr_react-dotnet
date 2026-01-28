@@ -29,7 +29,9 @@ namespace Backend.Controllers
                               TourneyId = matchDto.TourneyId,
                               Lanes = matchDto.Lanes,
                               OddLaneTeamId = matchDto.OddLaneTeamId,
-                              EvenLaneTeamId = matchDto.EvenLaneTeamId
+                              EvenLaneTeamId = matchDto.EvenLaneTeamId,
+                              CreatedAt = DateTime.Now,
+                              CreatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
                         };
 
                         _bowlingLeagueRepository.CreateMatch(match);
@@ -56,6 +58,20 @@ namespace Backend.Controllers
                         match.Lanes = matchDto.Lanes;
                         match.OddLaneTeamId = matchDto.OddLaneTeamId;
                         match.EvenLaneTeamId = matchDto.EvenLaneTeamId;
+                        match.UpdatedAt = DateTime.Now;
+                        match.UpdatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                        
+                        if (matchDto.IsDelete)
+                        {
+                              match.IsDelete = true;
+                              match.DeletedAt = DateTime.Now;
+                              match.DeletedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                        }else
+                        {
+                              match.IsDelete = false;
+                              match.DeletedAt = null;
+                              match.DeletedBy = null;
+                        }
 
                         _bowlingLeagueRepository.Update(match);
                         return Ok(new { message = "Cập nhật trận đấu thành công!", matchId = match.MatchId });
@@ -66,20 +82,20 @@ namespace Backend.Controllers
                   }
             }
 
-            [HttpDelete("{id}")]
-            [Authorize(Roles = "Admin")]
-            public IActionResult DeleteMatch(int id)
-            {
-                  try
-                  {
-                        _bowlingLeagueRepository.DeleteMatch(id);
-                        return Ok(new { message = "Xóa trận đấu thành công!" });
-                  }
-                  catch (Exception ex)
-                  {
-                        return StatusCode(500, $"Lỗi server: {ex.Message}");
-                  }
-            }
+            // [HttpDelete("{id}")]
+            // [Authorize(Roles = "Admin")]
+            // public IActionResult DeleteMatch(int id)
+            // {
+            //       try
+            //       {
+            //             _bowlingLeagueRepository.DeleteMatch(id);
+            //             return Ok(new { message = "Xóa trận đấu thành công!" });
+            //       }
+            //       catch (Exception ex)
+            //       {
+            //             return StatusCode(500, $"Lỗi server: {ex.Message}");
+            //       }
+            // }
 
             [HttpGet]
             [AllowAnonymous]
@@ -93,13 +109,11 @@ namespace Backend.Controllers
 
                         var matches = _bowlingLeagueRepository.TourneyMatches.Select(m =>
                         {
-                              // Get all games for this match
                               var games = matchGames.Where(mg => mg.MatchId == m.MatchId).ToList();
 
                               int oddLaneWins = 0;
                               int evenLaneWins = 0;
 
-                              // Calculate wins based on BowlerScores if available, otherwise fallback to MatchGame.WinningTeamId
                               var matchScores = scores.Where(s => s.MatchId == m.MatchId).ToList();
 
                               // We assume 3 games usually
@@ -323,7 +337,9 @@ namespace Backend.Controllers
                                     BowlerId = scoreEntry.BowlerId,
                                     RawScore = scoreEntry.RawScore,
                                     HandiCapScore = scoreEntry.HandicapScore,
-                                    WonGame = wonGame
+                                    WonGame = wonGame,
+                                    CreatedAt = DateTime.Now,
+                                    CreatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
                               };
 
                               _bowlingLeagueRepository.CreateBowlerScore(bowlerScore);

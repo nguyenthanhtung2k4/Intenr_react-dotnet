@@ -60,6 +60,25 @@ public partial class BowlingLeagueContext : DbContext
                   entity.Property(e => e.TeamId)
                   .HasColumnType("INT")
                   .HasColumnName("TeamID");
+
+                  entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                  entity.Property(e => e.UpdatedAt);
+
+                  entity.Property(e => e.CreatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.UpdatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedAt);
+
+                  entity.Property(e => e.IsDelete)
+                  .HasDefaultValue(false);
             });
 
             modelBuilder.Entity<Accounts>(entity =>
@@ -82,6 +101,22 @@ public partial class BowlingLeagueContext : DbContext
                       entity.Property(e => e.Role)
                         .IsRequired()
                         .HasMaxLength(50);
+
+                      entity.Property(e => e.CreatedAt)
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                      entity.Property(e => e.UpdatedAt);
+
+                      entity.Property(e => e.CreatedBy)
+                      .HasMaxLength(100);
+
+                      entity.Property(e => e.UpdatedBy)
+                      .HasMaxLength(100);
+
+                      entity.Property(e => e.DeletedBy)
+                      .HasMaxLength(100);
+
+                      entity.Property(e => e.DeletedAt);
 
                       entity.Property(e => e.IsDelete)
                         .HasDefaultValue(false);
@@ -112,6 +147,25 @@ public partial class BowlingLeagueContext : DbContext
                   .HasColumnType("smallint");
                   entity.Property(e => e.WonGame).HasColumnType("bit");
 
+                  entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                  entity.Property(e => e.UpdatedAt);
+
+                  entity.Property(e => e.CreatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.UpdatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedAt);
+
+                  entity.Property(e => e.IsDelete)
+                  .HasDefaultValue(false);
+
                   entity.HasOne(d => d.Bowler).WithMany(p => p.BowlerScores)
                   .HasForeignKey(d => d.BowlerId)
                   .OnDelete(DeleteBehavior.ClientSetNull);
@@ -138,6 +192,25 @@ public partial class BowlingLeagueContext : DbContext
                   .HasColumnType("INT")
                   .HasColumnName("WinningTeamID");
 
+                  entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                  entity.Property(e => e.UpdatedAt);
+
+                  entity.Property(e => e.CreatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.UpdatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedAt);
+
+                  entity.Property(e => e.IsDelete)
+                  .HasDefaultValue(false);
+
                   entity.HasOne(d => d.Match).WithMany(p => p.MatchGames)
                   .HasForeignKey(d => d.MatchId)
                   .OnDelete(DeleteBehavior.ClientSetNull);
@@ -158,6 +231,25 @@ public partial class BowlingLeagueContext : DbContext
                   .HasColumnType("INT")
                   .HasColumnName("CaptainID");
                   entity.Property(e => e.TeamName).HasColumnType("nvarchar (50)");
+
+                  entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                  entity.Property(e => e.UpdatedAt);
+
+                  entity.Property(e => e.CreatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.UpdatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedAt);
+
+                  entity.Property(e => e.IsDelete)
+                  .HasDefaultValue(false);
             });
 
             modelBuilder.Entity<Tournament>(entity =>
@@ -171,6 +263,25 @@ public partial class BowlingLeagueContext : DbContext
 
                   entity.Property(e => e.TourneyDate).HasColumnType("date");
                   entity.Property(e => e.TourneyLocation).HasColumnType("nvarchar (50)");
+
+                  entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                  entity.Property(e => e.UpdatedAt);
+
+                  entity.Property(e => e.CreatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.UpdatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedAt);
+
+                  entity.Property(e => e.IsDelete)
+                  .HasDefaultValue(false);
             });
 
             modelBuilder.Entity<TourneyMatch>(entity =>
@@ -204,6 +315,25 @@ public partial class BowlingLeagueContext : DbContext
                   .HasColumnType("INT")
                   .HasColumnName("TourneyID");
 
+                  entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                  entity.Property(e => e.UpdatedAt);
+
+                  entity.Property(e => e.CreatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.UpdatedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedBy)
+                  .HasMaxLength(100);
+
+                  entity.Property(e => e.DeletedAt);
+
+                  entity.Property(e => e.IsDelete)
+                  .HasDefaultValue(false);
+
                   entity.HasOne(d => d.Tourney).WithMany(p => p.TourneyMatches).HasForeignKey(d => d.TourneyId);
             });
 
@@ -216,6 +346,9 @@ public partial class BowlingLeagueContext : DbContext
                   entity.Property(e => e.BowlerRating).HasColumnType("nvarchar (15)");
                   entity.Property(e => e.BowlerHighAvg).HasColumnType("smallint");
                   entity.Property(e => e.BowlerLowAvg).HasColumnType("smallint");
+
+                  entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
             modelBuilder.Entity<ZtblSkipLabel>(entity =>
@@ -228,6 +361,9 @@ public partial class BowlingLeagueContext : DbContext
                   // Đây không phải khóa tự động tăng, nên giữ nguyên ValueGeneratedNever
                   .ValueGeneratedNever()
                   .HasColumnType("INT");
+
+                  entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
             modelBuilder.Entity<ZtblWeek>(entity =>
@@ -238,6 +374,9 @@ public partial class BowlingLeagueContext : DbContext
 
                   entity.Property(e => e.WeekStart).HasColumnType("date");
                   entity.Property(e => e.WeekEnd).HasColumnType("date");
+
+                  entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
             OnModelCreatingPartial(modelBuilder);

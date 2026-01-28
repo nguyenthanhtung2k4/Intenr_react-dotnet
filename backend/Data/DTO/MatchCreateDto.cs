@@ -6,4 +6,6 @@ public class MatchCreateDto
       public string? Lanes { get; set; }
       public int OddLaneTeamId { get; set; }
       public int EvenLaneTeamId { get; set; }
+      public bool IsDelete { get; set; }
+      
 }

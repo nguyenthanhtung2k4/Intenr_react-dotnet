@@ -1,10 +1,5 @@
 TASK TASK
-
 Edit : Cập nhật số lượng  thật trong UI  chính
-Edit:  Sắp  xếp  lại giải đấu trong UI chính (order)
-
-status : Trạng thái 
-order : Thứ tự 
 
 
 BACKEND

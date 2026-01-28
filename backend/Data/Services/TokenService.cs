@@ -15,7 +15,7 @@ namespace Backend.Data.Services
             {
                   _configuration = configuration;
             }
-            public string GenerateJwtToken(int userId, string role)
+            public string GenerateJwtToken(int userId, string role, string email)
             {
                   var issuer = _configuration["Jwt:Issuer"];
                   var audience = _configuration["Jwt:Audience"];
@@ -29,6 +29,7 @@ namespace Backend.Data.Services
                     new Claim("Id", userId.ToString()),
                     new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                     new Claim(ClaimTypes.Role, role ?? "User"), // Add Role
+                    new Claim(ClaimTypes.Email, email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 }),
                         Expires = DateTime.UtcNow.AddMinutes(60),

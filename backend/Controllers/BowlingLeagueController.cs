@@ -76,13 +76,20 @@ namespace Backend.Controllers
 
 
                   // 2. TÍCH HỢP LOGIC XÓA MỀM (Soft Delete)
-                  if (patchDto.IsDeleted.HasValue)
+                 if (patchDto.IsDeleted.HasValue)
                   {
                         Data.IsDelete = patchDto.IsDeleted.Value;
+                        Data.DeletedAt = DateTime.Now;
+
+                        var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                        Data.DeletedBy = userEmail;
                   }
+
 
                   try
                   {
+                        Data.UpdatedAt = DateTime.Now;
+                        Data.UpdatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
                         _bowlingLeagueRepository.UpdateBowler(Data);
 
                         return Ok(Data);
@@ -115,7 +122,9 @@ namespace Backend.Controllers
                               BowlerState = newBowler.BowlerState,
                               BowlerZip = newBowler.BowlerZip,
                               BowlerPhoneNumber = newBowler.BowlerPhoneNumber,
-                              TeamId = newBowler.TeamId
+                              TeamId = newBowler.TeamId,
+                              CreatedAt = DateTime.Now,
+                              CreatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
                         };
 
                         _bowlingLeagueRepository.CreateBowler(bowler);
@@ -152,14 +161,14 @@ namespace Backend.Controllers
 
                         var userId = acc.Id;
                         var role = acc.Role;
-                        var token = _tokenService.GenerateJwtToken(userId, role); // Sử dụng Id và Role của tài khoản
+                        var token = _tokenService.GenerateJwtToken(userId, role, acc.Email);
 
                         return Ok(new
                         {
                               message = "Đăng nhập thành công!",
                               userid = userId,
-                              // role = role,
-                              // token = token
+                              role,
+                              token
                         });
                   }
                   catch (Exception ex)
@@ -214,7 +223,9 @@ namespace Backend.Controllers
                               Email = accountsDto.Email,
                               Password = accountsDto.Password,
                               Role = accountsDto.Role,
-                              IsDelete = accountsDto.IsDelete
+                              IsDelete = accountsDto.IsDelete,
+                              CreatedAt = DateTime.Now,
+                              CreatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
                         };
 
                         _bowlingLeagueRepository.CreateAcounts(account);
@@ -284,8 +295,14 @@ namespace Backend.Controllers
                         if (accountsDto.IsDelete == true)
                         {
                               acc.IsDelete = true;
+                              acc.DeletedAt = DateTime.Now;
+                              acc.DeletedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
                         }
-
+                        else
+                        {
+                              acc.UpdatedAt = DateTime.Now;
+                              acc.UpdatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                        }
                         _bowlingLeagueRepository.UpdateAccounts(acc);
 
                         return Ok(new
@@ -324,7 +341,7 @@ namespace Backend.Controllers
                         return StatusCode(500, new { message = "Lỗi server", detail = ex.Message });
                   }
             }
-            
+
             [HttpPost("Logout")]
             [AllowAnonymous] // Có thể để [Authorize] hoặc [AllowAnonymous] tùy thuộc vào thiết kế. Để [AllowAnonymous] cho đơn giản.
             public IActionResult Logout()

@@ -354,9 +354,18 @@ export const updateMatch = async (id: number, matchData: MatchCreateData) => {
 };
 
 // 12.2 Delete Match
+// export const deleteMatch = async (id: number) => {
+//   try {
+//     const response = await api.delete(`/Matches/${id}`);
+//     return response.data;
+//   } catch (error) {
+//     throw handleApiError(error, 'deleteMatch');
+//   }
+// };
+
 export const deleteMatch = async (id: number) => {
   try {
-    const response = await api.delete(`/Matches/${id}`);
+    const response = await api.put(`/Matches/${id}`, { isDelete: true });
     return response.data;
   } catch (error) {
     throw handleApiError(error, 'deleteMatch');
