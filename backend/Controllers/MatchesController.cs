@@ -60,13 +60,14 @@ namespace Backend.Controllers
                         match.EvenLaneTeamId = matchDto.EvenLaneTeamId;
                         match.UpdatedAt = DateTime.Now;
                         match.UpdatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-                        
+
                         if (matchDto.IsDelete)
                         {
                               match.IsDelete = true;
                               match.DeletedAt = DateTime.Now;
                               match.DeletedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-                        }else
+                        }
+                        else
                         {
                               match.IsDelete = false;
                               match.DeletedAt = null;
@@ -346,7 +347,10 @@ namespace Backend.Controllers
                         }
 
                         // Also update/create MatchGame entry
-                        _bowlingLeagueRepository.CreateOrUpdateMatchGame(dto.MatchId, dto.GameNumber, winningTeamId);
+
+                        var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+                        _bowlingLeagueRepository.CreateOrUpdateMatchGame(dto.MatchId, dto.GameNumber, winningTeamId, userEmail);
 
                         return Ok(new
                         {
