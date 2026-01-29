@@ -10,23 +10,23 @@ namespace Backend.Data
       {
             private readonly BowlingLeagueContext _bowlingContext = temp;
 
-            public IEnumerable<Bowler> Bowlers => [.._bowlingContext.Bowlers.Include(x => x.Team).ToList()];
-            public IEnumerable<Accounts> Accounts => [.._bowlingContext.Accounts];
+            public IEnumerable<Bowler> Bowlers => [.. _bowlingContext.Bowlers.Include(x => x.Team).ToList()];
+            public IEnumerable<Accounts> Accounts => [.. _bowlingContext.Accounts];
 
-            public IEnumerable<BowlerScore> Scores => [.._bowlingContext.Scores];
+            public IEnumerable<BowlerScore> Scores => [.. _bowlingContext.Scores];
 
-            public IEnumerable<MatchGame> MatchGames => [.._bowlingContext.MatchGames.Include(x =>    x.Match).ToList()];
+            public IEnumerable<MatchGame> MatchGames => [.. _bowlingContext.MatchGames.Include(x => x.Match).ToList()];
 
-            public IEnumerable<Team> Teams => [.._bowlingContext.Teams];
+            public IEnumerable<Team> Teams => [.. _bowlingContext.Teams];
 
-            public IEnumerable<Tournament> Tournaments => [.._bowlingContext.Tournaments];
+            public IEnumerable<Tournament> Tournaments => [.. _bowlingContext.Tournaments];
 
-            public IEnumerable<TourneyMatch> TourneyMatches => 
+            public IEnumerable<TourneyMatch> TourneyMatches =>
             [.._bowlingContext.TourneyMatches
                 .Include(x => x.Tourney)
                 .Include(x => x.OddLaneTeam)
                 .Include(x => x.EvenLaneTeam)
-                .ToList()];   
+                .ToList()];
 
             public IEnumerable<ZtblBowlerRating> ZtblBowlerRatings => _bowlingContext.ZtblBowlerRatings;
 
@@ -98,28 +98,28 @@ namespace Backend.Data
             // 🔹 Create
             public void CreateBowler(Bowler bowler)
             {
-            ArgumentNullException.ThrowIfNull(bowler);
+                  ArgumentNullException.ThrowIfNull(bowler);
 
-            try
-            {
-                  bowler.BowlerId = 0;
-
-                  if (bowler.TeamId.HasValue)
+                  try
                   {
-                        var existingTeam = _bowlingContext.Teams
-                        .FirstOrDefault(t => t.TeamId == bowler.TeamId.Value) 
-                        ?? throw new Exception($"Không tìm thấy Team với ID {bowler.TeamId}");
+                        bowler.BowlerId = 0;
 
-                        bowler.Team = existingTeam;
+                        if (bowler.TeamId.HasValue)
+                        {
+                              var existingTeam = _bowlingContext.Teams
+                              .FirstOrDefault(t => t.TeamId == bowler.TeamId.Value)
+                              ?? throw new Exception($"Không tìm thấy Team với ID {bowler.TeamId}");
+
+                              bowler.Team = existingTeam;
+                        }
+
+                        _bowlingContext.Bowlers.Add(bowler);
+                        _bowlingContext.SaveChanges();
                   }
-
-                  _bowlingContext.Bowlers.Add(bowler);
-                  _bowlingContext.SaveChanges();
-            }
-            catch (DbUpdateException dbEx)
-            {
-                  throw new Exception($"Lỗi lưu Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
-            }
+                  catch (DbUpdateException dbEx)
+                  {
+                        throw new Exception($"Lỗi lưu Bowler: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                  }
             }
 
             public void CreateTeam(Team team)
@@ -201,6 +201,8 @@ namespace Backend.Data
                               existing.RawScore = bowlerScore.RawScore;
                               existing.HandiCapScore = bowlerScore.HandiCapScore;
                               existing.WonGame = bowlerScore.WonGame;
+                              existing.UpdatedAt = DateTime.Now;
+                              existing.UpdatedBy = bowlerScore.CreatedBy;
                         }
                         else
                         {
@@ -215,7 +217,7 @@ namespace Backend.Data
                   }
             }
 
-            public void CreateOrUpdateMatchGame(int matchId, short gameNumber, int? winningTeamId)
+            public void CreateOrUpdateMatchGame(int matchId, short gameNumber, int? winningTeamId, string? createdBy = null)
             {
                   try
                   {
@@ -225,6 +227,8 @@ namespace Backend.Data
                         if (existing != null)
                         {
                               existing.WinningTeamId = winningTeamId;
+                              existing.UpdatedAt = DateTime.Now;
+                              existing.UpdatedBy = createdBy;
                         }
                         else
                         {
@@ -232,7 +236,9 @@ namespace Backend.Data
                               {
                                     MatchId = matchId,
                                     GameNumber = gameNumber,
-                                    WinningTeamId = winningTeamId
+                                    WinningTeamId = winningTeamId,
+                                    CreatedAt = DateTime.Now,
+                                    CreatedBy = createdBy
                               };
                               _bowlingContext.MatchGames.Add(matchGame);
                         }

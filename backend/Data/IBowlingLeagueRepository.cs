@@ -34,6 +34,6 @@
             void CreateMatch(TourneyMatch match);
             void DeleteMatch(int matchId);
             void CreateBowlerScore(BowlerScore bowlerScore);
-            void CreateOrUpdateMatchGame(int matchId, short gameNumber, int? winningTeamId);
+            void CreateOrUpdateMatchGame(int matchId, short gameNumber, int? winningTeamId, string? createdBy = null);
       }
 }
