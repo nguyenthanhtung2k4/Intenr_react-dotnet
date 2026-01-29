@@ -11,10 +11,10 @@ namespace Backend.Controllers
 {
       [Route("api/[controller]")]
       [ApiController]
-      public class TournamentsController(IBowlingLeagueRepository temp, ITokenService token) : ControllerBase
+      public class TournamentsController(IBowlingLeagueRepository repository, ITokenService tokenService) : ControllerBase
       {
-            private readonly IBowlingLeagueRepository _bowlingLeagueRepository = temp;
-            private readonly ITokenService _tokenService = token;
+            private readonly IBowlingLeagueRepository _repository = repository;
+            private readonly ITokenService _tokenService = tokenService;
 
             [HttpGet]
             [AllowAnonymous]
@@ -22,16 +22,15 @@ namespace Backend.Controllers
             {
                   try
                   {
-                        var tournaments = _bowlingLeagueRepository.Tournaments.Where(t => t.IsDelete != true).ToList();
-                        if (tournaments == null || tournaments.Count == 0)
-                        {
-                              return Ok(new List<Tournament>());
-                        }
+                        var tournaments = _repository.Tournaments
+                              .Where(t => t.IsDelete != true)
+                              .ToList();
+
                         return Ok(tournaments);
                   }
                   catch (Exception ex)
                   {
-                        return StatusCode(500, $"Loi server khi tai turnament: {ex}");
+                        return StatusCode(500, $"Lỗi server khi tải danh sách giải đấu: {ex.Message}");
                   }
             }
 
@@ -41,16 +40,17 @@ namespace Backend.Controllers
             {
                   try
                   {
-                        if (!ModelState.IsValid)
-                        {
-                              return BadRequest(ModelState);
-                        }
-                        _bowlingLeagueRepository.CreateTournament(tournament);
-                        return Ok(tournament);
+                        tournament.CreatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                        tournament.CreatedAt = DateTime.Now;
+                        tournament.IsDelete = false;
+
+                        _repository.CreateTournament(tournament);
+
+                        return CreatedAtAction(nameof(GetTournamentById), new { tournamentId = tournament.TourneyId }, tournament);
                   }
                   catch (Exception ex)
                   {
-                        return StatusCode(500, $"Loi server khi tao turnament: {ex}");
+                        return StatusCode(500, $"Lỗi server khi tạo giải đấu: {ex.Message}");
                   }
             }
 
@@ -60,7 +60,8 @@ namespace Backend.Controllers
             {
                   try
                   {
-                        var tournament = _bowlingLeagueRepository.Tournaments.FirstOrDefault(t => t.TourneyId == tournamentId);
+                        var tournament = _repository.Tournaments.FirstOrDefault(t => t.TourneyId == tournamentId);
+
                         if (tournament == null || tournament.IsDelete == true)
                         {
                               return NotFound(new { message = "Không tìm thấy giải đấu" });
@@ -69,7 +70,7 @@ namespace Backend.Controllers
                   }
                   catch (Exception ex)
                   {
-                        return StatusCode(500, $"Loi server khi tai turnament: {ex}");
+                        return StatusCode(500, $"Lỗi server khi tìm giải đấu: {ex.Message}");
                   }
             }
 
@@ -81,14 +82,43 @@ namespace Backend.Controllers
                   {
                         if (tournamentId != tournament.TourneyId)
                         {
-                              return BadRequest("ID mismatch");
+                              return BadRequest("Mã giải đấu không khớp (ID mismatch)");
                         }
-                        _bowlingLeagueRepository.Update(tournament);
-                        return Ok(tournament);
+
+                        // Lấy giải đấu hiện tại từ DB để cập nhật an toàn
+                        var existingTournament = _repository.Tournaments.FirstOrDefault(t => t.TourneyId == tournamentId);
+
+                        if (existingTournament == null)
+                        {
+                              return NotFound("Không tìm thấy giải đấu để cập nhật.");
+                        }
+
+                        var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+                        // Xử lý Soft Delete
+                        if (tournament.IsDelete == true)
+                        {
+                              existingTournament.IsDelete = true;
+                              existingTournament.DeletedAt = DateTime.Now;
+                              existingTournament.DeletedBy = email;
+
+                              _repository.Update(existingTournament);
+                              return Ok(existingTournament);
+                        }
+
+                        existingTournament.TourneyDate = tournament.TourneyDate;
+                        existingTournament.TourneyLocation = tournament.TourneyLocation;
+
+                        existingTournament.UpdatedBy = email;
+                        existingTournament.UpdatedAt = DateTime.Now;
+
+                        _repository.Update(existingTournament);
+
+                        return Ok(existingTournament);
                   }
                   catch (Exception ex)
                   {
-                        return StatusCode(500, $"Loi server khi tai turnament: {ex}");
+                        return StatusCode(500, $"Lỗi server khi cập nhật giải đấu: {ex.Message}");
                   }
             }
 
@@ -98,16 +128,12 @@ namespace Backend.Controllers
             {
                   try
                   {
-                        var tournamentMatches = _bowlingLeagueRepository.TourneyMatches.ToList();
-                        if (tournamentMatches == null || tournamentMatches.Count == 0)
-                        {
-                              return Ok(new List<TourneyMatch>());
-                        }
+                        var tournamentMatches = _repository.TourneyMatches.ToList();
                         return Ok(tournamentMatches);
                   }
                   catch (Exception ex)
                   {
-                        return StatusCode(500, $"Loi server khi tai turnament matches: {ex}");
+                        return StatusCode(500, $"Lỗi server khi tải trận đấu giải: {ex.Message}");
                   }
             }
       }
